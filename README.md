@@ -47,6 +47,7 @@ This project is a Stock Market Simulator currently under development. The projec
 - Java 11 or higher
 - Node.js and npm
 - PostgreSQL
+- MailDev
 
 ### Installation
 
