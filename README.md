@@ -78,7 +78,8 @@ This project is a Stock Market Simulator currently under development. The projec
 ### Configuration
    -*Database Configuration:*
    Update the application.properties file in the backend with your PostgreSQL database credentials.
-   -*Email Configuration:*
+  
+ -*Email Configuration:*
    Update the email service configuration in the backend to ensure email functionality works.
 
 ### Contributing
