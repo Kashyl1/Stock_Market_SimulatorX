@@ -88,11 +88,10 @@
 
 .link-prompt a {
   color: var(--font-color-light);
-  text-decoration: none;
 }
 
 .link-prompt:hover {
-  background-color: #FFE2D1;
+  background-color: var(--primary-color-dark);
 }
 
 .home-link {
@@ -136,6 +135,28 @@
   background: url('../../assets/LoginRegisterBackground.png') no-repeat center center;
   background-size: cover;
   z-index: -1;
+}
+
+.resend-container {
+  margin-top: 1rem;
+}
+
+.resend-button {
+  padding: 10px;
+  background-color: var(--primary-color);
+  color: var(--font-color-light);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.resend-button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.resend-message {
+  color: var(--font-color-dark);
+  margin-top: 1rem;
 }
 
 @media (max-width: 768px) {

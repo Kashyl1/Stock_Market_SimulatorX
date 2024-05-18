@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import '../AuthForm.css';
@@ -9,6 +9,19 @@ const LoginForm = ({ setIsLoggedIn }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errormessage, setErrorMessage] = useState('');
+    const [resendMessage, setResendMessage] = useState('');
+    const [canResend, setCanResend] = useState(true);
+    const [resendTimer, setResendTimer] = useState(0);
+
+    useEffect(() => {
+        let timer;
+        if (resendTimer > 0) {
+            timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+        } else {
+            setCanResend(true);
+        }
+        return () => clearTimeout(timer);
+    }, [resendTimer]);
 
     const navigate = useNavigate();
 
@@ -22,9 +35,31 @@ const LoginForm = ({ setIsLoggedIn }) => {
                 navigate('/demo');
             } else if (response.data.message) {
                 setErrorMessage(response.data.message);
+                if (response.data.resend) {
+                    setResendMessage('Your account is not verified. Please verify your account.');
+                    setCanResend(false);
+                    setResendTimer(60);
+                }
             }
         } catch (error) {
-            setErrorMessage("Wrong email or password!");
+            setErrorMessage('Wrong email or password!');
+        }
+    };
+
+    const handleResendVerification = async () => {
+        if (canResend) {
+            try {
+                const response = await axios.post('/api/auth/resend-verification', { email });
+                if (response.data.success) {
+                    setResendMessage('Verification email has been resent. Please check your inbox.');
+                    setCanResend(false);
+                    setResendTimer(60);
+                } else {
+                    setResendMessage('Failed to resend verification email. Please try again later.');
+                }
+            } catch (error) {
+                setResendMessage('Failed to resend verification email. Please try again later.');
+            }
         }
     };
 
@@ -53,6 +88,14 @@ const LoginForm = ({ setIsLoggedIn }) => {
                         />
                     </div>
                     {errormessage && <div className="error-message">{errormessage}</div>}
+                    {resendMessage && (
+                        <div className="resend-container">
+                            <p>{resendMessage}</p>
+                            <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
+                                {canResend ? 'Resend Verification Email' : `Wait ${resendTimer}s`}
+                            </button>
+                        </div>
+                    )}
                     <div className="form-footer">
                         <button type="submit">Login</button>
                         <div className="link-prompt">

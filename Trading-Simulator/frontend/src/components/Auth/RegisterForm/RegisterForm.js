@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './RegisterForm.css';
@@ -16,6 +16,19 @@ const RegisterForm = () => {
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [errors, setErrors] = useState({});
+    const [resendMessage, setResendMessage] = useState('');
+    const [canResend, setCanResend] = useState(true);
+    const [resendTimer, setResendTimer] = useState(0);
+
+    useEffect(() => {
+        let timer;
+        if (resendTimer > 0) {
+            timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+        } else {
+            setCanResend(true);
+        }
+        return () => clearTimeout(timer);
+    }, [resendTimer]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -47,6 +60,23 @@ const RegisterForm = () => {
         setFormData({ ...formData, [id]: value });
     };
 
+    const handleResendVerification = async () => {
+        if (canResend) {
+            try {
+                const response = await axios.post('/api/auth/resend-verification', { email: formData.email });
+                if (response.data.success) {
+                    setResendMessage('Verification email has been resent. Please check your inbox.');
+                    setCanResend(false);
+                    setResendTimer(60);
+                } else {
+                    setResendMessage('Failed to resend verification email. Please try again later.');
+                }
+            } catch (error) {
+                setResendMessage('Failed to resend verification email. Please try again later.');
+            }
+        }
+    };
+
     if (isSubmitted) {
         return (
             <div className="verification-page">
@@ -55,6 +85,10 @@ const RegisterForm = () => {
                     <h2>Verify Your Email</h2>
                     <p>Please check your email for a link to verify your email address.</p>
                     <p>Once verified, you'll be able to sign in.</p>
+                    {resendMessage && <p>{resendMessage}</p>}
+                    <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
+                        {canResend ? 'Resend Verification Email' : `Wait ${resendTimer}s `}
+                    </button>
                     <div className="link-prompt">
                         Already Verified? <Link to="/login">Sign In</Link>
                     </div>
