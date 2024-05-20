@@ -101,7 +101,7 @@ const RegisterForm = () => {
         <div className="auth-page">
             <div className="auth-container">
                 <FontAwesomeIcon icon={faUser} size="3x" className="user-icon" />
-                <div className="auth-header">Create your account</div>
+                <h2 className="auth-header">Create your account</h2>
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="input-group">
                         <FontAwesomeIcon icon={faUser} className="input-icon" />

@@ -16,4 +16,6 @@ code {
   --primary-color-dark: #E1F0C4;
   --font-color-light: black;
   --background-light: #f0f0f0;
+  --error-color: #ff4d4d;
+  --success-color: #4CAF50;
 }

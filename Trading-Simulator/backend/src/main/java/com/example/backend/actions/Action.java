@@ -1,4 +1,4 @@
-package com.example.backend.favorite;
+package com.example.backend.actions;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.example.backend.user.User;
-import com.example.backend.currency.Currency;
 
 import java.time.LocalDateTime;
 
@@ -15,20 +14,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Favorites")
-public class Favorite {
+@Table(name = "actions")
+public class Action {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer favoriteID;
+    private Integer actionID;
 
     @ManyToOne
     @JoinColumn(name = "userID", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "currencyID", nullable = false)
-    private Currency currency;
+    @Column(nullable = false, length = 100)
+    private String actionType;
+
+    @Column(columnDefinition = "text", nullable = false)
+    private String details;
 
     @Column(nullable = false)
-    private LocalDateTime addedAt;
+    private LocalDateTime timestamp;
 }

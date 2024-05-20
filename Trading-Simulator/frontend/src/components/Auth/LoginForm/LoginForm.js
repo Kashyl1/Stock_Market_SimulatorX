@@ -32,7 +32,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             if (response.data.token) {
                 localStorage.setItem('jwtToken', response.data.token);
                 setIsLoggedIn(true);
-                navigate('/demo');
+                navigate('/main');
             } else if (response.data.message) {
                 setErrorMessage(response.data.message);
                 if (response.data.resend) {
@@ -67,7 +67,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
         <div className="auth-page">
             <div className="auth-container">
                 <FontAwesomeIcon icon={faUser} size="3x" className="user-icon" />
-                <h2 className="auth-header">USER LOGIN</h2>
+                <h2 className="auth-header">User login</h2>
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="input-group">
                         <FontAwesomeIcon icon={faEnvelope} className="input-icon" />

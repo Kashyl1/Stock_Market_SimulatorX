@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import DemoPage from './pages/DemoPage';
 import VerificationPage from './pages/VerificationPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
+import MainPage from './pages/MainPage';
+import UserSettingsPage from './pages/UserSettingsPage';
 import axios from 'axios';
 
 import './App.css';
@@ -33,16 +34,19 @@ function App() {
     return (
         <Router>
             <div className="App">
-                <nav>
-                    {isLoggedIn && <button onClick={handleLogout}>Logout</button>}
-                    {isLoggedIn && <Link to="/demo">Demo</Link>}
-                </nav>
+                {isLoggedIn && (
+                    <nav className="navbar">
+                        <Link to="/main" className="nav-link">Main Page</Link>
+                        <button onClick={handleLogout} className="nav-button">Logout</button>
+                    </nav>
+                )}
                 <Routes>
-                    <Route path="/" element={<HomePage />} />
+                    <Route path="/" element={isLoggedIn ? <Navigate to="/main" /> : <HomePage />} />
                     <Route path="/verify" element={<VerificationPage />} />
                     <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
                     <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/demo" element={<DemoPage />} />
+                    <Route path="/main" element={<MainPage />} />
+                    <Route path="/settings" element={<UserSettingsPage />} />
                 </Routes>
             </div>
         </Router>

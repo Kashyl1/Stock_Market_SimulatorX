@@ -73,6 +73,32 @@
 .error-message {
   color: var(--error-color);
   margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  background-color: rgba(255, 77, 77, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+.success-message {
+  margin-top: 20px;
+  color: var(--success-color);
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .link-prompt {

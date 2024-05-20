@@ -1,10 +1,13 @@
 package com.example.backend.auth;
 
 import com.example.backend.Exceptions.AccountNotVerifiedException;
+import com.example.backend.Exceptions.InvalidCurrentPasswordException;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,5 +27,13 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) throws AccountNotVerifiedException {
         return ResponseEntity.ok(service.authenticate(request));
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<AuthenticationResponse> changePassword(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ChangePasswordRequest request) {
+        try {
+            return ResponseEntity.ok(service.changePassword(userDetails.getUsername(), request));
+        } catch (InvalidCurrentPasswordException e) {
+            return ResponseEntity.badRequest().body(AuthenticationResponse.builder().message(e.getMessage()).build());
+        }
     }
 }
