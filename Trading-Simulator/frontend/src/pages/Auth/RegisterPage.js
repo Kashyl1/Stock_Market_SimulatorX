@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import LoginForm from '../components/Auth/LoginForm';
-import { initParticles } from '../assets/customParticles';
+import RegisterForm from '../../components/Auth/RegisterForm';
+import { initParticles } from '../../assets/customParticles';
 
-const LoginPage = ({ setIsLoggedIn }) => {
+const RegisterPage = () => {
   useEffect(() => {
     initParticles();
   }, []);
@@ -14,10 +14,10 @@ const LoginPage = ({ setIsLoggedIn }) => {
       <div className="home-link">
         <Link to="/">Home</Link>
       </div>
-      <LoginForm setIsLoggedIn={setIsLoggedIn} />
+      <RegisterForm />
       <canvas className="background"></canvas>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

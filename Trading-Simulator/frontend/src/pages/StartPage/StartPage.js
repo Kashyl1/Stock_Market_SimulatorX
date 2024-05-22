@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './HomePage.css';
-import { initParticles } from '../assets/customParticles';
-import featureOneImage from '../assets/StartPageFeatureOne.png';
-import featureTwoImage from '../assets/StartPageFeatureTwo.png';
+import './StartPage.css';
+import { initParticles } from '../../assets/customParticles';
+import featureOneImage from '../../assets/StartPageFeatureOne.png';
+import featureTwoImage from '../../assets/StartPageFeatureTwo.png';
 
 const HomePage = () => {
   useEffect(() => {
