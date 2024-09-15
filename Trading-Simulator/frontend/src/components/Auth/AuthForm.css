@@ -17,10 +17,15 @@
   background: rgba(255, 255, 255, 0.8);
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
+  max-width: 400px;
   width: 100%;
-  z-index: 1;
   text-align: center;
+}
+
+.home-link {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .auth-header {
@@ -39,8 +44,9 @@
 
 .input-icon {
   position: absolute;
+  /* Trzymaj 34% i -20px inaczej ikonki najadą na pole tekstowe X'D*/
   top: 34%;
-  left: 10px;
+  left: -20px;
   transform: translateY(-50%);
   color: #888;
 }
