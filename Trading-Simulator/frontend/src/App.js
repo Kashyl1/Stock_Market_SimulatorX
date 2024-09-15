@@ -8,6 +8,9 @@ import MainPage from './pages/MainPage/MainPage';
 import UserSettingsPage from './pages/UserSettings/UserSettingsPage';
 import PrivateRoute from './components/Routing/PrivateRoute';
 import PublicRoute from './components/Routing/PublicRoute';
+import WalletPage from './pages/Wallet/WalletPage';
+import CurrenciesPage from './pages/Currencies/CurrenciesPage';
+
 import axios from 'axios';
 
 import './App.css';
@@ -49,6 +52,8 @@ function App() {
                     <Route path="/register" element={<PublicRoute element={RegisterPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/main" element={<PrivateRoute element={MainPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/settings/*" element={<PrivateRoute element={UserSettingsPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/wallet" element={<PrivateRoute element={WalletPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/currencies" element={<PrivateRoute element={CurrenciesPage} isLoggedIn={isLoggedIn} />} />
                 </Routes>
             </div>
         </Router>

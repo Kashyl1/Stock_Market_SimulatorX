@@ -6,10 +6,13 @@ import com.example.backend.config.JwtService;
 import com.example.backend.user.Role;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
+import com.example.backend.usersetting.ChangePasswordRequest;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -68,18 +71,15 @@ public class AuthenticationService {
                 .token(jwtToken)
                 .build();
     }
-    public AuthenticationResponse changePassword(String email, ChangePasswordRequest request) {
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            return AuthenticationResponse.builder().message("Current password is incorrect").build();
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        } else {
+            throw new RuntimeException("User not authenticated");
         }
-
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-
-        return AuthenticationResponse.builder()
-                .message("Password changed successfully.")
-                .build();
     }
 }

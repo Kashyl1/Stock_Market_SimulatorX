@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../AuthForm.css';
+import './ChangePasswordForm.css';
 
 const ChangePasswordForm = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -27,7 +27,7 @@ const ChangePasswordForm = () => {
 
     try {
       const token = localStorage.getItem('jwtToken');
-      const response = await axios.post('/api/auth/change-password',
+      const response = await axios.post('/api/user-settings/change-password',
         {
           currentPassword,
           newPassword
@@ -38,8 +38,9 @@ const ChangePasswordForm = () => {
           }
         }
       );
-      setMessage(response.data.message);
-      setMessageType(response.data.message === "Password changed successfully." ? 'success' : 'error');
+
+      setMessage(response.data.message || response.data);
+      setMessageType(response.data === "Password changed successfully" ? 'success' : 'error');
       setErrors({});
     } catch (error) {
       if (error.response && error.response.status === 400) {
@@ -55,7 +56,7 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <form onSubmit={handleChangePassword} className="auth-form">
+    <form onSubmit={handleChangePassword} className="change-password-form">
       <div className="input-group">
         <label htmlFor="currentPassword">Current Password</label>
         <input
@@ -63,6 +64,7 @@ const ChangePasswordForm = () => {
           id="currentPassword"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
+          className={errors.currentPassword ? 'error-input' : ''}
           required
         />
         {errors.currentPassword && <div className="error-message">{errors.currentPassword}</div>}
@@ -74,6 +76,7 @@ const ChangePasswordForm = () => {
           id="newPassword"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          className={errors.newPassword ? 'error-input' : ''}
           required
         />
         {errors.newPassword && <div className="error-message">{errors.newPassword}</div>}
@@ -85,6 +88,7 @@ const ChangePasswordForm = () => {
           id="confirmNewPassword"
           value={confirmNewPassword}
           onChange={(e) => setConfirmNewPassword(e.target.value)}
+          className={errors.confirmNewPassword ? 'error-input' : ''}
           required
         />
         {errors.confirmNewPassword && <div className="error-message">{errors.confirmNewPassword}</div>}
