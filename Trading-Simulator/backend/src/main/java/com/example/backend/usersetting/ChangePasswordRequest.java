@@ -1,4 +1,4 @@
-package com.example.backend.auth;
+package com.example.backend.usersetting;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
