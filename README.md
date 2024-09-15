@@ -53,7 +53,7 @@ This project is a Stock Market Simulator currently under development. The projec
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/stock-market-simulator.git
+   git clone https://github.com/Kashyl1/Stock_Market_SimulatorX
    cd stock-market-simulator
    ```
 2. **Backend Setup:**
