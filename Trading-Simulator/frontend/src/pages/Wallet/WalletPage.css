@@ -1,0 +1,91 @@
+/* Ogólny styl strony */
+.wallet-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f4f6f8;
+  padding: 20px;
+  position: relative;
+  font-family: "Cinzel", serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+
+
+.balance-section {
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  z-index: 1;
+}
+
+.balance-section h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.balance-section p {
+  font-size: 18px;
+  color: #666;
+}
+
+
+.add-funds-form {
+  margin-top: 20px;
+}
+
+.add-funds-form input[type="number"],
+.add-funds-form input[type="text"],
+.add-funds-form input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.add-funds-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: #d4af37; /* Złoty kolor */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+  font-family: "Cinzel", serif;
+  font-weight: 500;
+}
+
+.add-funds-form button:hover {
+  filter: brightness(0.9);
+}
+
+
+.balance-display {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.background {
+ margin: 0;
+  padding: 0;
+  background-image: url('../../assets/3601908.jpg');
+  background-size: cover;
+  background-position: center;   background-attachment: fixed;
+  z-index: 0;
+}
+
