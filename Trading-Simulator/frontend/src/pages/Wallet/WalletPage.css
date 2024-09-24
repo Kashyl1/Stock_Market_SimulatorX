@@ -9,9 +9,15 @@
   padding: 20px;
   position: relative;
   font-family: "Cinzel", serif;
-    font-optical-sizing: auto;
-    font-weight: 500;
-    font-style: normal;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  margin: 0;
+  padding: 0;
+  background-image: url('../../assets/3601908.jpg');
+  background-size: cover;
+  background-position: center;   background-attachment: fixed;
+  z-index: 0;
 }
 
 
@@ -80,12 +86,4 @@
   margin-bottom: 20px;
 }
 
-.background {
- margin: 0;
-  padding: 0;
-  background-image: url('../../assets/3601908.jpg');
-  background-size: cover;
-  background-position: center;   background-attachment: fixed;
-  z-index: 0;
-}
 
