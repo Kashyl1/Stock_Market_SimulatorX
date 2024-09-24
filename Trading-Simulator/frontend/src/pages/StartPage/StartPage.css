@@ -8,9 +8,9 @@
   background-position: center;
   color: white;
   text-align: center;
-  position: relative;
+  position: static;
   overflow: hidden;
-
+  background: none;
 }
 
 .header {
