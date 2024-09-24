@@ -17,7 +17,6 @@ const WalletPage = () => {
         {/* O tutaj jeszcze potem wypłata pieniedzy na konto no nie ale to w serwisie najpierw i backendzik*/}
         {/* Dobra */}
       </div>
-      <canvas className="background"></canvas>
     </div>
   );
 };

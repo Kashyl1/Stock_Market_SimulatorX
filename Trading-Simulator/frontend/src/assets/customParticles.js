@@ -7,10 +7,10 @@ export const initParticles = () => {
     Particles.init({
       selector: '.background',
       maxParticles: 150,
-      sizeVariations: 25,
+      sizeVariations: 4,
       speed: 0.15,
-      color: ['#DCE0D9', '#31081F', '#6B0F1A', '#595959', '#808F85'],
-      minDistance: 140,
+      color: ['#FFFFFF', '#FFFAFA', '#D3D3D3', '#FFD700'],
+      minDistance: 140
     });
   } else {
     console.warn('Element with selector ".background" not found, skipping particles initialization.');
