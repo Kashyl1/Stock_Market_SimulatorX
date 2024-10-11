@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -39,10 +40,13 @@ public class TransactionController {
     }
 
     @GetMapping("/available-assets")
-    public ResponseEntity<List<Map<String, Object>>> getAvailableAssets() {
-        List<Map<String, Object>> assets = transactionService.getAvailableAssetsWithPrices();
+    public ResponseEntity<Page<Map<String, Object>>> getAvailableAssets(
+            @PageableDefault(page = 0, size = 50, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        logger.info("Received request for available assets: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<Map<String, Object>> assets = transactionService.getAvailableAssetsWithPrices(pageable);
         return ResponseEntity.ok(assets);
     }
+
     @GetMapping("/history")
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionHistory(
             @PageableDefault(page = 0, size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {

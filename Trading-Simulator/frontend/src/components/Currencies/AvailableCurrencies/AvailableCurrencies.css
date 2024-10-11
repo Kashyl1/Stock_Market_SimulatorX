@@ -43,7 +43,6 @@ body {
   text-decoration: underline;
 }
 
-/* Stylowanie listy kryptowalut */
 .currency-list {
   display: flex;
   flex-wrap: wrap;

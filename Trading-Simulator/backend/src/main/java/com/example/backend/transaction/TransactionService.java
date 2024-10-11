@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,32 +39,46 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final AuthenticationService authenticationService;
 
-    public List<Map<String, Object>> getAvailableAssetsWithPrices() {
-        List<Map<String, Object>> assets = coinGeckoService.getAvailableAssets();
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+    public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
+        try {
+            logger.info("Fetching available assets from CoinGecko for page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
+            List<Map<String, Object>> assets = coinGeckoService.getAvailableAssets(pageable);
+            logger.info("Fetched {} assets from CoinGecko", assets.size());
 
-        for (Map<String, Object> asset : assets) {
-            String baseCurrency = (String) asset.get("id");
+            if (assets.isEmpty()) {
+                logger.warn("No assets fetched from CoinGecko for page: {}", pageable.getPageNumber());
+            }
 
-            CompletableFuture<Void> future = coinGeckoService.getExchangeRatesAsync(baseCurrency)
-                    .thenAccept(rates -> {
-                        if (rates != null && rates.containsKey("usd")) {
-                            asset.put("price_in_usd", rates.get("usd"));
-                        } else {
-                            asset.put("price_in_usd", "Unavailable");
-                        }
-                    }).exceptionally(ex -> {
-                        asset.put("price_in_usd", "Error");
-                        return null;
-                    });
+            List<String> currencies = assets.stream()
+                    .map(asset -> (String) asset.get("id"))
+                    .collect(Collectors.toList());
 
-            futures.add(future);
+            logger.info("Fetching exchange rates for currencies: {}", currencies);
+
+            Map<String, Map<String, Object>> ratesMap = coinGeckoService.getExchangeRatesBatch(currencies);
+            logger.info("Fetched exchange rates for {} currencies", ratesMap.size());
+
+            for (Map<String, Object> asset : assets) {
+                String baseCurrency = (String) asset.get("id");
+                Map<String, Object> rates = ratesMap.get(baseCurrency.toLowerCase());
+
+                if (rates != null && rates.containsKey("usd")) {
+                    asset.put("price_in_usd", rates.get("usd"));
+                } else {
+                    asset.put("price_in_usd", "Unavailable");
+                }
+            }
+
+            long totalAssets = coinGeckoService.getTotalAssetsCount();
+            logger.info("Total assets count: {}", totalAssets);
+
+            return new PageImpl<>(assets, pageable, totalAssets);
+        } catch (Exception e) {
+            logger.error("Error in getAvailableAssetsWithPrices: ", e);
+            throw new RuntimeException("Failed to get available assets with prices.");
         }
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-        return assets;
     }
+
 
     @Transactional
     public void buyAsset(Integer portfolioID, String currencyID, Double amountInUSD) {

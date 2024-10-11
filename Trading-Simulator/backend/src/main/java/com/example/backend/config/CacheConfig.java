@@ -7,14 +7,25 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
 @EnableCaching
 public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("availableAssets", "exchangeRates");
-        cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(2000).expireAfterWrite(5, java.util.concurrent.TimeUnit.MINUTES));
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+                "availableAssetsPage",
+                "exchangeRatesBatch",
+                "availableAssets",
+                "exchangeRates"
+        );
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+                .maximumSize(2000)
+                .expireAfterWrite(300, TimeUnit.SECONDS));
         return cacheManager;
     }
 }
+
+
