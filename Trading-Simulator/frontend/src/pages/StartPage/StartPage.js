@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './StartPage.css';
-import { initParticles } from '../../assets/customParticles';
+import CustomParticlesBackground from '../../assets/CustomParticlesBackground';
 import featureOneImage from '../../assets/StartPageFeatureOne.png';
 import featureTwoImage from '../../assets/StartPageFeatureTwo.png';
 
 const HomePage = () => {
-  useEffect(() => {
-    initParticles();
-  }, []);
 
   return (
     <div className="home-page">
+    <CustomParticlesBackground />
       <div className="static-background"></div>
       <header className="header">
         <h1>Welcome to Our Trading Platform</h1>

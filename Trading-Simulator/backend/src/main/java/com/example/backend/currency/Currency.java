@@ -1,12 +1,15 @@
 package com.example.backend.currency;
 
+import com.example.backend.portfolio.PortfolioAsset;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+import java.util.List;
+
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,10 +20,10 @@ public class Currency {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer currencyID;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 10, unique = true)
     private String symbol;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String name;
 
     @Column(nullable = false, length = 100)
@@ -31,4 +34,12 @@ public class Currency {
 
     @Column(nullable = false, length = 50)
     private String source;
+
+    @Column(nullable = false, unique = true)
+    private String coinGeckoID;
+
+    @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @JsonIgnore
+    private List<PortfolioAsset> portfolioAssets;
 }

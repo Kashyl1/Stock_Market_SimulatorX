@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addFunds } from '../../services/WalletService';
+import { addFunds } from '../../../services/WalletService';
 
 const AddFundsForm = ({ onFundsAdded }) => {
   const [amount, setAmount] = useState('');

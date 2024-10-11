@@ -1,5 +1,5 @@
 import React from 'react';
-import UserSettingsSidebar from '../../components/UserSettings/UserSettingsSidebar';
+import UserSettingsSidebar from '../../components/UserSettings/UserSettingsSidebar/UserSettingsSidebar';
 import { Route, Routes } from 'react-router-dom';
 import ChangePasswordForm from '../../components/UserSettings/ChangePasswordForm/ChangePasswordForm';
 import './UserSettingsPage.css';

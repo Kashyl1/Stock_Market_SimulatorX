@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Trading-Simulator/backend/backend.iml" filepath="$PROJECT_DIR$/Trading-Simulator/backend/backend.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/inzynierka.iml" filepath="$PROJECT_DIR$/.idea/inzynierka.iml" />
     </modules>
   </component>

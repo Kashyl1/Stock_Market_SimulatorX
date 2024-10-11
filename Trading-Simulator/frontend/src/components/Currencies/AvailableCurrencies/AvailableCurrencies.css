@@ -1,8 +1,7 @@
-/* Główna strona */
 body {
   margin: 0;
   padding: 0;
-  background-image: url('../../assets/3601908.jpg');
+  background-image: url('../../../assets/3601908.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

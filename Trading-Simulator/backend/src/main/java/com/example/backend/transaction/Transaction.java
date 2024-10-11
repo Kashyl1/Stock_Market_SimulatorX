@@ -1,5 +1,6 @@
 package com.example.backend.transaction;
 
+import com.example.backend.portfolio.Portfolio;
 import com.example.backend.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,4 +41,8 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "userID", nullable = false)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "portfolioID", nullable = false)
+    private Portfolio portfolio;
 }

@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer auditLogID;
+    private Integer auditLogid;
 
     @ManyToOne
-    @JoinColumn(name = "userID", nullable = false)
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 100)

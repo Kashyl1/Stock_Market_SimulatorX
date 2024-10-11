@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getBalance } from '../../services/WalletService';
+import { getBalance } from '../../../services/WalletService';
 
 const BalanceDisplay = () => {
-  const [balance, setBalance] = useState(null);  // Domyślnie null
+  const [balance, setBalance] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {

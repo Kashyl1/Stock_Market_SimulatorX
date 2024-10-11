@@ -26,16 +26,15 @@ public class CoinGeckoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CoinGeckoService.class);
 
-    // Endpointy CoinGecko
     private final String COINGECKO_ASSETS_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&page=";
-    private final String COINGECKO_EXCHANGE_RATE_URL = "https://api.coingecko.com/api/v3/simple/price?ids={currency}&vs_currencies=usd";
+    private final String COINGECKO_CURRENCY_DATA_URL = "https://api.coingecko.com/api/v3/coins/{currency}";
 
     @Cacheable("availableAssets")
     public List<Map<String, Object>> getAvailableAssets() {
         List<Map<String, Object>> allAssets = new ArrayList<>();
 
         int totalAssets = 1000;
-        int perPage = 250;
+        int perPage = 30;
         int pages = (int) Math.ceil(totalAssets / (double) perPage);
 
         for (int page = 1; page <= pages; page++) {
@@ -52,7 +51,6 @@ public class CoinGeckoService {
     @Cacheable(value = "exchangeRates", key = "#currency")
     public Map<String, Object> getExchangeRates(String currency) {
         String url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currency + "&vs_currencies=usd";
-        logger.info("Fetching exchange rate for currency: {}", currency);
         return restTemplate.getForObject(url, Map.class);
     }
 
@@ -62,19 +60,24 @@ public class CoinGeckoService {
         if (cache != null) {
             Map<String, Object> cachedRates = cache.get(currency, Map.class);
             if (cachedRates != null) {
-                logger.info("Using cached exchange rate for currency: {}", currency);
                 return CompletableFuture.completedFuture(cachedRates);
             }
         }
 
         String url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currency + "&vs_currencies=usd";
-        logger.info("Fetching exchange rate from API for currency: {}", currency);
         Map<String, Object> rates = restTemplate.getForObject(url, Map.class);
-
         if (cache != null) {
             cache.put(currency, rates);
         }
-
         return CompletableFuture.completedFuture(rates);
+    }
+    public Map<String, Object> getCurrencyData(String currencyID) {
+        String url = COINGECKO_CURRENCY_DATA_URL.replace("{currency}", currencyID.toLowerCase());
+        try {
+            return restTemplate.getForObject(url, Map.class);
+        } catch (Exception e) {
+            logger.error("Error fetching currency data for {}: {}", currencyID, e.getMessage());
+            return null;
+        }
     }
 }

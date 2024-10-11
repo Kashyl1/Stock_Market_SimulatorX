@@ -46,6 +46,7 @@ public class AuthenticationService {
                 .role(Role.USER)
                 .verified(false)
                 .verificationToken(verificationToken)
+                .balance(0.0)
                 .build();
 
         userRepository.save(user);

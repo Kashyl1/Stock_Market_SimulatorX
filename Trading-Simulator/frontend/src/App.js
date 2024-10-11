@@ -10,6 +10,8 @@ import PrivateRoute from './components/Routing/PrivateRoute';
 import PublicRoute from './components/Routing/PublicRoute';
 import WalletPage from './pages/Wallet/WalletPage';
 import CurrenciesPage from './pages/Currencies/CurrenciesPage';
+import PortfoliosPage from './pages/PortfoliosPage/PortfoliosPage';
+import PortfolioDetails from './components/Portfolios/PortfolioDetails/PortfolioDetails';
 
 import axios from 'axios';
 
@@ -54,6 +56,8 @@ function App() {
                     <Route path="/settings/*" element={<PrivateRoute element={UserSettingsPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/wallet" element={<PrivateRoute element={WalletPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/currencies" element={<PrivateRoute element={CurrenciesPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/portfolios" element={<PrivateRoute element={PortfoliosPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/portfolios/:id" element={<PortfolioDetails />} />
                 </Routes>
             </div>
         </Router>

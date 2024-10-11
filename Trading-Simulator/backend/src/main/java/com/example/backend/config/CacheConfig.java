@@ -14,7 +14,7 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("availableAssets", "exchangeRates");
-        cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(100).expireAfterWrite(10, java.util.concurrent.TimeUnit.MINUTES));
+        cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(2000).expireAfterWrite(5, java.util.concurrent.TimeUnit.MINUTES));
         return cacheManager;
     }
 }

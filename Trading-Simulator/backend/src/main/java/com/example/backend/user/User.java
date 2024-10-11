@@ -27,7 +27,7 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Integer ID;
 
     @Column(nullable = false, length = 50)
     private String firstname;
@@ -57,6 +57,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @Column(nullable = false)
     private Double balance = 0.0;
 

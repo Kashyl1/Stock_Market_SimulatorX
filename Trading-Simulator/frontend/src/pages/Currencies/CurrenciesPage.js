@@ -1,6 +1,6 @@
 import React from 'react';
-import AvailableCurrencies from '../../components/Currencies/AvailableCurrencies';
-import '../../components/Currencies/AvailableCurrencies.css';
+import AvailableCurrencies from '../../components/Currencies/AvailableCurrencies/AvailableCurrencies';
+import '../../components/Currencies/AvailableCurrencies/AvailableCurrencies.css';
 
 
 

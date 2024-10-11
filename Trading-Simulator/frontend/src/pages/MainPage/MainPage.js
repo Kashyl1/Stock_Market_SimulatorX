@@ -8,7 +8,7 @@ const MainPage = () => {
       <Link to="/settings">User Settings</Link>
       <Link to="/wallet">Wallet</Link>
       <Link to="/currencies">Crypto</Link>
-
+      <Link to="/portfolios">Go to Portfolios</Link>
     </div>
   );
 };

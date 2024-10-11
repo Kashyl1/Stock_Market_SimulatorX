@@ -1,0 +1,44 @@
+/* src/pages/Portfolios.css */
+
+.portfolios-page {
+  padding: 20px;
+}
+
+.portfolio-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.portfolio-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 5px;
+  width: 250px;
+}
+
+.portfolio-card h3 {
+  margin-bottom: 10px;
+}
+
+.portfolio-card button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.portfolio-card button:hover {
+  background-color: #0056b3;
+}
+
+.portfolio-details-section {
+  margin-top: 40px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
+}

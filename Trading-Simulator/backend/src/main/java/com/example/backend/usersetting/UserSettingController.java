@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserSettingController {
 
     private final UserSettingService userSettingService;
-    /**
-     * Endpoint do zmiany hasła
-     */
     @PostMapping("/change-password")
     public ResponseEntity<ChangePasswordResponse> changePassword(@AuthenticationPrincipal UserDetails userDetails, @RequestBody ChangePasswordRequest request) {
         try {
