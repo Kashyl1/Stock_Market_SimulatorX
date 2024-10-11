@@ -32,7 +32,7 @@ public class PortfolioAsset {
     private Currency currency;
 
     private Double amount;
+    private Double currentPrice;
     private Double averagePurchasePrice;
-
     private LocalDateTime updatedAt;
 }

@@ -41,23 +41,13 @@ public class TransactionService {
 
     public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
         try {
-            logger.info("Fetching available assets from CoinGecko for page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
             List<Map<String, Object>> assets = coinGeckoService.getAvailableAssets(pageable);
-            logger.info("Fetched {} assets from CoinGecko", assets.size());
-
-            if (assets.isEmpty()) {
-                logger.warn("No assets fetched from CoinGecko for page: {}", pageable.getPageNumber());
-            }
 
             List<String> currencies = assets.stream()
                     .map(asset -> (String) asset.get("id"))
                     .collect(Collectors.toList());
 
-            logger.info("Fetching exchange rates for currencies: {}", currencies);
-
             Map<String, Map<String, Object>> ratesMap = coinGeckoService.getExchangeRatesBatch(currencies);
-            logger.info("Fetched exchange rates for {} currencies", ratesMap.size());
-
             for (Map<String, Object> asset : assets) {
                 String baseCurrency = (String) asset.get("id");
                 Map<String, Object> rates = ratesMap.get(baseCurrency.toLowerCase());
@@ -70,11 +60,8 @@ public class TransactionService {
             }
 
             long totalAssets = coinGeckoService.getTotalAssetsCount();
-            logger.info("Total assets count: {}", totalAssets);
-
             return new PageImpl<>(assets, pageable, totalAssets);
         } catch (Exception e) {
-            logger.error("Error in getAvailableAssetsWithPrices: ", e);
             throw new RuntimeException("Failed to get available assets with prices.");
         }
     }
@@ -83,8 +70,6 @@ public class TransactionService {
     @Transactional
     public void buyAsset(Integer portfolioID, String currencyID, Double amountInUSD) {
         User currentUser = authenticationService.getCurrentUser();
-        logger.info("User {} is attempting to buy asset {} with amount ${}", currentUser.getEmail(), currencyID, amountInUSD);
-
         Portfolio portfolio = portfolioRepository.findByPortfolioIDAndUser(portfolioID, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
@@ -100,8 +85,6 @@ public class TransactionService {
 
         currentUser.setBalance(currentUser.getBalance() - amountInUSD);
         userRepository.save(currentUser);
-        logger.info("User {} balance updated to {}", currentUser.getEmail(), currentUser.getBalance());
-
         PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
                 .orElse(PortfolioAsset.builder()
                         .portfolio(portfolio)
@@ -120,8 +103,6 @@ public class TransactionService {
         portfolioAsset.setUpdatedAt(LocalDateTime.now());
 
         portfolioAssetRepository.save(portfolioAsset);
-        logger.info("Portfolio asset updated: {}", portfolioAsset);
-
         Transaction transaction = Transaction.builder()
                 .currency(currency)
                 .transactionType("BUY")
@@ -133,7 +114,6 @@ public class TransactionService {
                 .build();
 
         transactionRepository.save(transaction);
-        logger.info("Transaction recorded: {}", transaction);
     }
 
     @Transactional
@@ -161,16 +141,12 @@ public class TransactionService {
 
         if (newAmount == 0.0) {
             portfolioAssetRepository.delete(portfolioAsset);
-            logger.info("Portfolio asset {} deleted as amount reached zero", portfolioAsset);
         } else {
             portfolioAssetRepository.save(portfolioAsset);
-            logger.info("Portfolio asset updated: {}", portfolioAsset);
         }
 
         currentUser.setBalance(currentUser.getBalance() + amountInUSD);
         userRepository.save(currentUser);
-        logger.info("User {} balance updated to {}", currentUser.getEmail(), currentUser.getBalance());
-
         Transaction transaction = Transaction.builder()
                 .currency(currency)
                 .transactionType("SELL")
@@ -182,7 +158,6 @@ public class TransactionService {
                 .build();
 
         transactionRepository.save(transaction);
-        logger.info("Transaction recorded: {}", transaction);
     }
 
     private Currency fetchAndSaveCurrency(String currencyID) {
@@ -235,21 +210,18 @@ public class TransactionService {
         User currentUser = authenticationService.getCurrentUser();
         logger.info("Fetching paginated transaction history for user: {}", currentUser.getEmail());
         Page<Transaction> transactions = transactionRepository.findByUser(currentUser, pageable);
-        return transactions.map(transaction -> TransactionHistoryDTO.builder()
-                .transactionID(transaction.getTransactionID())
-                .transactionType(transaction.getTransactionType())
-                .amount(transaction.getAmount())
-                .rate(transaction.getRate())
-                .timestamp(transaction.getTimestamp())
-                .currencyName(transaction.getCurrency().getName())
-                .portfolioName(transaction.getPortfolio().getName())
-                .build());
+        return mapTransactionsToDTO(transactions);
     }
+
     public Page<TransactionHistoryDTO> getTransactionHistoryByPortfolio(Integer portfolioId, Pageable pageable) {
         User currentUser = authenticationService.getCurrentUser();
         logger.info("Fetching paginated transaction history for user: {} and portfolio ID: {}", currentUser.getEmail(), portfolioId);
         Portfolio portfolio = getPortfolioByIdAndUser(portfolioId, currentUser);
         Page<Transaction> transactions = transactionRepository.findByUserAndPortfolio(currentUser, portfolio, pageable);
+        return mapTransactionsToDTO(transactions);
+    }
+
+    private Page<TransactionHistoryDTO> mapTransactionsToDTO(Page<Transaction> transactions) {
         return transactions.map(transaction -> TransactionHistoryDTO.builder()
                 .transactionID(transaction.getTransactionID())
                 .transactionType(transaction.getTransactionType())

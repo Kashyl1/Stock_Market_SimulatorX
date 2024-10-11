@@ -47,3 +47,28 @@ export const getPortfolioById = async (id) => {
     throw error;
   }
 };
+
+export const getPortfolioAssetsWithGains = async (portfolioId) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/${portfolioId}/gains`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTotalPortfolioGainOrLoss = async (portfolioId) => {
+  const token = localStorage.getItem('jwtToken');
+  const response = await axios.get(`${API_URL}/${portfolioId}/total-gain-or-loss`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};

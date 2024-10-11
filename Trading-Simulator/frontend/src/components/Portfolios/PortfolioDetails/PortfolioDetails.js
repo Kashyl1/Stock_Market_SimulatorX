@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getPortfolioById } from '../../../services/PortfolioService';
+import { getPortfolioById, getPortfolioAssetsWithGains, getTotalPortfolioGainOrLoss } from '../../../services/PortfolioService';
 import SellAssetModal from '../../../components/Transaction/SellAssetModal/SellAssetModal';
 import TransactionHistory from '../../../components/TransactionHistory/TransactionHistory';
 import './PortfolioDetails.css';
@@ -10,14 +10,22 @@ const PortfolioDetails = () => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [assetsWithGains, setAssetsWithGains] = useState([]);
+  const [totalGainOrLoss, setTotalGainOrLoss] = useState(0); // Dodane pole
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [showSellModal, setShowSellModal] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
   const fetchPortfolio = async () => {
     try {
-      const data = await getPortfolioById(id);
-      setPortfolio(data);
+      const portfolioData = await getPortfolioById(id);
+      setPortfolio(portfolioData);
+
+      const gainsData = await getPortfolioAssetsWithGains(id);
+      setAssetsWithGains(gainsData);
+
+      const totalGainOrLossData = await getTotalPortfolioGainOrLoss(id);
+      setTotalGainOrLoss(totalGainOrLossData);
     } catch (err) {
       setError('Failed to fetch portfolio details.');
       console.error('Error fetching portfolio:', err);
@@ -68,21 +76,24 @@ const PortfolioDetails = () => {
       <h2>{portfolio.name}</h2>
       <p>Created At: {new Date(portfolio.createdAt).toLocaleDateString()}</p>
       <h3>Assets:</h3>
-      {portfolio.portfolioAssets && portfolio.portfolioAssets.length > 0 ? (
+      {assetsWithGains && assetsWithGains.length > 0 ? (
         <div className="assets-list">
-          {portfolio.portfolioAssets.map((asset) => (
-            <div key={asset.portfolioAssetID} className="asset-card">
-              <img src={asset.currency.image} alt={`${asset.currency.name} icon`} />
-              <h4>{asset.currency.name} ({asset.currency.symbol.toUpperCase()})</h4>
+          {assetsWithGains.map((asset) => (
+            <div key={asset.currencyName} className="asset-card">
+              <h4>{asset.currencyName} ({asset.currencyName})</h4>
               <p>Amount: {asset.amount}</p>
               <p>Average Purchase Price: ${asset.averagePurchasePrice.toFixed(2)}</p>
-              <button onClick={() => handleSellClick(asset.currency)}>Sell</button>
+              <p>Current Price: ${asset.currentPrice.toFixed(2)}</p>
+              <p>Gain/Loss: {asset.gainOrLoss >= 0 ? '+' : ''}${asset.gainOrLoss.toFixed(2)}</p>
+              <button onClick={() => handleSellClick(asset)}>Sell</button>
             </div>
           ))}
         </div>
       ) : (
         <p>No assets found in this portfolio.</p>
       )}
+
+      <h3>Total Portfolio Gain/Loss: {totalGainOrLoss >= 0 ? '+' : ''}${totalGainOrLoss.toFixed(2)}</h3>
 
       <button onClick={toggleTransactionHistory}>
         {showTransactionHistory ? 'Hide' : 'View'} Transaction History

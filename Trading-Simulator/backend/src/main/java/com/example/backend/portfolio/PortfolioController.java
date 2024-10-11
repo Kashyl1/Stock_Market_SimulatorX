@@ -36,5 +36,24 @@ public class PortfolioController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+    @GetMapping("/{id}/gains")
+    public ResponseEntity<List<PortfolioAssetDTO>> getPortfolioAssetsWithGains(@PathVariable Integer id) {
+        try {
+            List<PortfolioAssetDTO> assetsWithGains = portfolioService.getPortfolioAssetsWithGains(id);
+            return ResponseEntity.ok(assetsWithGains);
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    @GetMapping("/{id}/total-gain-or-loss")
+    public ResponseEntity<Double> getTotalPortfolioGainOrLoss(@PathVariable Integer id) {
+        try {
+            Double gainOrLoss = portfolioService.calculateTotalPortfolioGainOrLoss(id);
+            return ResponseEntity.ok(gainOrLoss);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
@@ -16,16 +16,25 @@ const AvailableCurrencies = () => {
   const [page, setPage] = useState(0);
   const [size] = useState(50);
 
+  // Fetchowanie portfeli tylko raz, na początku
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const portfoliosData = await getUserPortfolios();
+        setPortfolios(portfoliosData);
+      } catch (err) {
+        setError('Failed to fetch portfolios.');
+      }
+    };
+
+    fetchPortfolios();
+  }, []);
+
   const { data, isLoading, isError } = useQuery(
     ['availableAssets', page],
     () => getAvailableAssets(page, size),
     {
       refetchInterval: 300000,
-      onSuccess: (data) => {
-        getUserPortfolios()
-          .then(setPortfolios)
-          .catch(() => setError('Failed to fetch portfolios.'));
-      },
       onError: () => {
         setError('Failed to fetch data.');
       },
@@ -55,7 +64,8 @@ const AvailableCurrencies = () => {
   };
 
   const handleBuySuccess = () => {
-    refetch();
+    // Możesz odświeżyć dane lub portfele po udanym zakupie
+    // fetchPortfolios(); // Jeśli chcesz odświeżyć portfele
   };
 
   const debouncedSetSearchTerm = debounce((value) => {
