@@ -27,7 +27,7 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue
-    private Integer ID;
+    private Integer id;
 
     @Column(nullable = false, length = 50)
     private String firstname;
@@ -96,7 +96,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
 
 }

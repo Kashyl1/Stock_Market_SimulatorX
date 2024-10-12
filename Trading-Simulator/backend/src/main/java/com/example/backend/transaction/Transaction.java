@@ -20,10 +20,10 @@ import java.time.LocalDateTime;
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer transactionID;
+    private Integer transactionid;
 
     @ManyToOne
-    @JoinColumn(name = "currencyID", nullable = false)
+    @JoinColumn(name = "currencyid", nullable = false)
     private Currency currency;
 
     @Column(nullable = false, length = 10)
@@ -39,10 +39,10 @@ public class Transaction {
     private LocalDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "userID", nullable = false)
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "portfolioID", nullable = false)
+    @JoinColumn(name = "portfolioid", nullable = false)
     private Portfolio portfolio;
 }

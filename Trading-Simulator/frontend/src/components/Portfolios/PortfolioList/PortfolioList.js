@@ -15,10 +15,10 @@ const PortfolioList = ({ portfolios }) => {
   return (
     <div className="portfolio-list">
       {portfolios.map((portfolio) => (
-        <div key={portfolio.portfolioID} className="portfolio-card">
+        <div key={portfolio.portfolioid} className="portfolio-card">
           <h3>{portfolio.name}</h3>
           <p>Created At: {new Date(portfolio.createdAt).toLocaleDateString()}</p>
-          <Link to={`/portfolios/${portfolio.portfolioID}`}>
+          <Link to={`/portfolios/${portfolio.portfolioid}`}>
             <button>View Details</button>
           </Link>
         </div>

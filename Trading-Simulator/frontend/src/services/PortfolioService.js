@@ -1,5 +1,3 @@
-// src/services/PortfolioService.js
-
 import axios from 'axios';
 
 const API_URL = '/api/portfolios';
@@ -33,7 +31,7 @@ export const getUserPortfolios = async () => {
   }
 };
 
-export const getPortfolioById = async (id) => {
+export const getPortfolioByid = async (id) => {
   const token = localStorage.getItem('jwtToken');
   try {
     const response = await axios.get(`${API_URL}/${id}`, {
@@ -48,10 +46,10 @@ export const getPortfolioById = async (id) => {
   }
 };
 
-export const getPortfolioAssetsWithGains = async (portfolioId) => {
+export const getPortfolioAssetsWithGains = async (portfolioid) => {
   const token = localStorage.getItem('jwtToken');
   try {
-    const response = await axios.get(`${API_URL}/${portfolioId}/gains`, {
+    const response = await axios.get(`${API_URL}/${portfolioid}/gains`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -63,9 +61,9 @@ export const getPortfolioAssetsWithGains = async (portfolioId) => {
   }
 };
 
-export const getTotalPortfolioGainOrLoss = async (portfolioId) => {
+export const getTotalPortfolioGainOrLoss = async (portfolioid) => {
   const token = localStorage.getItem('jwtToken');
-  const response = await axios.get(`${API_URL}/${portfolioId}/total-gain-or-loss`, {
+  const response = await axios.get(`${API_URL}/${portfolioid}/total-gain-or-loss`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

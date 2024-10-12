@@ -1,14 +1,12 @@
-// src/services/TransactionService.js
-
 import axios from 'axios';
 
 const API_URL = '/api/transactions';
 
-export const buyAsset = async (portfolioID, currencyID, amountInUSD) => {
+export const buyAsset = async (portfolioid, currencyid, amountInUSD) => {
   const token = localStorage.getItem('jwtToken');
   const response = await axios.post(
     `${API_URL}/buy-asset`,
-    { portfolioID, currencyID, amountInUSD },
+    { portfolioid, currencyid, amountInUSD },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -18,11 +16,11 @@ export const buyAsset = async (portfolioID, currencyID, amountInUSD) => {
   return response.data;
 };
 
-export const sellAsset = async (portfolioID, currencyID, amount) => {
+export const sellAsset = async (portfolioid, currencyid, amount) => {
   const token = localStorage.getItem('jwtToken');
   const response = await axios.post(
     `${API_URL}/sell-asset`,
-    { portfolioID, currencyID, amount },
+    { portfolioid, currencyid, amount },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -48,10 +46,10 @@ export const getTransactionHistory = async (params) => {
   }
 };
 
-export const getTransactionHistoryByPortfolio = async (portfolioId, params) => {
+export const getTransactionHistoryByPortfolio = async (portfolioid, params) => {
   try {
     const token = localStorage.getItem('jwtToken');
-    const response = await axios.get(`${API_URL}/history/portfolio/${portfolioId}`, {
+    const response = await axios.get(`${API_URL}/history/portfolio/${portfolioid}`, {
       params,
       headers: {
         Authorization: `Bearer ${token}`,

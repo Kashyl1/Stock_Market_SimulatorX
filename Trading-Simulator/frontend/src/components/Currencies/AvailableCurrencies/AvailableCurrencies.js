@@ -16,7 +16,6 @@ const AvailableCurrencies = () => {
   const [page, setPage] = useState(0);
   const [size] = useState(50);
 
-  // Fetchowanie portfeli tylko raz, na początku
   useEffect(() => {
     const fetchPortfolios = async () => {
       try {
@@ -64,8 +63,6 @@ const AvailableCurrencies = () => {
   };
 
   const handleBuySuccess = () => {
-    // Możesz odświeżyć dane lub portfele po udanym zakupie
-    // fetchPortfolios(); // Jeśli chcesz odświeżyć portfele
   };
 
   const debouncedSetSearchTerm = debounce((value) => {

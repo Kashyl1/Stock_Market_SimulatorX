@@ -2,17 +2,19 @@ package com.example.backend.portfolio;
 
 import com.example.backend.CoinGecko.CoinGeckoService;
 import com.example.backend.auth.AuthenticationService;
+import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.beans.Transient;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,11 +28,12 @@ public class PortfolioService {
     @Autowired
     private CoinGeckoService coinGeckoService;
 
+    private static final Logger logger = LoggerFactory.getLogger(PortfolioService.class);
+
 
 
     public Portfolio createPortfolio(String name) {
         User currentUser = authenticationService.getCurrentUser();
-
         Optional<Portfolio> existingPortfolio = portfolioRepository.findByUserAndName(currentUser, name);
         if (existingPortfolio.isPresent()) {
             throw new RuntimeException("Portfolio with that name already exist");
@@ -44,44 +47,49 @@ public class PortfolioService {
 
         return portfolioRepository.save(portfolio);
     }
-
-    public List<Portfolio> getUserPortfolios() {
+    public List<PortfolioDTO> getUserPortfolios() {
         User currentUser = authenticationService.getCurrentUser();
+
         List<Portfolio> portfolios = portfolioRepository.findByUser(currentUser);
-        return portfolios;
-    }
 
-    @Transactional
-    public Portfolio getUserPortfolioById(Integer portfolioID) {
-        User currentUser = authenticationService.getCurrentUser();
-        return portfolioRepository.findWithAssetsByPortfolioIDAndUser(portfolioID, currentUser)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found " + portfolioID + " " + currentUser.getEmail()));
+        return portfolios.stream().map(portfolio -> {
+            List<PortfolioAssetDTO> assets = portfolio.getPortfolioAssets().stream().map(asset -> new PortfolioAssetDTO(asset.getCurrency().getName(), asset.getAmount(), asset.getAveragePurchasePrice(), asset.getCurrentPrice(), null)).collect(Collectors.toList());
+            return new PortfolioDTO(portfolio.getPortfolioid(), portfolio.getName(), assets);
+        }).collect(Collectors.toList());
     }
-    public List<PortfolioAssetDTO> getPortfolioAssetsWithGains(Integer portfolioId) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+    @Transactional
+    public Portfolio getUserPortfolioByid(Integer portfolioid) {
+        User currentUser = authenticationService.getCurrentUser();
+        return portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, currentUser)
+                .orElseThrow(() -> new RuntimeException("Portfolio not found " + portfolioid + " " + currentUser.getEmail()));
+    }
+    public List<PortfolioAssetDTO> getPortfolioAssetsWithGains(Integer portfolioid) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioid)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
         List<String> currencies = portfolio.getPortfolioAssets().stream()
-                .map(asset -> asset.getCurrency().getCoinGeckoID())
+                .map(asset -> asset.getCurrency().getCoinGeckoid())
                 .collect(Collectors.toList());
 
         Map<String, Map<String, Object>> ratesMap = coinGeckoService.getExchangeRatesBatch(currencies);
 
-        List<PortfolioAssetDTO> assetDTOs = new ArrayList<>();
-        for (PortfolioAsset asset : portfolio.getPortfolioAssets()) {
-            String currencyID = asset.getCurrency().getCoinGeckoID().toLowerCase();
-            Map<String, Object> currencyRates = ratesMap.get(currencyID);
-            Double currentPrice = currencyRates != null && currencyRates.containsKey("usd")
-                    ? ((Number) currencyRates.get("usd")).doubleValue()
-                    : null;
+        List<PortfolioAssetDTO> assetDTOs = portfolio.getPortfolioAssets().parallelStream()
+                .map(asset -> {
+                    String currencyid = asset.getCurrency().getCoinGeckoid().toLowerCase();
+                    Map<String, Object> currencyRates = ratesMap.get(currencyid);
+                    Double currentPrice = currencyRates != null && currencyRates.containsKey("usd")
+                            ? ((Number) currencyRates.get("usd")).doubleValue()
+                            : null;
 
-            if (currentPrice != null) {
-                asset.setCurrentPrice(currentPrice);
+                    if (currentPrice != null) {
+                        asset.setCurrentPrice(currentPrice);
+                        return getPortfolioAssetDTO(asset, currentPrice);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-                PortfolioAssetDTO dto = getPortfolioAssetDTO(asset, currentPrice);
-                assetDTOs.add(dto);
-            }
-        }
 
         return assetDTOs;
     }
@@ -99,12 +107,12 @@ public class PortfolioService {
         dto.setGainOrLoss(gainOrLoss);
         return dto;
     }
-    public Double calculateTotalPortfolioGainOrLoss(Integer portfolioId) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+    public Double calculateTotalPortfolioGainOrLoss(Integer portfolioid) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioid)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
         List<String> currencies = portfolio.getPortfolioAssets().stream()
-                .map(asset -> asset.getCurrency().getCoinGeckoID())
+                .map(asset -> asset.getCurrency().getCoinGeckoid())
                 .collect(Collectors.toList());
 
         Map<String, Map<String, Object>> ratesMap = coinGeckoService.getExchangeRatesBatch(currencies);
@@ -113,8 +121,8 @@ public class PortfolioService {
         double totalCurrentValue = 0.0;
 
         for (PortfolioAsset asset : portfolio.getPortfolioAssets()) {
-            String currencyID = asset.getCurrency().getCoinGeckoID().toLowerCase();
-            Map<String, Object> currencyRates = ratesMap.get(currencyID);
+            String currencyid = asset.getCurrency().getCoinGeckoid().toLowerCase();
+            Map<String, Object> currencyRates = ratesMap.get(currencyid);
             Double currentPrice = currencyRates != null && currencyRates.containsKey("usd")
                     ? ((Number) currencyRates.get("usd")).doubleValue()
                     : null;
@@ -128,7 +136,6 @@ public class PortfolioService {
             }
         }
 
-        // Zysk/strata całego portfela
         return totalCurrentValue - totalInitialValue;
     }
 

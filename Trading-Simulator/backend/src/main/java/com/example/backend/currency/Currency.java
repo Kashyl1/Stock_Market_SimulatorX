@@ -18,7 +18,7 @@ import java.util.List;
 public class Currency {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer currencyID;
+    private Integer currencyid;
 
     @Column(nullable = false, length = 10, unique = true)
     private String symbol;
@@ -36,7 +36,7 @@ public class Currency {
     private String source;
 
     @Column(nullable = false, unique = true)
-    private String coinGeckoID;
+    private String coinGeckoid;
 
     @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference

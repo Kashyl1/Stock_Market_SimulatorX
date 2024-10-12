@@ -19,7 +19,8 @@ public class CacheConfig {
                 "availableAssetsPage",
                 "exchangeRatesBatch",
                 "availableAssets",
-                "exchangeRates"
+                "exchangeRates",
+                "userPortfolios"
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(2000)

@@ -74,7 +74,7 @@ public class CoinGeckoService {
         }
     }
     public long getTotalAssetsCount() {
-        return 2000;
+        return 200;
     }
 
     @Cacheable(value = "exchangeRates", key = "#currency")
@@ -82,12 +82,12 @@ public class CoinGeckoService {
         String url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currency + "&vs_currencies=usd";
         return restTemplate.getForObject(url, Map.class);
     }
-    public Map<String, Object> getCurrencyData(String currencyID) {
-        String url = COINGECKO_CURRENCY_DATA_URL.replace("{currency}", currencyID.toLowerCase());
+    public Map<String, Object> getCurrencyData(String currencyid) {
+        String url = COINGECKO_CURRENCY_DATA_URL.replace("{currency}", currencyid.toLowerCase());
         try {
             return restTemplate.getForObject(url, Map.class);
         } catch (Exception e) {
-            logger.error("Error fetching currency data for {}: {}", currencyID, e.getMessage());
+            logger.error("Error fetching currency data for {}: {}", currencyid, e.getMessage());
             return null;
         }
     }

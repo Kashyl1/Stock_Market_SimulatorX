@@ -7,7 +7,7 @@ import TransactionFilters from './TransactionFilters';
 import { getTransactionHistory, getTransactionHistoryByPortfolio } from '../../services/TransactionService';
 import './TransactionHistory.css';
 
-const TransactionHistory = ({ portfolioId }) => {
+const TransactionHistory = ({ portfolioid }) => {
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(0);
   const [size] = useState(10);
@@ -38,8 +38,8 @@ const TransactionHistory = ({ portfolioId }) => {
       };
 
       let response;
-      if (portfolioId) {
-        response = await getTransactionHistoryByPortfolio(portfolioId, params);
+      if (portfolioid) {
+        response = await getTransactionHistoryByPortfolio(portfolioid, params);
       } else {
         response = await getTransactionHistory(params);
       }
@@ -70,7 +70,7 @@ const TransactionHistory = ({ portfolioId }) => {
 
   return (
     <div className="transaction-history">
-      <h2>Transaction History {portfolioId ? `for Portfolio ID: ${portfolioId}` : ''}</h2>
+      <h2>Transaction History {portfolioid ? `for Portfolio id: ${portfolioid}` : ''}</h2>
 
       <TransactionFilters onFilterChange={handleFilterChange} />
 

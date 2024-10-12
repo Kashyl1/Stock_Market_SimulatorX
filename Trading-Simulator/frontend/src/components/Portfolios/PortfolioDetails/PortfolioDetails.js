@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getPortfolioById, getPortfolioAssetsWithGains, getTotalPortfolioGainOrLoss } from '../../../services/PortfolioService';
+import { getPortfolioByid, getPortfolioAssetsWithGains, getTotalPortfolioGainOrLoss } from '../../../services/PortfolioService';
 import SellAssetModal from '../../../components/Transaction/SellAssetModal/SellAssetModal';
 import TransactionHistory from '../../../components/TransactionHistory/TransactionHistory';
 import './PortfolioDetails.css';
@@ -11,14 +11,14 @@ const PortfolioDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [assetsWithGains, setAssetsWithGains] = useState([]);
-  const [totalGainOrLoss, setTotalGainOrLoss] = useState(0); // Dodane pole
+  const [totalGainOrLoss, setTotalGainOrLoss] = useState(0);
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [showSellModal, setShowSellModal] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
   const fetchPortfolio = async () => {
     try {
-      const portfolioData = await getPortfolioById(id);
+      const portfolioData = await getPortfolioByid(id);
       setPortfolio(portfolioData);
 
       const gainsData = await getPortfolioAssetsWithGains(id);
@@ -39,7 +39,7 @@ const PortfolioDetails = () => {
   }, [id]);
 
   const handleSellClick = (currency) => {
-    const asset = portfolio.portfolioAssets.find(a => a.currency.coinGeckoId === currency.coinGeckoId);
+    const asset = portfolio.portfolioAssets.find(a => a.currency.coinGeckoid === currency.coinGeckoid);
     if (asset) {
       setSelectedCurrency({ ...currency, amount: asset.amount });
       setShowSellModal(true);
@@ -100,13 +100,13 @@ const PortfolioDetails = () => {
       </button>
 
       {showTransactionHistory && (
-        <TransactionHistory portfolioId={portfolio.portfolioID} />
+        <TransactionHistory portfolioid={portfolio.portfolioid} />
       )}
 
       {showSellModal && selectedCurrency && (
         <SellAssetModal
           currency={selectedCurrency}
-          portfolioID={portfolio.portfolioID}
+          portfolioid={portfolio.portfolioid}
           currentAmount={selectedCurrency.amount}
           onClose={handleCloseModal}
           onSellSuccess={handleSellSuccess}

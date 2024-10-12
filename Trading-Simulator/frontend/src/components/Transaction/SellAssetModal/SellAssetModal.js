@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { sellAsset } from '../../../services/TransactionService';
 import './SellAssetModal.css';
 
-const SellAssetModal = ({ currency, portfolioID, currentAmount, onClose, onSellSuccess }) => {
+const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellSuccess }) => {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ const SellAssetModal = ({ currency, portfolioID, currentAmount, onClose, onSellS
     setLoading(true);
     try {
       const sellAmount = parseFloat(amount);
-      await sellAsset(portfolioID, currency.coinGeckoID, sellAmount);
+      await sellAsset(portfolioid, currency.coinGeckoid, sellAmount);
       alert('Asset sold successfully');
       onSellSuccess();
       onClose();

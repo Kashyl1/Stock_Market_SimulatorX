@@ -12,12 +12,12 @@ import lombok.Setter;
 public class SellAssetRequest {
 
     @NotNull(message = "Portfolio ID is required")
-    @JsonProperty("portfolioID")
-    private Integer portfolioID;
+    @JsonProperty("portfolioid")
+    private Integer portfolioid;
 
     @NotBlank(message = "Currency ID is required")
-    @JsonProperty("currencyID")
-    private String currencyID;
+    @JsonProperty("currencyid")
+    private String currencyid;
 
     @NotNull(message = "Amount is required")
     @Min(value = 0, message = "Amount must be positive")

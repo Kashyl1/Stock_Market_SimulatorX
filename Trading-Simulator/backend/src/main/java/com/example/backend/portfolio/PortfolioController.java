@@ -15,6 +15,7 @@ public class PortfolioController {
     @Autowired
     private PortfolioService portfolioService;
 
+
     @PostMapping("/create")
     public ResponseEntity<Portfolio> createPortfolio(@RequestBody CreatePortfolioRequest request) {
         Portfolio portfolio = portfolioService.createPortfolio(request.getName());
@@ -22,15 +23,15 @@ public class PortfolioController {
     }
 
     @GetMapping("/my-portfolios")
-    public ResponseEntity<List<Portfolio>> getUserPortfolios() {
-        List<Portfolio> portfolios = portfolioService.getUserPortfolios();
+    public ResponseEntity<List<PortfolioDTO>> getUserPortfolios() {
+        List<PortfolioDTO> portfolios = portfolioService.getUserPortfolios();
         return ResponseEntity.ok(portfolios);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Portfolio> getUserPortfolioById(@PathVariable Integer id) {
+    public ResponseEntity<Portfolio> getUserPortfolioByid(@PathVariable Integer id) {
         try {
-            Portfolio portfolio = portfolioService.getUserPortfolioById(id);
+            Portfolio portfolio = portfolioService.getUserPortfolioByid(id);
             return ResponseEntity.ok(portfolio);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);

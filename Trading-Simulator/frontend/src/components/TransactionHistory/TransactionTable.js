@@ -35,7 +35,7 @@ const TransactionTable = ({ transactions, onSortChange, sortBy, sortDir }) => {
           </tr>
         ) : (
           transactions.map(tx => (
-            <tr key={tx.transactionID}>
+            <tr key={tx.transactionid}>
               <td>{tx.transactionType}</td>
               <td>{tx.currencyName}</td>
               <td>{tx.amount}</td>

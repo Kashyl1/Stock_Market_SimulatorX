@@ -13,6 +13,8 @@ import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -66,17 +68,16 @@ public class TransactionService {
         }
     }
 
-
     @Transactional
-    public void buyAsset(Integer portfolioID, String currencyID, Double amountInUSD) {
+    public void buyAsset(Integer portfolioid, String currencyid, Double amountInUSD) {
         User currentUser = authenticationService.getCurrentUser();
-        Portfolio portfolio = portfolioRepository.findByPortfolioIDAndUser(portfolioID, currentUser)
+        Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
-        Currency currency = currencyRepository.findByCoinGeckoID(currencyID.toLowerCase())
-                .orElseGet(() -> fetchAndSaveCurrency(currencyID));
+        Currency currency = currencyRepository.findByCoinGeckoid(currencyid.toLowerCase())
+                .orElseGet(() -> fetchAndSaveCurrency(currencyid));
 
-        Double rate = getExchangeRate(currencyID);
+        Double rate = getExchangeRate(currencyid);
         Double amountOfCurrency = amountInUSD / rate;
 
         if (currentUser.getBalance() < amountInUSD) {
@@ -115,17 +116,16 @@ public class TransactionService {
 
         transactionRepository.save(transaction);
     }
-
     @Transactional
-    public void sellAsset(Integer portfolioID, String currencyID, Double amountOfCurrency) {
+    public void sellAsset(Integer portfolioid, String currencyid, Double amountOfCurrency) {
         User currentUser = authenticationService.getCurrentUser();
-        Portfolio portfolio = portfolioRepository.findByPortfolioIDAndUser(portfolioID, currentUser)
+        Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
-        Currency currency = currencyRepository.findByCoinGeckoID(currencyID.toLowerCase())
-                .orElseGet(() -> fetchAndSaveCurrency(currencyID));
+        Currency currency = currencyRepository.findByCoinGeckoid(currencyid.toLowerCase())
+                .orElseGet(() -> fetchAndSaveCurrency(currencyid));
 
-        Double rate = getExchangeRate(currencyID);
+        Double rate = getExchangeRate(currencyid);
         Double amountInUSD = amountOfCurrency * rate;
 
         PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
@@ -160,8 +160,8 @@ public class TransactionService {
         transactionRepository.save(transaction);
     }
 
-    private Currency fetchAndSaveCurrency(String currencyID) {
-        Map<String, Object> currencyData = coinGeckoService.getCurrencyData(currencyID);
+    private Currency fetchAndSaveCurrency(String currencyid) {
+        Map<String, Object> currencyData = coinGeckoService.getCurrencyData(currencyid);
         if (currencyData == null) {
             throw new RuntimeException("Failed to fetch currency data from external API");
         }
@@ -185,7 +185,7 @@ public class TransactionService {
         Currency newCurrency = Currency.builder()
                 .symbol(symbol != null ? symbol.toUpperCase() : "UNKNOWN")
                 .name(name != null ? name : "UNKNOWN")
-                .coinGeckoID(currencyID.toLowerCase())
+                .coinGeckoid(currencyid.toLowerCase())
                 .country(country)
                 .description(description != null ? description : "")
                 .source(source)
@@ -193,13 +193,13 @@ public class TransactionService {
         return currencyRepository.save(newCurrency);
     }
 
-    private Double getExchangeRate(String currencyID) {
-        Map<String, Object> rateMap = coinGeckoService.getExchangeRates(currencyID);
-        if (rateMap == null || !rateMap.containsKey(currencyID.toLowerCase())) {
+    private Double getExchangeRate(String currencyid) {
+        Map<String, Object> rateMap = coinGeckoService.getExchangeRates(currencyid);
+        if (rateMap == null || !rateMap.containsKey(currencyid.toLowerCase())) {
             throw new RuntimeException("Failed to fetch exchange rate for currency");
         }
 
-        Map<String, Object> currencyRates = (Map<String, Object>) rateMap.get(currencyID.toLowerCase());
+        Map<String, Object> currencyRates = (Map<String, Object>) rateMap.get(currencyid.toLowerCase());
         if (currencyRates == null || !currencyRates.containsKey("usd")) {
             throw new RuntimeException("Failed to fetch exchange rate for currency");
         }
@@ -213,17 +213,17 @@ public class TransactionService {
         return mapTransactionsToDTO(transactions);
     }
 
-    public Page<TransactionHistoryDTO> getTransactionHistoryByPortfolio(Integer portfolioId, Pageable pageable) {
+    public Page<TransactionHistoryDTO> getTransactionHistoryByPortfolio(Integer portfolioid, Pageable pageable) {
         User currentUser = authenticationService.getCurrentUser();
-        logger.info("Fetching paginated transaction history for user: {} and portfolio ID: {}", currentUser.getEmail(), portfolioId);
-        Portfolio portfolio = getPortfolioByIdAndUser(portfolioId, currentUser);
+        logger.info("Fetching paginated transaction history for user: {} and portfolio ID: {}", currentUser.getEmail(), portfolioid);
+        Portfolio portfolio = getPortfolioByidAndUser(portfolioid, currentUser);
         Page<Transaction> transactions = transactionRepository.findByUserAndPortfolio(currentUser, portfolio, pageable);
         return mapTransactionsToDTO(transactions);
     }
 
     private Page<TransactionHistoryDTO> mapTransactionsToDTO(Page<Transaction> transactions) {
         return transactions.map(transaction -> TransactionHistoryDTO.builder()
-                .transactionID(transaction.getTransactionID())
+                .transactionid(transaction.getTransactionid())
                 .transactionType(transaction.getTransactionType())
                 .amount(transaction.getAmount())
                 .rate(transaction.getRate())
@@ -234,9 +234,9 @@ public class TransactionService {
     }
 
     @Transactional
-    public Portfolio getPortfolioByIdAndUser(Integer portfolioID, User user) {
-        logger.info("Fetching portfolio with ID: {} for user: {}", portfolioID, user.getEmail());
-        return portfolioRepository.findByPortfolioIDAndUser(portfolioID, user)
+    public Portfolio getPortfolioByidAndUser(Integer portfolioid, User user) {
+        logger.info("Fetching portfolio with ID: {} for user: {}", portfolioid, user.getEmail());
+        return portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
     }
 

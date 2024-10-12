@@ -23,10 +23,10 @@ import java.util.List;
 public class Portfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer portfolioID;
+    private Integer portfolioid;
 
     @ManyToOne
-    @JoinColumn(name = "userID", nullable = false)
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 100)

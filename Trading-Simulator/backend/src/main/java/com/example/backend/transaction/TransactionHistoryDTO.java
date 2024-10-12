@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionHistoryDTO {
-    private Integer transactionID;
+    private Integer transactionid;
     private String transactionType;
     private Double amount;
     private Double rate;

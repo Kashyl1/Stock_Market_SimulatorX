@@ -17,10 +17,10 @@ import java.time.LocalDate;
 public class HistoricalRate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer historicalRateID;
+    private Integer historicalRateid;
 
     @ManyToOne
-    @JoinColumn(name = "currencyID", nullable = false)
+    @JoinColumn(name = "currencyid", nullable = false)
     private Currency currency;
 
     @Column(nullable = false)

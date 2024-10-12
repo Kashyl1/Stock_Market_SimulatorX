@@ -4,12 +4,12 @@ import './BuyAssetModal.css';
 
 const BuyAssetModal = ({ currency, portfolios, onClose }) => {
   const [amountInUSD, setAmountInUSD] = useState('');
-  const [selectedPortfolioID, setSelectedPortfolioID] = useState('');
+  const [selectedPortfolioid, setSelectedPortfolioid] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleBuy = async () => {
-    if (!selectedPortfolioID) {
+    if (!selectedPortfolioid) {
       setError('Please select a portfolio.');
       return;
     }
@@ -21,13 +21,13 @@ const BuyAssetModal = ({ currency, portfolios, onClose }) => {
     setLoading(true);
     try {
       const purchaseData = {
-        portfolioID: parseInt(selectedPortfolioID, 10),
-        currencyID: currency.id,
+        portfolioid: parseInt(selectedPortfolioid, 10),
+        currencyid: currency.id,
         amountInUSD: parseFloat(amountInUSD),
       };
       console.log('Sending purchase data:', purchaseData);
 
-      await buyAsset(purchaseData.portfolioID, purchaseData.currencyID, purchaseData.amountInUSD);
+      await buyAsset(purchaseData.portfolioid, purchaseData.currencyid, purchaseData.amountInUSD);
       alert('Asset purchased successfully');
       onClose();
     } catch (err) {
@@ -66,12 +66,12 @@ const BuyAssetModal = ({ currency, portfolios, onClose }) => {
         <label>
           Select Portfolio:
           <select
-            value={selectedPortfolioID}
-            onChange={(e) => setSelectedPortfolioID(e.target.value)}
+            value={selectedPortfolioid}
+            onChange={(e) => setSelectedPortfolioid(e.target.value)}
           >
             <option value="">Select a portfolio</option>
             {portfolios.map((portfolio) => (
-              <option key={portfolio.portfolioID} value={portfolio.portfolioID}>
+              <option key={portfolio.portfolioid} value={portfolio.portfolioid}>
                 {portfolio.name}
               </option>
             ))}

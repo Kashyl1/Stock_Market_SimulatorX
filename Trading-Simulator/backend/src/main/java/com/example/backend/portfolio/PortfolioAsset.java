@@ -19,16 +19,16 @@ public class PortfolioAsset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer portfolioAssetID;
+    private Integer portfolioAssetid;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "portfolioID")
+    @JoinColumn(name = "portfolioid")
 
     @JsonIgnoreProperties("portfolioAssets")
     private Portfolio portfolio;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "currencyID")
+    @JoinColumn(name = "currencyid")
     private Currency currency;
 
     private Double amount;

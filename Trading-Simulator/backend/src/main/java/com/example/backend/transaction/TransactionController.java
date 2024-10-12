@@ -29,13 +29,13 @@ public class TransactionController {
 
     @PostMapping("/buy-asset")
     public ResponseEntity<String> buyAsset(@Valid @RequestBody BuyAssetRequest request) {
-        transactionService.buyAsset(request.getPortfolioID(), request.getCurrencyID(), request.getAmountInUSD());
+        transactionService.buyAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmountInUSD());
         return ResponseEntity.ok("Asset purchased successfully");
     }
 
     @PostMapping("/sell-asset")
     public ResponseEntity<String> sellAsset(@Valid @RequestBody SellAssetRequest request) {
-        transactionService.sellAsset(request.getPortfolioID(), request.getCurrencyID(), request.getAmount());
+        transactionService.sellAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmount());
         return ResponseEntity.ok("Asset sold successfully");
     }
 
@@ -54,12 +54,12 @@ public class TransactionController {
         Page<TransactionHistoryDTO> transactions = transactionService.getTransactionHistory(pageable);
         return ResponseEntity.ok(transactions);
     }
-    @GetMapping("/history/portfolio/{portfolioId}")
+    @GetMapping("/history/portfolio/{portfolioid}")
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionHistoryByPortfolio(
-            @PathVariable Integer portfolioId,
+            @PathVariable Integer portfolioid,
             @PageableDefault(page = 0, size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<TransactionHistoryDTO> transactions = transactionService.getTransactionHistoryByPortfolio(portfolioId, pageable);
+        Page<TransactionHistoryDTO> transactions = transactionService.getTransactionHistoryByPortfolio(portfolioid, pageable);
         return ResponseEntity.ok(transactions);
     }
 }
