@@ -3,12 +3,16 @@ package com.example.backend.auth;
 import com.example.backend.Exceptions.EmailAlreadyExistsException;
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.config.JwtService;
+import com.example.backend.portfolio.PortfolioService;
 import com.example.backend.user.Role;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import com.example.backend.usersetting.ChangePasswordRequest;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +33,8 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final VerificationService verificationService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+
 
     public AuthenticationResponse register(RegisterRequest request) throws MessagingException {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
@@ -72,13 +78,20 @@ public class AuthenticationService {
                 .token(jwtToken)
                 .build();
     }
-    public User getCurrentUser() {
+
+    @Cacheable(value = "currentUser", key = "#email")
+    public User getCurrentUser(String email) {
+        logger.info("Halo " + email);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+    public String getCurrentUserEmail() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+
         if (principal instanceof UserDetails) {
-            String email = ((UserDetails) principal).getUsername();
-            return userRepository.findByEmail(email)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            logger.info("Halo " + ((UserDetails) principal).getUsername());
+            return ((UserDetails) principal).getUsername();
         } else {
             throw new RuntimeException("User not authenticated");
         }

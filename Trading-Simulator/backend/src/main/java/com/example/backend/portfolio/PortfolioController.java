@@ -1,7 +1,7 @@
 package com.example.backend.portfolio;
 
-import com.example.backend.auth.AuthenticationService;
-import com.example.backend.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +14,7 @@ public class PortfolioController {
 
     @Autowired
     private PortfolioService portfolioService;
+    private static final Logger logger = LoggerFactory.getLogger(PortfolioController.class);
 
 
     @PostMapping("/create")
@@ -29,10 +30,10 @@ public class PortfolioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Portfolio> getUserPortfolioByid(@PathVariable Integer id) {
+    public ResponseEntity<PortfolioDTO> getUserPortfolioByid(@PathVariable Integer id) {
         try {
-            Portfolio portfolio = portfolioService.getUserPortfolioByid(id);
-            return ResponseEntity.ok(portfolio);
+            PortfolioDTO portfolioDTO = portfolioService.getUserPortfolioByid(id);
+            return ResponseEntity.ok(portfolioDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
         }

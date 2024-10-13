@@ -1,5 +1,3 @@
-// src/components/Transaction/SellAssetModal/SellAssetModal.js
-
 import React, { useState } from 'react';
 import { sellAsset } from '../../../services/TransactionService';
 import './SellAssetModal.css';
@@ -29,7 +27,6 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
       setError('Failed to sell asset. ' + errorMessage);
-      console.error('Sell asset error:', err);
     } finally {
       setLoading(false);
     }

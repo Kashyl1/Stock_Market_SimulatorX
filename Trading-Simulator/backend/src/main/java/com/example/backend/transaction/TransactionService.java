@@ -22,10 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,8 +67,11 @@ public class TransactionService {
     }
 
     @Transactional
+    @CacheEvict(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
+    @CachePut(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
     public void buyAsset(Integer portfolioid, String currencyid, Double amountInUSD) {
-        User currentUser = authenticationService.getCurrentUser();
+        String email = authenticationService.getCurrentUserEmail();
+        User currentUser = authenticationService.getCurrentUser(email);
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
@@ -103,6 +104,10 @@ public class TransactionService {
         portfolioAsset.setAveragePurchasePrice(newAveragePrice);
         portfolioAsset.setUpdatedAt(LocalDateTime.now());
 
+        portfolio.setUpdatedAt(LocalDateTime.now());
+        portfolioRepository.save(portfolio);
+
+
         portfolioAssetRepository.save(portfolioAsset);
         Transaction transaction = Transaction.builder()
                 .currency(currency)
@@ -117,8 +122,12 @@ public class TransactionService {
         transactionRepository.save(transaction);
     }
     @Transactional
+    @CacheEvict(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
+    @CachePut(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
     public void sellAsset(Integer portfolioid, String currencyid, Double amountOfCurrency) {
-        User currentUser = authenticationService.getCurrentUser();
+        String email = authenticationService.getCurrentUserEmail();
+        User currentUser = authenticationService.getCurrentUser(email);
+
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
@@ -138,7 +147,8 @@ public class TransactionService {
         Double newAmount = portfolioAsset.getAmount() - amountOfCurrency;
         portfolioAsset.setAmount(newAmount);
         portfolioAsset.setUpdatedAt(LocalDateTime.now());
-
+        portfolio.setUpdatedAt(LocalDateTime.now());
+        portfolioRepository.save(portfolio);
         if (newAmount == 0.0) {
             portfolioAssetRepository.delete(portfolioAsset);
         } else {
@@ -207,15 +217,15 @@ public class TransactionService {
         return ((Number) currencyRates.get("usd")).doubleValue();
     }
     public Page<TransactionHistoryDTO> getTransactionHistory(Pageable pageable) {
-        User currentUser = authenticationService.getCurrentUser();
-        logger.info("Fetching paginated transaction history for user: {}", currentUser.getEmail());
+        String email = authenticationService.getCurrentUserEmail();
+        User currentUser = authenticationService.getCurrentUser(email);
         Page<Transaction> transactions = transactionRepository.findByUser(currentUser, pageable);
         return mapTransactionsToDTO(transactions);
     }
 
     public Page<TransactionHistoryDTO> getTransactionHistoryByPortfolio(Integer portfolioid, Pageable pageable) {
-        User currentUser = authenticationService.getCurrentUser();
-        logger.info("Fetching paginated transaction history for user: {} and portfolio ID: {}", currentUser.getEmail(), portfolioid);
+        String email = authenticationService.getCurrentUserEmail();
+        User currentUser = authenticationService.getCurrentUser(email);
         Portfolio portfolio = getPortfolioByidAndUser(portfolioid, currentUser);
         Page<Transaction> transactions = transactionRepository.findByUserAndPortfolio(currentUser, portfolio, pageable);
         return mapTransactionsToDTO(transactions);
@@ -235,7 +245,6 @@ public class TransactionService {
 
     @Transactional
     public Portfolio getPortfolioByidAndUser(Integer portfolioid, User user) {
-        logger.info("Fetching portfolio with ID: {} for user: {}", portfolioid, user.getEmail());
         return portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
     }

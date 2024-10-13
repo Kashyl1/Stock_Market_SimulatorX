@@ -21,13 +21,11 @@ public class PortfolioAsset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer portfolioAssetid;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolioid")
-
-    @JsonIgnoreProperties("portfolioAssets")
     private Portfolio portfolio;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currencyid")
     private Currency currency;
 

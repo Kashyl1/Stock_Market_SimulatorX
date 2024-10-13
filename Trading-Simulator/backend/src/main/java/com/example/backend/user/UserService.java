@@ -17,7 +17,8 @@ public class UserService {
      */
     @Transactional
     public BalanceResponse addFunds(double amount) {
-        User user = authenticationService.getCurrentUser();
+        String email = authenticationService.getCurrentUserEmail();
+        User user = authenticationService.getCurrentUser(email);
 
         if (amount <= 0) {
             return BalanceResponse.builder()
@@ -36,7 +37,8 @@ public class UserService {
     }
 
     public BalanceResponse getBalance() {
-        User user = authenticationService.getCurrentUser();
+        String email = authenticationService.getCurrentUserEmail();
+        User user = authenticationService.getCurrentUser(email);
 
         return BalanceResponse.builder()
                 .balance(user.getBalance())

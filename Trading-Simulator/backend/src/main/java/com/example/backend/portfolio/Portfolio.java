@@ -19,13 +19,13 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "Portfolios")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "verificationToken"})
 public class Portfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer portfolioid;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid", nullable = false)
     private User user;
 
@@ -38,7 +38,6 @@ public class Portfolio {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("portfolio")
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PortfolioAsset> portfolioAssets = new ArrayList<>();
 }

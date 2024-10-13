@@ -30,7 +30,7 @@ public class CoinGeckoService {
     private final String COINGECKO_ASSETS_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&page=";
     private final String COINGECKO_CURRENCY_DATA_URL = "https://api.coingecko.com/api/v3/coins/{currency}";
 
-    @Cacheable("availableAssetsPage")
+    @Cacheable("availableAssets")
     public List<Map<String, Object>> getAvailableAssets(Pageable pageable) {
         List<Map<String, Object>> pagedAssets = new ArrayList<>();
 

@@ -1,6 +1,7 @@
 package com.example.backend.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -24,7 +25,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/*").
-                        permitAll().
+                        permitAll()
+                        .requestMatchers(EndpointRequest.to("health", "info", "caches", "metrics")).hasRole("USER").
                         anyRequest().
                         authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(

@@ -38,12 +38,9 @@ const PortfolioDetails = () => {
     fetchPortfolio();
   }, [id]);
 
-  const handleSellClick = (currency) => {
-    const asset = portfolio.portfolioAssets.find(a => a.currency.coinGeckoid === currency.coinGeckoid);
-    if (asset) {
-      setSelectedCurrency({ ...currency, amount: asset.amount });
-      setShowSellModal(true);
-    }
+  const handleSellClick = (asset) => {
+    setSelectedCurrency(asset);
+    setShowSellModal(true);
   };
 
   const handleCloseModal = () => {
@@ -71,16 +68,28 @@ const PortfolioDetails = () => {
     return <p className="error-message">Portfolio not found.</p>;
   }
 
+  const formatDateTime = (dateTimeStr) => {
+    const options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+    return new Date(dateTimeStr).toLocaleString(undefined, options);
+  };
+
   return (
     <div className="portfolio-details">
       <h2>{portfolio.name}</h2>
-      <p>Created At: {new Date(portfolio.createdAt).toLocaleDateString()}</p>
+      <p>Created At: {formatDateTime(portfolio.createdAt)}</p>
+      <p>Updated At: {formatDateTime(portfolio.updatedAt)}</p>
       <h3>Assets:</h3>
       {assetsWithGains && assetsWithGains.length > 0 ? (
         <div className="assets-list">
           {assetsWithGains.map((asset) => (
             <div key={asset.currencyName} className="asset-card">
-              <h4>{asset.currencyName} ({asset.currencyName})</h4>
+              <h4>{asset.currencyName}</h4>
               <p>Amount: {asset.amount}</p>
               <p>Average Purchase Price: ${asset.averagePurchasePrice.toFixed(2)}</p>
               <p>Current Price: ${asset.currentPrice.toFixed(2)}</p>

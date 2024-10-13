@@ -19,7 +19,8 @@ public class UserSettingService {
      * Zmiana hasła użytkownika
      */
     public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
-        User user = authenticationService.getCurrentUser();
+        String email = authenticationService.getCurrentUserEmail();
+        User user = authenticationService.getCurrentUser(email);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             return ChangePasswordResponse.builder()

@@ -1,7 +1,6 @@
 package com.example.backend.portfolio;
 
 import lombok.*;
-import org.checkerframework.checker.index.qual.SearchIndexBottom;
 
 @Getter
 @Setter
@@ -14,4 +13,5 @@ public class PortfolioAssetDTO {
     private Double averagePurchasePrice;
     private Double currentPrice;
     private Double gainOrLoss;
+    private String coinGeckoid;
 }

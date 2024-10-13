@@ -16,15 +16,19 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "availableAssetsPage",
                 "exchangeRatesBatch",
                 "availableAssets",
                 "exchangeRates",
-                "userPortfolios"
+                "userPortfolios",
+                "currentUser",
+                "portfolioById",
+                "portfolioGainLoss",
+                "portfolioAssetsWithGains"
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(2000)
-                .expireAfterWrite(300, TimeUnit.SECONDS));
+                .expireAfterWrite(300, TimeUnit.SECONDS)
+                .recordStats());
         return cacheManager;
     }
 }
