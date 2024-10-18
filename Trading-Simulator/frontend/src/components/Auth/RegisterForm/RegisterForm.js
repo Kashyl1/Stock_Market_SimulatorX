@@ -5,6 +5,7 @@ import './RegisterForm.css';
 import '../AuthForm.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import logo from '../../../assets/stock_logov2.png';
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -100,7 +101,7 @@ const RegisterForm = () => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-                <FontAwesomeIcon icon={faUser} size="3x" className="user-icon" />
+                <img src={logo} alt="Logo" className="logo_login" />
                 <h2 className="auth-header">Create your account</h2>
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="input-group">

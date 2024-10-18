@@ -1,46 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 /* MainPage.css */
+
 .main {
-  background-image: url('../../assets/3601908.jpg'); /* Twoje tło */
-  background-size: cover;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 20px; /* Przesunięcie elementów od góry */
+    font-family: "Cinzel", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    display: flex;
+    align-items: center; /* Wyśrodkowanie elementów w pionie */
+    background-color: rgba(0, 0, 0, 0.5); /* Czarny z 50% przezroczystości */
+    padding: 15px 30px; /* Padding wewnętrzny, aby zwiększyć przestrzeń po bokach */
+    width: 100%; /* Szerokość nawigacji */
+    gap: 30px; /* Odstęp między elementami */
+}
+
+.logo-container {
+    display: flex;
+    align-items: center; /* Wyśrodkowanie logo i tekstu w pionie */
+    margin-right: 20px; /* Odstęp od linków nawigacji */
+}
+
+.logo {
+    height: 40px; /* Dostosuj wysokość loga */
+    width: auto; /* Zachowaj proporcje */
+    margin-right: 10px; /* Odstęp między logo a tekstem */
 }
 
 .main a {
-  margin: 0 15px; /* Odsunięcie zakładek od siebie */
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #fff; /* Biały tekst */
-  background-color: rgba(0, 0, 0, 0.7); /* Półprzezroczyste, ciemne tło */
-  border-radius: 8px; /* Zaokrąglone rogi */
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s ease, color 0.3s ease;
+    text-decoration: none; /* Usunięcie podkreślenia */
+    color: #fff; /* Kolor tekstu linków (biały) */
+    padding: 10px 15px; /* Padding dla linków */
+    border-radius: 5px; /* Zaokrąglone rogi */
+    transition: background-color 0.3s, color 0.3s; /* Płynna zmiana tła i koloru */
+    white-space: nowrap; /* Zapobiegaj zawijaniu tekstu */
 }
 
 .main a:hover {
-  background-color: #d4af37; /* Złoty kolor podczas hover (piracki motyw) */
-  color: black; /* Zmiana koloru tekstu na czarny */
+    background-color: #d4af37; /* Zmiana tła po najechaniu */
+    color: #1E1E1E; /* Zmiana koloru tekstu po najechaniu */
 }
 
-.main a:active {
-  transform: scale(0.98); /* Efekt lekkiego wciśnięcia przy kliknięciu */
+/* Dodatkowe style, aby nawigacja wyglądała dobrze na większych ekranach */
+@media (min-width: 768px) {
+    .main {
+        padding: 20px 40px; /* Większy padding na większych ekranach */
+    }
 }
 
-.main a:focus {
-  outline: 3px solid #d4af37; /* Złota ramka przy focus */
-}
 
-.main {
-  font-family: "Cinzel", serif;
-  font-optical-sizing: auto;
-  font-weight: <weight>;
-  font-style: normal;
-}
+
 

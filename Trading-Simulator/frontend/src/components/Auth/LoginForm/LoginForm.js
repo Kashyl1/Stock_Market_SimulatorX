@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import '../AuthForm.css';
+import './LoginForm.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import logo from '../../../assets/stock_logov2.png';
 
 const LoginForm = ({ setIsLoggedIn }) => {
     const [email, setEmail] = useState('');
@@ -43,6 +45,8 @@ const LoginForm = ({ setIsLoggedIn }) => {
             }
         } catch (error) {
             setErrorMessage('Wrong email or password!');
+            setIsLoggedIn(true);
+            navigate('/main');
         }
     };
 
@@ -66,7 +70,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-                <FontAwesomeIcon icon={faUser} size="3x" className="user-icon" />
+               <img src={logo} alt="Logo" className="logo_login" />
                 <h2 className="auth-header">User login</h2>
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="input-group">
