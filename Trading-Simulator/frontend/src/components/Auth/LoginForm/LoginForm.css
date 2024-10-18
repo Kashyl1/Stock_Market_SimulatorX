@@ -1,3 +1,9 @@
 .fa-user {
   color: var(--font-color-light);
 }
+
+.home-button {
+  font-size: 1rem;
+    color: #007bff;
+    text-decoration: none;
+}
