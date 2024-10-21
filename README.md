@@ -1,6 +1,6 @@
 # Stock Market Simulator
 
-This project is a Stock Market Simulator currently under development. The project aims to provide users with the ability to simulate stock market trading.
+This project is a **Stock Market Simulator** that allows users to simulate cryptocurrency trading and manage their portfolios. The application provides various features for managing user accounts, wallets, and assets, giving a full simulation experience.
 
 ## Features
 
@@ -9,14 +9,18 @@ This project is a Stock Market Simulator currently under development. The projec
 - **User Login:** Allows existing users to log in.
 - **Email Verification:** Sends a verification email to the user upon registration to confirm their email address.
 
-### Future Features
-- **Market Simulation:** Simulate stock market trading with real-time data.
-- **Portfolio Management:** Manage a portfolio of simulated investments.
-- **Transaction History:** Track all transactions and portfolio changes.
-- **Alerts and Notifications:** Set up alerts for specific market conditions and receive notifications.
-- **Project of Database:** [Database.pdf](https://github.com/Kashyl1/Stock_Market_SimulatorX/files/15365477/Database.pdf)
+### Cryptocurrency Trading
+- **Buy Cryptocurrencies:** Users can now purchase cryptocurrencies within the simulator using virtual funds.
+- **Create Wallets:** Allows users to create and manage multiple cryptocurrency wallets.
+- **Add Funds:** Users can add virtual funds to their accounts for trading purposes.
+- **View Current Prices:** Displays real-time prices of available cryptocurrencies, allowing users to monitor the market.
 
+### Portfolio Management
+- **Manage Portfolio:** Users can view and manage their cryptocurrency investments, tracking their portfolio performance.
+- **Transaction History:** Keeps a log of all transactions, including purchases and wallet funding.
 
+### User Settings
+- **Update User Profile:** Users can update their personal details and configure settings in their accounts.
 
 ## Technologies Used
 
