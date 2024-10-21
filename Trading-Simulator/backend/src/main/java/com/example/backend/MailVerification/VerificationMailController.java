@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 @RestController
@@ -60,6 +61,8 @@ public class VerificationMailController {
             return ResponseEntity.ok().body("{\"success\": true}");
         } catch (MessagingException e) {
             return ResponseEntity.status(500).body("Failed to send verification email");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 }
