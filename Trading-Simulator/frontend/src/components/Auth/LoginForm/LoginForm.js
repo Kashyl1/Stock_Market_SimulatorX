@@ -45,8 +45,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             }
         } catch (error) {
             setErrorMessage('Wrong email or password!');
-            setIsLoggedIn(true);
-            navigate('/main');
+            setIsLoggedIn(false);
         }
     };
 

@@ -4,6 +4,7 @@ const API_URL = '/api/user';
 
 export const addFunds = async (amount) => {
   const token = localStorage.getItem('jwtToken');
+  console.log('JWT Token:', token);
   const response = await axios.post(`${API_URL}/add-funds`, { amount }, {
     headers: {
       Authorization: `Bearer ${token}`

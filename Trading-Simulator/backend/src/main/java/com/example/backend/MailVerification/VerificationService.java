@@ -4,6 +4,7 @@ import com.example.backend.user.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -19,6 +20,8 @@ import java.util.UUID;
 public class VerificationService {
     private final JavaMailSender mailSender;
     private final Map<String, Instant> resendCooldowns = new HashMap<>();
+    @Value("${app.base-url}")
+    private String baseUrl;
     public String verificationToken() {
         return UUID.randomUUID().toString();
     }
@@ -26,7 +29,7 @@ public class VerificationService {
     @Async
     public void sendVerificationEmail(User user, String verificationToken) throws MessagingException {
         String subject = "Verify your account";
-        String verificationUrl = "http://localhost:3000/verify?token=" + verificationToken;
+        String verificationUrl = baseUrl + "/api/auth/verify?token=" + verificationToken;
         String message = "<p>Hello, " + user.getFirstname() +
                 "</p><p>Click on the link below to verify your account:</p>" +
                 "<p><a href='" + verificationUrl + "'>" + verificationUrl + "</a></p>";

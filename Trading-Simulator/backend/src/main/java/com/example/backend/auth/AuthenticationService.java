@@ -49,7 +49,7 @@ public class AuthenticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .verified(false)
                 .verificationToken(verificationToken)
                 .balance(0.0)
@@ -81,7 +81,6 @@ public class AuthenticationService {
 
     @Cacheable(value = "currentUser", key = "#email")
     public User getCurrentUser(String email) {
-        logger.info("Halo " + email);
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
@@ -90,7 +89,6 @@ public class AuthenticationService {
 
 
         if (principal instanceof UserDetails) {
-            logger.info("Halo " + ((UserDetails) principal).getUsername());
             return ((UserDetails) principal).getUsername();
         } else {
             throw new RuntimeException("User not authenticated");

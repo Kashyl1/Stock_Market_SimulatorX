@@ -68,7 +68,7 @@ class AuthenticationServiceTest {
         assertThat(savedUser.getLastname()).isEqualTo("Doe");
         assertThat(savedUser.getEmail()).isEqualTo("john.doe@example.com");
         assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
-        assertThat(savedUser.getRole()).isEqualTo(Role.USER);
+        assertThat(savedUser.getRole()).isEqualTo(Role.ROLE_USER);
         assertThat(savedUser.isVerified()).isFalse();
         assertThat(savedUser.getVerificationToken()).isEqualTo("testVerificationToken");
 
@@ -94,7 +94,7 @@ class AuthenticationServiceTest {
         User user = User.builder()
                 .email(request.getEmail())
                 .password("encodedPassword")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .verified(true)
                 .build();
 
@@ -115,7 +115,7 @@ class AuthenticationServiceTest {
         User user = User.builder()
                 .email(request.getEmail())
                 .password("encodedPassword")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .verified(false)
                 .build();
 
