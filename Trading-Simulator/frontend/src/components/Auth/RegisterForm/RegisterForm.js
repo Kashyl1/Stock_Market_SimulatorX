@@ -64,7 +64,7 @@ const RegisterForm = () => {
     const handleResendVerification = async () => {
         if (canResend) {
             try {
-                const response = await axios.post('/api/auth/resend-verification', { email: formData.email });
+                const response = await axios.post('http://localhost:8080/api/auth/resend-verification', { email: formData.email });
                 if (response.data.success) {
                     setResendMessage('Verification email has been resent. Please check your inbox.');
                     setCanResend(false);
