@@ -28,7 +28,6 @@ const PortfolioDetails = () => {
       setTotalGainOrLoss(totalGainOrLossData);
     } catch (err) {
       setError('Failed to fetch portfolio details.');
-      console.error('Error fetching portfolio:', err);
     } finally {
       setLoading(false);
     }

@@ -30,8 +30,6 @@ const DeleteAccountForm = ({ setIsLoggedIn }) => {
 
     try {
         const response = await deleteAccount(confirmText);
-        console.log('Account deletion response:', response);
-
         if (response === "User account and associated data have been deleted.") {
           setMessage(response);
           setMessageType('success');

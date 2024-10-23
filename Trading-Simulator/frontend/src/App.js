@@ -19,7 +19,6 @@ import './App.css';
 
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('jwtToken');
-    console.log('Token during request:', token);
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

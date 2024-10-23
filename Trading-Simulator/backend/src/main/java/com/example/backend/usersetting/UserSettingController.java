@@ -33,4 +33,9 @@ public class UserSettingController {
             return ResponseEntity.status(401).body("User is not authenticated or deletion failed.");
         }
     }
+    @PostMapping("/change-email")
+    public ResponseEntity<ChangeEmailResponse> changeEmail(@RequestBody ChangeEmailRequest request) {
+        ChangeEmailResponse response = userSettingService.changeEmail(request);
+        return ResponseEntity.ok(response);
+    }
 }

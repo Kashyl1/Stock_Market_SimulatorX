@@ -26,7 +26,6 @@ export const getUserPortfolios = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching portfolios:', error);
     throw error;
   }
 };
@@ -41,7 +40,6 @@ export const getPortfolioByid = async (id) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching portfolio by ID:', error);
     throw error;
   }
 };

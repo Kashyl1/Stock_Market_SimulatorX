@@ -29,3 +29,17 @@ export const deleteAccount = async (confirmText) => {
   );
   return response.data;
 };
+
+export const changeEmail = async (currentPassword, newEmail) => {
+  const token = localStorage.getItem('jwtToken');
+  const response = await axios.post(
+    `${API_URL}/change-email`,
+    { currentPassword, newEmail },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};

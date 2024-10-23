@@ -1,5 +1,6 @@
 package com.example.backend.usersetting;
 
+import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.portfolio.Portfolio;
 import com.example.backend.portfolio.PortfolioAsset;
@@ -25,6 +26,7 @@ public class UserSettingService {
     private final TransactionRepository transactionRepository;
     private final PortfolioRepository portfolioRepository;
     private final PortfolioAssetRepository portfolioAssetRepository;
+    private final VerificationService verificationService;
 
     public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
         String email = authenticationService.getCurrentUserEmail();
@@ -63,6 +65,38 @@ public class UserSettingService {
         userRepository.delete(user);
 
         return "User account and associated data have been deleted.";
+    }
+
+    public ChangeEmailResponse changeEmail(ChangeEmailRequest request) {
+        String currentEmail = authenticationService.getCurrentUserEmail();
+        User user = authenticationService.getCurrentUser(currentEmail);
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            return ChangeEmailResponse.builder()
+                    .message("Current password is incorrect")
+                    .build();
+        }
+
+        String newEmail = request.getNewEmail();
+        user.setEmail(newEmail);
+        user.setVerified(false);
+
+        String verificationToken = verificationService.verificationToken();
+        user.setVerificationToken(verificationToken);
+
+        userRepository.save(user);
+
+        try {
+            verificationService.sendVerificationEmail(user, verificationToken);
+        } catch (Exception e) {
+            return ChangeEmailResponse.builder()
+                    .message("Failed to send verification email")
+                    .build();
+        }
+
+        return ChangeEmailResponse.builder()
+                .message("Email changed successfully. Please verify your new email. You will be redirected to main page in 5 seconds...")
+                .build();
     }
 
 }
