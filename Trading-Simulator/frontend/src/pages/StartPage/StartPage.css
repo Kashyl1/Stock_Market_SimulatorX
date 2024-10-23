@@ -374,6 +374,17 @@
     color: #E2E8F0; /* Lighter grayish color for text */
 }
 
+.logo-container_start {
+    display: flex;
+    align-items: center; /* Wyśrodkowanie logo i tekstu w pionie */
+    margin-right: 20px; /* Odstęp od linków nawigacji */
+}
+
+.logo_start {
+    height: 40px; /* Dostosuj wysokość loga */
+    width: auto; /* Zachowaj proporcje */
+    margin-right: 10px; /* Odstęp między logo a tekstem */
+}
 
 @media (max-width: 768px) {
   .features-section {

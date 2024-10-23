@@ -10,7 +10,7 @@ import video from '../../assets/RCB.mp4';
 import exampleImageOne from '../../assets/gold_chart.png';
 import exampleImageTwo from '../../assets/vision.png';
 
-// Funkcja, która przesuwa widok o określony offset
+
 function scrollToSection(event, offset) {
     event.preventDefault();
     const targetId = event.currentTarget.getAttribute("href").substring(1);
@@ -24,15 +24,15 @@ function scrollToSection(event, offset) {
     }
 }
 
-
 const HomePage = () => {
+
   return (
     <div className="home-page">
       <CustomParticlesBackground />
       <div className="static-background"></div>
       <div className="start_menu">
-            <div className="logo-container">
-              <img src={logo} alt="Logo" className="logo" />
+            <div className="logo-container_start">
+              <img src={logo} alt="Logo" className="logo_start"/>
             </div>
             <div className="links">
                <a href="#home" onClick={(e) => scrollToSection(e, 100)}>Home</a>
