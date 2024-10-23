@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserSettingController {
 
     private final UserSettingService userSettingService;
+
     @PostMapping("/change-password")
-    public ResponseEntity<ChangePasswordResponse> changePassword(@AuthenticationPrincipal UserDetails userDetails, @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
             ChangePasswordResponse response = userSettingService.changePassword(request);
             return ResponseEntity.ok(response);
@@ -21,6 +22,15 @@ public class UserSettingController {
             return ResponseEntity.status(401).body(ChangePasswordResponse.builder()
                     .message("User is not authenticated")
                     .build());
+        }
+    }
+    @PostMapping("/delete-account")
+    public ResponseEntity<String> deleteAccount(@RequestBody DeleteAccountRequest request) {
+        try {
+            String response = userSettingService.deleteUserAccount(request.getConfirmText());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body("User is not authenticated or deletion failed.");
         }
     }
 }

@@ -42,7 +42,7 @@ public class VerificationService {
         String htmlMessage = "<html>" +
                 "<body style='font-family: Arial, sans-serif;'>" +
                 "<p>Hello " + user.getFirstname() + ",</p>" +
-                "<p>Thank you for registering at <strong>YourAppName</strong>!</p>" +
+                "<p>Thank you for registering at <strong>Royal Coin</strong>!</p>" +
                 "<p>To activate your account, please click the button below:</p>" +
                 "<p style='text-align: center;'>" +
                 "<a href='" + verificationUrl + "' style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Activate Account</a>" +

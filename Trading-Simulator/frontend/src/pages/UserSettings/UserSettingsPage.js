@@ -2,15 +2,17 @@ import React from 'react';
 import UserSettingsSidebar from '../../components/UserSettings/UserSettingsSidebar/UserSettingsSidebar';
 import { Route, Routes } from 'react-router-dom';
 import ChangePasswordForm from '../../components/UserSettings/ChangePasswordForm/ChangePasswordForm';
+import DeleteAccountForm from '../../components/UserSettings/DeleteAccountForm/DeleteAccountForm';
 import './UserSettingsPage.css';
 
-const UserSettingsPage = () => {
+const UserSettingsPage = ({ setIsLoggedIn }) => {
   return (
     <div className="settings-page">
       <UserSettingsSidebar />
       <div className="settings-content">
         <Routes>
           <Route path="change-password" element={<ChangePasswordForm />} />
+          <Route path="delete-account" element={<DeleteAccountForm setIsLoggedIn={setIsLoggedIn} />} />
         </Routes>
       </div>
     </div>

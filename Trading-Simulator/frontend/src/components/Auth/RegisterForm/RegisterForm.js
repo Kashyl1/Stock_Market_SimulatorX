@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { register, resendVerificationEmail } from '../../../services/AuthService';
 import { Link } from 'react-router-dom';
 import './RegisterForm.css';
 import '../AuthForm.css';
@@ -41,18 +41,10 @@ const RegisterForm = () => {
         }
 
         try {
-            const response = await axios.post('/api/auth/register', formData);
+            await register(formData.firstname, formData.lastname, formData.email, formData.password);
             setIsSubmitted(true);
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                if (error.response.data && typeof error.response.data === 'object') {
-                    setErrors(error.response.data);
-                } else {
-                    setErrors({ form: 'An error occurred during registration. Please try again later.' });
-                }
-            } else {
-                setErrors({ form: 'An unexpected error occurred. Please try again later.' });
-            }
+            setErrors({ form: 'An error occurred during registration. Please try again later.' });
         }
     };
 
@@ -64,8 +56,8 @@ const RegisterForm = () => {
     const handleResendVerification = async () => {
         if (canResend) {
             try {
-                const response = await axios.post('http://localhost:8080/api/auth/resend-verification', { email: formData.email });
-                if (response.data.success) {
+                const response = await resendVerificationEmail(formData.email);
+                if (response.success) {
                     setResendMessage('Verification email has been resent. Please check your inbox.');
                     setCanResend(false);
                     setResendTimer(60);

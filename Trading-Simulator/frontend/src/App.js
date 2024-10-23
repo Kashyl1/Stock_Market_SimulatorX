@@ -54,7 +54,7 @@ function App() {
                     <Route path="/login" element={<PublicRoute element={LoginPage} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />} />
                     <Route path="/register" element={<PublicRoute element={RegisterPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/main" element={<PrivateRoute element={MainPage} isLoggedIn={isLoggedIn} />} />
-                    <Route path="/settings/*" element={<PrivateRoute element={UserSettingsPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/settings/*" element={<PrivateRoute element={() => <UserSettingsPage setIsLoggedIn={setIsLoggedIn} />} isLoggedIn={isLoggedIn} />} />
                     <Route path="/wallet" element={<PrivateRoute element={WalletPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/currencies" element={<PrivateRoute element={CurrenciesPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/portfolios" element={<PrivateRoute element={PortfoliosPage} isLoggedIn={isLoggedIn} />} />

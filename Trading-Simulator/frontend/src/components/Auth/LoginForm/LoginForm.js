@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { login, resendVerificationEmail } from '../../../services/AuthService';
 import '../AuthForm.css';
 import './LoginForm.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -30,14 +30,13 @@ const LoginForm = ({ setIsLoggedIn }) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post('/api/auth/authenticate', { email, password });
-            if (response.data.token) {
-                localStorage.setItem('jwtToken', response.data.token);
+            const response = await login(email, password);
+            if (response.token) {
                 setIsLoggedIn(true);
                 navigate('/main');
-            } else if (response.data.message) {
-                setErrorMessage(response.data.message);
-                if (response.data.resend) {
+            } else {
+                setErrorMessage(response.message);
+                if (response.resend) {
                     setResendMessage('Your account is not verified. Please verify your account.');
                     setCanResend(false);
                     setResendTimer(60);
@@ -52,8 +51,8 @@ const LoginForm = ({ setIsLoggedIn }) => {
     const handleResendVerification = async () => {
         if (canResend) {
             try {
-                const response = await axios.post('/api/auth/resend-verification', { email });
-                if (response.data.success) {
+                const response = await resendVerificationEmail(email);
+                if (response.success) {
                     setResendMessage('Verification email has been resent. Please check your inbox.');
                     setCanResend(false);
                     setResendTimer(60);
@@ -69,7 +68,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-               <img src={logo} alt="Logo" className="logo_login" />
+                <img src={logo} alt="Logo" className="logo_login" />
                 <h2 className="auth-header">User login</h2>
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="input-group">
