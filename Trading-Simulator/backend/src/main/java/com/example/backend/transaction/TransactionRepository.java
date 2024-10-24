@@ -11,4 +11,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     Page<Transaction> findByUser(User user, Pageable pageable);
 
     Page<Transaction> findByUserAndPortfolio(User user, Portfolio portfolio, Pageable pageable);
+    void deleteAllByUser(User user);
+
 }

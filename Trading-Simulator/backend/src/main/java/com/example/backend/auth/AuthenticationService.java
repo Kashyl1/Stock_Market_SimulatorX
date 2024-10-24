@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 
@@ -36,7 +37,7 @@ public class AuthenticationService {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
 
-    public AuthenticationResponse register(RegisterRequest request) throws MessagingException {
+    public AuthenticationResponse register(RegisterRequest request) throws MessagingException, UnsupportedEncodingException {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
         if (existingUser.isPresent()) {
@@ -49,7 +50,7 @@ public class AuthenticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .verified(false)
                 .verificationToken(verificationToken)
                 .balance(0.0)
@@ -81,7 +82,6 @@ public class AuthenticationService {
 
     @Cacheable(value = "currentUser", key = "#email")
     public User getCurrentUser(String email) {
-        logger.info("Halo " + email);
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
@@ -90,7 +90,6 @@ public class AuthenticationService {
 
 
         if (principal instanceof UserDetails) {
-            logger.info("Halo " + ((UserDetails) principal).getUsername());
             return ((UserDetails) principal).getUsername();
         } else {
             throw new RuntimeException("User not authenticated");

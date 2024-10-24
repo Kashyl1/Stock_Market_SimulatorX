@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +50,7 @@ class AuthenticationServiceTest {
 
 
     @Test
-    void register_ShouldRegisterUserAndSendVerificationEmail() throws MessagingException {
+    void register_ShouldRegisterUserAndSendVerificationEmail() throws MessagingException, UnsupportedEncodingException {
         RegisterRequest request = new RegisterRequest("John", "Doe", "john.doe@example.com", "Password1");
 
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
@@ -68,7 +69,7 @@ class AuthenticationServiceTest {
         assertThat(savedUser.getLastname()).isEqualTo("Doe");
         assertThat(savedUser.getEmail()).isEqualTo("john.doe@example.com");
         assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
-        assertThat(savedUser.getRole()).isEqualTo(Role.USER);
+        assertThat(savedUser.getRole()).isEqualTo(Role.ROLE_USER);
         assertThat(savedUser.isVerified()).isFalse();
         assertThat(savedUser.getVerificationToken()).isEqualTo("testVerificationToken");
 
@@ -76,7 +77,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void register_ShouldThrowException_WhenEmailAlreadyExists() throws MessagingException {
+    void register_ShouldThrowException_WhenEmailAlreadyExists() throws MessagingException, UnsupportedEncodingException {
         RegisterRequest request = new RegisterRequest("John", "Doe", "john.doe@example.com", "Password1");
 
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(new User()));
@@ -94,7 +95,7 @@ class AuthenticationServiceTest {
         User user = User.builder()
                 .email(request.getEmail())
                 .password("encodedPassword")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .verified(true)
                 .build();
 
@@ -115,7 +116,7 @@ class AuthenticationServiceTest {
         User user = User.builder()
                 .email(request.getEmail())
                 .password("encodedPassword")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .verified(false)
                 .build();
 

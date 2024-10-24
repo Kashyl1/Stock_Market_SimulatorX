@@ -6,7 +6,7 @@ import iconOne from '../../assets/secure.png';
 import iconTwo from '../../assets/tools.png';
 import iconThree from '../../assets/experience.png';
 import logo from '../../assets/stock_logov2.png';
-import video from '../../assets/RCB.mp4';
+// import video from '../../assets/Jano.mp4';
 import exampleImageOne from '../../assets/gold_chart.png';
 import exampleImageTwo from '../../assets/vision.png';
 
@@ -75,7 +75,6 @@ const HomePage = () => {
        <div className="features-section">
             <div className="video-column">
               <video controls className="feature-video" width="1000" >
-               <source src={video} type="video/mp4" />
                 Your browser does not support the video tag.
                </video>
             </div>

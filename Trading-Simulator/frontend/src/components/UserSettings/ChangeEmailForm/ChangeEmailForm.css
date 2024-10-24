@@ -1,0 +1,69 @@
+.change-email-form {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.change-email-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.change-email-form button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.change-email-form .success-message {
+  color: var(--success-color);
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.change-email-form .error-message {
+  color: var(--error-color);
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.error-input {
+  border-color: var(--error-color);
+}

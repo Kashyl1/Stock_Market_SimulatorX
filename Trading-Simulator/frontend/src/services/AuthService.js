@@ -1,24 +1,52 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/auth';
+const API_URL = '/api/auth';
 
-const register = (firstname, lastname, email, password) => {
-    return axios.post(`${API_URL}/register`, {
-        firstname,
-        lastname,
-        email,
-        password,
+export const register = async (firstname, lastname, email, password) => {
+  try {
+    const response = await axios.post(`${API_URL}/register`, {
+      firstname,
+      lastname,
+      email,
+      password,
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
-const login = (email, password) => {
-    return axios.post(`${API_URL}/authenticate`, {
-        email,
-        password,
+export const login = async (email, password) => {
+  try {
+    const response = await axios.post(`${API_URL}/authenticate`, {
+      email,
+      password,
     });
+    if (response.data.token) {
+      localStorage.setItem('jwtToken', response.data.token);
+    }
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
-export default {
-    register,
-    login,
+export const verifyAccount = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/verify`, {
+      params: { token },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const resendVerificationEmail = async (email) => {
+  try {
+    const response = await axios.post(`${API_URL}/resend-verification`, { email });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };

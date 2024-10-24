@@ -25,15 +25,11 @@ const BuyAssetModal = ({ currency, portfolios, onClose }) => {
         currencyid: currency.id,
         amountInUSD: parseFloat(amountInUSD),
       };
-      console.log('Sending purchase data:', purchaseData);
-
       await buyAsset(purchaseData.portfolioid, purchaseData.currencyid, purchaseData.amountInUSD);
       alert('Asset purchased successfully');
       onClose();
     } catch (err) {
-      console.error('Buy asset error response data:', err.response?.data);
       let errorMessage = 'An unexpected error occurred.';
-
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.response?.data) {
@@ -43,7 +39,6 @@ const BuyAssetModal = ({ currency, portfolios, onClose }) => {
         }
       }
       setError('Failed to purchase asset. ' + errorMessage);
-      console.error('Buy asset error:', err);
     } finally {
       setLoading(false);
     }

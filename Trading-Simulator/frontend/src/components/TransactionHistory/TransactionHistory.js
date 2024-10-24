@@ -1,5 +1,3 @@
-// src/components/TransactionHistory/TransactionHistory.js
-
 import React, { useState, useEffect } from 'react';
 import TransactionTable from './TransactionTable';
 import Pagination from './Pagination';

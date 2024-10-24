@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
     @EntityGraph(attributePaths = {"portfolioAssets.currency"})
     List<Portfolio> findByUser(User user);
+    void deleteAllByUser(User user);
 
     Optional<Portfolio> findByPortfolioidAndUser(Integer portfolioid, User user);
 

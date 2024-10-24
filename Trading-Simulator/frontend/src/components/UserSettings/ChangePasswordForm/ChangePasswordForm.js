@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { changePassword } from '../../../services/UserSettings';
 import './ChangePasswordForm.css';
 
 const ChangePasswordForm = () => {
@@ -26,32 +26,12 @@ const ChangePasswordForm = () => {
     }
 
     try {
-      const token = localStorage.getItem('jwtToken');
-      const response = await axios.post('/api/user-settings/change-password',
-        {
-          currentPassword,
-          newPassword
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      setMessage(response.data.message || response.data);
-      setMessageType(response.data === "Password changed successfully" ? 'success' : 'error');
+      const response = await changePassword(currentPassword, newPassword);
+      setMessage(response.message || response);
+      setMessageType(response.message === 'Password changed successfully' ? 'success' : 'error');
       setErrors({});
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        if (error.response.data && typeof error.response.data === 'object') {
-          setErrors(error.response.data);
-        } else {
-          setErrors({ form: 'An error occurred during password change. Please try again later.' });
-        }
-      } else {
-        setErrors({ form: 'An unexpected error occurred. Please try again later.' });
-      }
+      setErrors({ form: 'An unexpected error occurred. Please try again later.' });
     }
   };
 

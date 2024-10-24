@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +36,7 @@ class VerificationServiceTest {
     }
 
     @Test
-    void sendVerificationEmail_ShouldSendEmail() throws MessagingException {
+    void sendVerificationEmail_ShouldSendEmail() throws MessagingException, UnsupportedEncodingException {
         User user = new User();
         user.setEmail("test@example.com");
         user.setFirstname("John");

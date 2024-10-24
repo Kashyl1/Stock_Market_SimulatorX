@@ -120,6 +120,7 @@
 
 .video-column {
   flex: 1;
+  z-index: -1;
 }
 
 .info-column {

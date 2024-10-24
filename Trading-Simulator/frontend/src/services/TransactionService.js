@@ -41,7 +41,6 @@ export const getTransactionHistory = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching transaction history:', error);
     throw error;
   }
 };
@@ -57,7 +56,6 @@ export const getTransactionHistoryByPortfolio = async (portfolioid, params) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching transaction history by portfolio:', error);
     throw error;
   }
 };

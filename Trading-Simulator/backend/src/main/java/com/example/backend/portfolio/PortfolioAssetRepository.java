@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface PortfolioAssetRepository extends JpaRepository<PortfolioAsset, Integer> {
     Optional<PortfolioAsset> findByPortfolioAndCurrency(Portfolio portfolio, Currency currency);
+    void deleteAllByPortfolio(Portfolio portfolio);
+
 }
