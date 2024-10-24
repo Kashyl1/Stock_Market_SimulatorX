@@ -6,7 +6,7 @@
     justify-content: center;
     min-height: 100vh;
     background-size: cover;
-    padding: 60px; /* Zwiększenie paddingu */
+    padding: 60px;
     position: relative;
     overflow: hidden;
 }
@@ -15,11 +15,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 3rem; /* Zwiększenie paddingu */
+    padding: 3rem;
     background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px; /* Zwiększenie zaokrąglenia */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Większy cień */
-    max-width: 500px; /* Zwiększenie maksymalnej szerokości */
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
     width: 100%;
     text-align: center;
     z-index: 1;
@@ -28,13 +28,13 @@
 .home-link {
     display: flex;
     justify-content: center;
-    margin-bottom: 30px; /* Zwiększenie odstępu */
+    margin-bottom: 30px;
 }
 
 .auth-header {
     color: #1E1E1E;
-    margin: 1.5rem 0; /* Zwiększenie marginesu */
-    font-size: 2.2rem; /* Zwiększenie rozmiaru czcionki */
+    margin: 1.5rem 0;
+    font-size: 2.2rem;
     font-family: 'Cinzel', serif;
 }
 
@@ -44,38 +44,38 @@
 
 .input-group {
     position: relative;
-    margin-bottom: 1.5rem; /* Zwiększenie odstępu */
+    margin-bottom: 1.5rem;
 }
 
 .input-icon {
     position: absolute;
     top: 34%;
-    left: -25px; /* Dostosowanie pozycji */
+    left: -25px;
     transform: translateY(-50%);
     color: #888;
 }
 
 .auth-form input {
     width: 100%;
-    padding: 15px 15px 15px 40px; /* Zwiększenie paddingu */
-    margin-bottom: 1.5rem; /* Zwiększenie marginesu */
+    padding: 15px 15px 15px 40px;
+    margin-bottom: 1.5rem;
     border: 1px solid #ccc;
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    border-radius: 6px;
     box-sizing: border-box;
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    font-size: 1.2rem;
     text-align: left;
 }
 
 .auth-form button {
     width: 100%;
-    padding: 15px; /* Zwiększenie paddingu */
-    margin-top: 1.5rem; /* Zwiększenie marginesu */
+    padding: 15px;
+    margin-top: 1.5rem;
     border: none;
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    border-radius: 6px;
     background-color: #d4af37;
     color: #1E1E1E;
     cursor: pointer;
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    font-size: 1.2rem;
     transition: background-color 0.3s ease;
 }
 
@@ -84,31 +84,37 @@
 }
 
 .form-footer {
-    width: 100%;
-    text-align: center;
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.form-footer:hover {
+  text-decoration: none; /* Dlaczego to nie działa XD */
 }
 
 .error-message {
     color: #d9534f;
-    margin-bottom: 1.5rem; /* Zwiększenie marginesu */
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     text-align: center;
     background-color: rgba(255, 77, 77, 0.1);
-    padding: 15px; /* Zwiększenie paddingu */
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    padding: 15px;
+    border-radius: 6px;
     animation: fadeInOut 3s ease-in-out;
 }
 
 .success-message {
-    margin-top: 25px; /* Zwiększenie marginesu */
+    margin-top: 25px;
     color: #5cb85c;
-    font-size: 1.4rem; /* Zwiększenie rozmiaru czcionki */
+    font-size: 1.4rem;
     font-weight: bold;
     text-align: center;
     background-color: rgba(76, 175, 80, 0.1);
-    padding: 15px; /* Zwiększenie paddingu */
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    padding: 15px;
+    border-radius: 6px;
     animation: fadeInOut 3s ease-in-out;
 }
 
@@ -120,12 +126,12 @@
 }
 
 .link-prompt {
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    font-size: 1.2rem;
     color: #1E1E1E;
-    margin-top: 1.5rem; /* Zwiększenie marginesu */
+    margin-top: 1.5rem;
     background-color: #d4af37;
-    padding: 0.7rem 1.5rem; /* Zwiększenie paddingu */
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
     display: inline-block;
     transition: background-color 0.3s ease;
 }
@@ -140,7 +146,7 @@
 
 .home-button {
     position: absolute;
-    top: 25px; /* Zwiększenie pozycji */
+    top: 25px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 2;
@@ -148,10 +154,10 @@
 
 .home-button a {
     color: #1E1E1E;
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    font-size: 1.2rem;
     background-color: #d4af37;
-    padding: 0.7rem 2.5rem; /* Zwiększenie paddingu */
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    padding: 0.7rem 2.5rem;
+    border-radius: 6px;
     transition: background-color 0.3s ease;
 }
 
@@ -170,17 +176,17 @@
 }
 
 .resend-container {
-    margin-top: 1.5rem; /* Zwiększenie marginesu */
+    margin-top: 1.5rem;
 }
 
 .resend-button {
-    padding: 15px; /* Zwiększenie paddingu */
+    padding: 15px;
     background-color: #d4af37;
     color: #1E1E1E;
     border: none;
-    border-radius: 6px; /* Zwiększenie zaokrąglenia */
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    font-size: 1.2rem;
 }
 
 .resend-button:hover {
@@ -189,20 +195,20 @@
 
 .resend-message {
     color: #1E1E1E;
-    margin-top: 1.5rem; /* Zwiększenie marginesu */
-    font-size: 1.2rem; /* Zwiększenie rozmiaru czcionki */
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
 }
 
 
 .logo_login {
-    width: 150px; /* Zwiększenie szerokości obrazka */
-    height: auto; /* Automatyczne dostosowanie wysokości, aby zachować proporcje */
-    margin-bottom: 20px; /* Dodanie odstępu od dołu */
-    transition: transform 0.3s ease; /* Płynne powiększenie przy najechaniu */
+    width: 150px;
+    height: auto;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
 }
 
 .logo_login:hover {
-    transform: scale(1.1); /* Powiększenie obrazka o 10% przy najechaniu */
+    transform: scale(1.1);
 }
 
 

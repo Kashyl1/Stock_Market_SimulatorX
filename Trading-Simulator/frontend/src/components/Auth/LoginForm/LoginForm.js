@@ -99,10 +99,10 @@ const LoginForm = ({ setIsLoggedIn }) => {
                         </div>
                     )}
                     <div className="form-footer">
-                        <button type="submit">Login</button>
-                        <div className="link-prompt">
-                            <p>Don't have an account? <Link to="/register">Sign up</Link></p>
-                        </div>
+                          <button type="submit">Login</button>
+                          <Link to="/register" className="link-prompt">
+                            <p>Don't have an account? Sign up</p>
+                          </Link>
                     </div>
                 </form>
             </div>
