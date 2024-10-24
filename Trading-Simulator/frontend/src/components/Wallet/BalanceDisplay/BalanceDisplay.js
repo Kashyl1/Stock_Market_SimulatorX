@@ -24,7 +24,6 @@ const BalanceDisplay = () => {
 
   return (
     <div className="balance-display">
-      <h3>Your Balance</h3>
       {balance !== null && balance !== undefined ? (
         <p>${balance.toFixed(2)}</p>
       ) : (

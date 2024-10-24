@@ -1,0 +1,52 @@
+.sidebar_main {
+    height: 100vh;
+    width: 250px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-right: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.logo-container {
+    margin-bottom: 30px;
+}
+
+.logo {
+    width: 180px;
+    height: auto;
+}
+
+.menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-links a {
+    text-decoration: none;
+    color: #fff;
+    font-family: "Cinzel", serif;
+    font-size: 18px;
+    padding: 15px 0;
+    line-height: 1.5;
+    transition: color 0.3s;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.menu-links a:hover {
+      background-color: #d4af37;
+      transform: scale(1.02);
+      transition: background-color 0.4s ease-in-out, transform 0.2s ease-in-out;
+}
+
+
+.sidebar {
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+

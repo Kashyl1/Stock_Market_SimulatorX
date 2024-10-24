@@ -30,7 +30,7 @@ public class VerificationService {
     @Async
     public void sendVerificationEmail(User user, String verificationToken) throws MessagingException, UnsupportedEncodingException {
         String subject = "Activate Your Account at Royal Coin";
-        String verificationUrl = baseUrl + "/api/auth/verify?token=" + verificationToken;
+        String verificationUrl = baseUrl + "/verify?token=" + verificationToken;
 
         String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
                 "Thank you for registering at Royal Coin!\n" +

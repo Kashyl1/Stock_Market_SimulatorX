@@ -79,11 +79,13 @@ const RegisterForm = () => {
                     <p>Please check your email for a link to verify your email address.</p>
                     <p>Once verified, you'll be able to sign in.</p>
                     {resendMessage && <p>{resendMessage}</p>}
+                    <div className="verification-container_flex">
                     <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
-                        {canResend ? 'Resend Verification Email' : `Wait ${resendTimer}s `}
+                        {canResend ? 'Resend verification email' : `Wait ${resendTimer}s `}
                     </button>
-                    <div className="link-prompt">
-                        Already Verified? <Link to="/login">Sign In</Link>
+                    <Link to="/login" className="link-prompt_verification">
+                        <a>Already have an account?</a>
+                    </Link>
                     </div>
                 </div>
             </div>
@@ -154,9 +156,9 @@ const RegisterForm = () => {
                     {errors.form && <div className="error-message">{errors.form}</div>}
                     <div className="form-footer">
                         <button type="submit">Register</button>
-                        <div className="link-prompt">
-                            <p>Already have an account? <Link to="/login">Sign In</Link></p>
-                        </div>
+                        <Link to="/login" className="link-prompt">
+                            <p>Already have an account? Sign In</p>
+                        </Link>
                     </div>
                 </form>
             </div>
