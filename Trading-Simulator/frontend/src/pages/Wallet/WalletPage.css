@@ -1,35 +1,24 @@
 /* Ogólny styl strony */
 .wallet-page {
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background-color: #f4f6f8;
-  padding: 20px;
-  position: relative;
   font-family: "Cinzel", serif;
   font-optical-sizing: auto;
   font-weight: 500;
   font-style: normal;
-  margin: 0;
-  padding: 0;
-  background-image: url('../../assets/3601908.jpg');
-  background-size: cover;
-  background-position: center;   background-attachment: fixed;
-  z-index: 0;
 }
 
 
 .balance-section {
-  background-color: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #fff;
   padding: 30px;
-  max-width: 600px;
-  width: 100%;
+  border-radius: 10px;
   text-align: center;
-  z-index: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 100%;
 }
 
 .balance-section h2 {
