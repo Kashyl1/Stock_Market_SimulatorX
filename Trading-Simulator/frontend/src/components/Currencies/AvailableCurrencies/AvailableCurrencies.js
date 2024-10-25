@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import BuyAssetModal from '../../Transaction/BuyAssetModal/BuyAssetModal';
-import { FixedSizeList as List } from 'react-window';
 import debounce from 'lodash.debounce';
+import { adjustSidebarHeight } from '../../../pages/Currencies/adjustSidebarHeight';
 import './AvailableCurrencies.css';
 
 const AvailableCurrencies = () => {
@@ -15,6 +15,7 @@ const AvailableCurrencies = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [size] = useState(50);
+
 
   useEffect(() => {
     const fetchPortfolios = async () => {
@@ -28,6 +29,7 @@ const AvailableCurrencies = () => {
 
     fetchPortfolios();
   }, []);
+
 
   const { data, isLoading, isError } = useQuery(
     ['availableAssets', page],
@@ -73,6 +75,11 @@ const AvailableCurrencies = () => {
     debouncedSetSearchTerm(e.target.value);
   };
 
+
+  useEffect(() => {
+    adjustSidebarHeight();
+  }, [portfolios, searchTerm, page, data]);
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -81,73 +88,74 @@ const AvailableCurrencies = () => {
     return <p className="error-message">{error || 'Error fetching data.'}</p>;
   }
 
+
   const filteredCurrencies = data.content.filter((currency) =>
     currency.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const Row = ({ index, style }) => {
-    const currency = filteredCurrencies[index];
-    return (
-      <div style={style} className="currency-card">
-        <img src={currency.image} alt={`${currency.name} icon`} />
-        <h2>{currency.name}</h2>
-        <p className="currency-price">${currency.price_in_usd}</p>
-        <p
-          className={`currency-change ${
-            currency.price_change_percentage_24h > 0 ? 'positive' : 'negative'
-          }`}
-        >
-          {currency.price_change_percentage_24h > 0 ? '+' : ''}
-          {currency.price_change_percentage_24h}%
-        </p>
-        <button onClick={() => handleBuyClick(currency)}>Buy</button>
-      </div>
-    );
-  };
-
   return (
-    <div>
-      <h2 className="available-cryptocurrencies">Explore the economics of cryptocurrencies</h2>
-
-      <div className="search-container">
-        <span className="search-icon">&#128269;</span>
-        <input
-          type="text"
-          placeholder="Search"
-          onChange={handleSearchChange}
-          className="search-input"
-        />
+    <div className="main-container">
+      <div className="table-container">
+        <h2 className="table-title">Available Currencies</h2>
+            <input
+              type="text"
+              placeholder="Search for crypto..."
+              onChange={handleSearchChange}
+              className="search-input"
+            />
+        <div className="table-header">
+          <div className="header-cell">Name</div>
+          <div className="header-cell">Price</div>
+          <div className="header-cell">Change</div>
+          <div className="header-cell">Market capitalization</div>
+          <div className="header-cell">Volume (24h)</div>
+          <div className="header-cell">Exchange</div>
+        </div>
+        {filteredCurrencies.map((currency, index) => (
+          <div className="table-row" key={index}>
+            <div className="cell currency-info">
+              <img src={currency.image} alt={currency.name} className="currency-icon" />
+              <div>
+                <span className="currency-name">{currency.name}</span>
+                <span className="currency-symbol">{currency.symbol.toUpperCase()}</span>
+              </div>
+            </div>
+            <div className="cell">${currency.price_in_usd.toFixed(2)}</div>
+            <div className="cell">
+              <span
+                className={`currency-change ${
+                  currency.price_change_percentage_24h > 0 ? 'positive' : 'negative'
+                }`}
+              >
+                {currency.price_change_percentage_24h > 0 ? '+' : ''}
+                {currency.price_change_percentage_24h.toFixed(2)}%
+              </span>
+            </div>
+            <div className="cell">${currency.market_cap}</div>
+            <div className="cell">${currency.volume_24}</div>
+            <div className="cell">
+              <button onClick={() => handleBuyClick(currency)}>Buy</button>
+            </div>
+          </div>
+        ))}
+        <div className="pagination-controls">
+          <button onClick={handlePrevPage} disabled={page === 0}>
+            Previous
+          </button>
+          <span>Page {page + 1}</span>
+          <button onClick={handleNextPage} disabled={data && page >= data.totalPages - 1}>
+            Next
+          </button>
+        </div>
+        {showBuyModal && selectedCurrency && (
+          <BuyAssetModal
+            currency={selectedCurrency}
+            portfolios={portfolios}
+            onClose={handleCloseBuyModal}
+            onBuySuccess={handleBuySuccess}
+          />
+        )}
       </div>
-
-      <div className="currency-list">
-        <List
-          height={600}
-          itemCount={filteredCurrencies.length}
-          itemSize={300}
-          width={'100%'}
-        >
-          {Row}
-        </List>
-      </div>
-
-      <div className="pagination-controls">
-        <button onClick={handlePrevPage} disabled={page === 0}>
-          Previous
-        </button>
-        <span> Page {page + 1} z {data.totalPages} </span>
-        <button onClick={handleNextPage} disabled={page >= data.totalPages - 1}>
-          Next
-        </button>
-      </div>
-
-      {showBuyModal && selectedCurrency && (
-        <BuyAssetModal
-          currency={selectedCurrency}
-          portfolios={portfolios}
-          onClose={handleCloseBuyModal}
-          onBuySuccess={handleBuySuccess}
-        />
-      )}
     </div>
   );
 };

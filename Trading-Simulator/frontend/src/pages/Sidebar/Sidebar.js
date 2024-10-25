@@ -9,9 +9,11 @@ import { faHome, faCoins, faWallet, faBriefcase, faCog } from '@fortawesome/free
 const Sidebar = () => {
     return (
             <div className="sidebar_main">
-                <div className="logo-container">
-                    <img src={logo} alt="Logo" className="logo" />
-                </div>
+                    <div className="logo-container">
+                        <Link to="/main">
+                            <img src={logo} alt="Logo" className="logo" />
+                        </Link>
+                    </div>
                 <div className="menu-links">
                     <Link to="/main">
                         <FontAwesomeIcon icon={faHome} /> Main Page

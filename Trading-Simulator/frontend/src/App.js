@@ -43,7 +43,6 @@ function App() {
             <div className="App">
                 {isLoggedIn && (
                     <nav className="navbar">
-                        <Link to="/main" className="nav-link">Main Page</Link>
                         <button onClick={handleLogout} className="nav-button">Logout</button>
                     </nav>
                 )}
