@@ -35,6 +35,9 @@ const PortfolioDetails = () => {
 
   useEffect(() => {
     fetchPortfolio();
+    const interval = setInterval(fetchPortfolio, 60000);
+
+    return () => clearInterval(interval);
   }, [id]);
 
   const handleSellClick = (asset) => {

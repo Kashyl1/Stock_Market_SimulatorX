@@ -1,6 +1,5 @@
 package com.example.backend.transaction;
 
-import com.example.backend.CoinGecko.CoinGeckoService;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
@@ -13,15 +12,15 @@ import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    private final CoinGeckoService coinGeckoService;
     private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
     private final PortfolioRepository portfolioRepository;
     private final PortfolioAssetRepository portfolioAssetRepository;
@@ -41,74 +39,82 @@ public class TransactionService {
 
     public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
         try {
-            List<Map<String, Object>> assets = coinGeckoService.getAvailableAssets(pageable);
+            Page<Currency> currencies = currencyRepository.findAll(pageable);
 
-            List<String> currencies = assets.stream()
-                    .map(asset -> (String) asset.get("id"))
+            List<Map<String, Object>> assets = currencies.stream()
+                    .map(currency -> {
+                        Map<String, Object> assetMap = new HashMap<>();
+                        assetMap.put("id", currency.getSymbol());
+                        assetMap.put("name", currency.getName());
+                        assetMap.put("price_in_usd", currency.getCurrentPrice());
+                        assetMap.put("price_change_24h", currency.getPriceChange());
+                        assetMap.put("price_change_percent_24h", currency.getPriceChangePercent());
+                        assetMap.put("volume_24h", currency.getVolume());
+                        assetMap.put("image_url", currency.getImageUrl());
+                        assetMap.put("currencyid", currency.getCurrencyid());
+                        return assetMap;
+                    })
                     .collect(Collectors.toList());
 
-            Map<String, Map<String, Object>> ratesMap = coinGeckoService.getExchangeRatesBatch(currencies);
-            for (Map<String, Object> asset : assets) {
-                String baseCurrency = (String) asset.get("id");
-                Map<String, Object> rates = ratesMap.get(baseCurrency.toLowerCase());
-
-                if (rates != null && rates.containsKey("usd")) {
-                    asset.put("price_in_usd", rates.get("usd"));
-                } else {
-                    asset.put("price_in_usd", "Unavailable");
-                }
-            }
-
-            long totalAssets = coinGeckoService.getTotalAssetsCount();
-            return new PageImpl<>(assets, pageable, totalAssets);
+            return new PageImpl<>(assets, pageable, currencies.getTotalElements());
         } catch (Exception e) {
+            logger.error("Failed to get available assets with prices.", e);
             throw new RuntimeException("Failed to get available assets with prices.");
         }
     }
 
+
     @Transactional
-    @CacheEvict(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
-    @CachePut(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
-    public void buyAsset(Integer portfolioid, String currencyid, Double amountInUSD) {
+    public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD) {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
-        Currency currency = currencyRepository.findByCoinGeckoid(currencyid.toLowerCase())
-                .orElseGet(() -> fetchAndSaveCurrency(currencyid));
+        Currency currency = currencyRepository.findBySymbol(currencySymbol.toUpperCase())
+                .orElseThrow(() -> new RuntimeException("Currency not found in database"));
 
-        Double rate = getExchangeRate(currencyid);
-        Double amountOfCurrency = amountInUSD / rate;
+        BigDecimal rate = currency.getCurrentPrice();
+        if (rate == null) {
+            throw new RuntimeException("Current price not available for " + currencySymbol);
+        }
 
-        if (currentUser.getBalance() < amountInUSD) {
+        BigDecimal amountOfCurrency = amountInUSD.divide(rate, 8, BigDecimal.ROUND_HALF_UP);
+
+        if (currentUser.getBalance().compareTo(amountInUSD) < 0) {
             throw new RuntimeException("Insufficient balance");
         }
 
-        currentUser.setBalance(currentUser.getBalance() - amountInUSD);
+        currentUser.setBalance(currentUser.getBalance().subtract(amountInUSD));
         userRepository.save(currentUser);
+
         PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
                 .orElse(PortfolioAsset.builder()
                         .portfolio(portfolio)
                         .currency(currency)
-                        .amount(0.0)
-                        .averagePurchasePrice(0.0)
+                        .amount(BigDecimal.ZERO)
+                        .averagePurchasePrice(BigDecimal.ZERO)
+                        .currentPrice(rate)
                         .updatedAt(LocalDateTime.now())
                         .build());
 
-        Double totalAmount = portfolioAsset.getAmount() + amountOfCurrency;
-        Double totalCost = (portfolioAsset.getAmount() * portfolioAsset.getAveragePurchasePrice()) + amountInUSD;
-        Double newAveragePrice = totalCost / totalAmount;
+        BigDecimal totalAmount = portfolioAsset.getAmount().add(amountOfCurrency);
+        BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
+                .add(amountInUSD);
+
+        BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
+                ? amountOfCurrency
+                : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
 
         portfolioAsset.setAmount(totalAmount);
         portfolioAsset.setAveragePurchasePrice(newAveragePrice);
+        portfolioAsset.setCurrentPrice(rate);
         portfolioAsset.setUpdatedAt(LocalDateTime.now());
 
         portfolio.setUpdatedAt(LocalDateTime.now());
         portfolioRepository.save(portfolio);
-
-
         portfolioAssetRepository.save(portfolioAsset);
+
         Transaction transaction = Transaction.builder()
                 .currency(currency)
                 .transactionType("BUY")
@@ -121,42 +127,47 @@ public class TransactionService {
 
         transactionRepository.save(transaction);
     }
+
     @Transactional
-    @CacheEvict(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
-    @CachePut(value = {"portfolioById", "portfolioGainLoss"}, key = "#portfolioid")
-    public void sellAsset(Integer portfolioid, String currencyid, Double amountOfCurrency) {
+    public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency) {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
 
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
-        Currency currency = currencyRepository.findByCoinGeckoid(currencyid.toLowerCase())
-                .orElseGet(() -> fetchAndSaveCurrency(currencyid));
+        Currency currency = currencyRepository.findById(currencyid)
+                .orElseThrow(() -> new RuntimeException("Currency not found in database"));
 
-        Double rate = getExchangeRate(currencyid);
-        Double amountInUSD = amountOfCurrency * rate;
+        BigDecimal rate = currency.getCurrentPrice();
+        if (rate == null) {
+            throw new RuntimeException("Current price not available for " + currencyid);
+        }
+
+        BigDecimal amountInUSD = amountOfCurrency.multiply(rate);
 
         PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
                 .orElseThrow(() -> new RuntimeException("You do not own this currency"));
 
-        if (portfolioAsset.getAmount() < amountOfCurrency) {
+        if (portfolioAsset.getAmount().compareTo(amountOfCurrency) < 0) {
             throw new RuntimeException("Insufficient amount of currency to sell");
         }
 
-        Double newAmount = portfolioAsset.getAmount() - amountOfCurrency;
+        BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrency);
         portfolioAsset.setAmount(newAmount);
         portfolioAsset.setUpdatedAt(LocalDateTime.now());
         portfolio.setUpdatedAt(LocalDateTime.now());
         portfolioRepository.save(portfolio);
-        if (newAmount == 0.0) {
+
+        if (newAmount.compareTo(BigDecimal.ZERO) == 0) {
             portfolioAssetRepository.delete(portfolioAsset);
         } else {
             portfolioAssetRepository.save(portfolioAsset);
         }
 
-        currentUser.setBalance(currentUser.getBalance() + amountInUSD);
+        currentUser.setBalance(currentUser.getBalance().add(amountInUSD));
         userRepository.save(currentUser);
+
         Transaction transaction = Transaction.builder()
                 .currency(currency)
                 .transactionType("SELL")
@@ -166,56 +177,13 @@ public class TransactionService {
                 .user(currentUser)
                 .portfolio(portfolio)
                 .build();
+        logger.info("Selling asset for currency ID: {}", currencyid);
 
         transactionRepository.save(transaction);
     }
 
-    private Currency fetchAndSaveCurrency(String currencyid) {
-        Map<String, Object> currencyData = coinGeckoService.getCurrencyData(currencyid);
-        if (currencyData == null) {
-            throw new RuntimeException("Failed to fetch currency data from external API");
-        }
 
-        String symbol = (String) currencyData.get("symbol");
-        String name = (String) currencyData.get("name");
-        String country = "Unknown";
-        String description = "";
 
-        Object descriptionObj = currencyData.get("description");
-        if (descriptionObj instanceof Map) {
-            Map<String, Object> descriptionMap = (Map<String, Object>) descriptionObj;
-            Object enDescription = descriptionMap.get("en");
-            if (enDescription instanceof String) {
-                description = (String) enDescription;
-            }
-        }
-
-        String source = "CoinGecko";
-
-        Currency newCurrency = Currency.builder()
-                .symbol(symbol != null ? symbol.toUpperCase() : "UNKNOWN")
-                .name(name != null ? name : "UNKNOWN")
-                .coinGeckoid(currencyid.toLowerCase())
-                .country(country)
-                .description(description != null ? description : "")
-                .source(source)
-                .build();
-        return currencyRepository.save(newCurrency);
-    }
-
-    private Double getExchangeRate(String currencyid) {
-        Map<String, Object> rateMap = coinGeckoService.getExchangeRates(currencyid);
-        if (rateMap == null || !rateMap.containsKey(currencyid.toLowerCase())) {
-            throw new RuntimeException("Failed to fetch exchange rate for currency");
-        }
-
-        Map<String, Object> currencyRates = (Map<String, Object>) rateMap.get(currencyid.toLowerCase());
-        if (currencyRates == null || !currencyRates.containsKey("usd")) {
-            throw new RuntimeException("Failed to fetch exchange rate for currency");
-        }
-
-        return ((Number) currencyRates.get("usd")).doubleValue();
-    }
     public Page<TransactionHistoryDTO> getTransactionHistory(Pageable pageable) {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);

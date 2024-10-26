@@ -2,10 +2,11 @@ package com.example.backend.transaction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -15,12 +16,12 @@ public class SellAssetRequest {
     @JsonProperty("portfolioid")
     private Integer portfolioid;
 
-    @NotBlank(message = "Currency ID is required")
+    @NotNull
     @JsonProperty("currencyid")
-    private String currencyid;
+    private Integer currencyid;
 
     @NotNull(message = "Amount is required")
     @Min(value = 0, message = "Amount must be positive")
     @JsonProperty("amount")
-    private Double amount;
+    private BigDecimal amount;
 }

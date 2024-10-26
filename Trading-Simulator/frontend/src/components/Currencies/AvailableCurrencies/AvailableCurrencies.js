@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useQuery } from 'react-query';
+import React, { useState, useEffect } from 'react';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import BuyAssetModal from '../../Transaction/BuyAssetModal/BuyAssetModal';
@@ -15,7 +14,8 @@ const AvailableCurrencies = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [size] = useState(50);
-
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchPortfolios = async () => {
@@ -30,17 +30,23 @@ const AvailableCurrencies = () => {
     fetchPortfolios();
   }, []);
 
-
-  const { data, isLoading, isError } = useQuery(
-    ['availableAssets', page],
-    () => getAvailableAssets(page, size),
-    {
-      refetchInterval: 300000,
-      onError: () => {
-        setError('Failed to fetch data.');
-      },
+  const fetchAvailableAssets = async () => {
+    setIsLoading(true);
+    try {
+      const availableAssets = await getAvailableAssets(page, size);
+      setData(availableAssets.content);
+      setIsLoading(false);
+    } catch (err) {
+      setError('Failed to fetch available assets.');
+      setIsLoading(false);
     }
-  );
+  };
+
+  useEffect(() => {
+    fetchAvailableAssets();
+    const interval = setInterval(fetchAvailableAssets, 60000);
+    return () => clearInterval(interval);
+  }, [page]);
 
   const handleNextPage = () => {
     if (data && page < data.totalPages - 1) {
@@ -64,9 +70,6 @@ const AvailableCurrencies = () => {
     setSelectedCurrency(null);
   };
 
-  const handleBuySuccess = () => {
-  };
-
   const debouncedSetSearchTerm = debounce((value) => {
     setSearchTerm(value);
   }, 300);
@@ -74,7 +77,6 @@ const AvailableCurrencies = () => {
   const handleSearchChange = (e) => {
     debouncedSetSearchTerm(e.target.value);
   };
-
 
   useEffect(() => {
     adjustSidebarHeight();
@@ -84,55 +86,61 @@ const AvailableCurrencies = () => {
     return <p>Loading...</p>;
   }
 
-  if (isError || error) {
-    return <p className="error-message">{error || 'Error fetching data.'}</p>;
+  if (error) {
+    return <p className="error-message">{error}</p>;
   }
 
-
-  const filteredCurrencies = data.content.filter((currency) =>
+  const filteredCurrencies = data.filter((currency) =>
     currency.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatPrice = (price) => {
+    if (price === undefined || price === null) return 'N/A';
+    if (price >= 1) return price.toFixed(2);
+    if (price >= 0.01) return price.toFixed(4);
+    if (price >= 0.0001) return price.toFixed(6);
+    if (price >= 0.00000001) return price.toFixed(8);
+    return price.toFixed(12);
+  };
 
   return (
     <div className="main-container">
       <div className="table-container">
         <h2 className="table-title">Available Currencies</h2>
-            <input
-              type="text"
-              placeholder="Search for crypto..."
-              onChange={handleSearchChange}
-              className="search-input"
-            />
+        <input
+          type="text"
+          placeholder="Search for crypto..."
+          onChange={handleSearchChange}
+          className="search-input"
+        />
         <div className="table-header">
           <div className="header-cell">Name</div>
           <div className="header-cell">Price</div>
-          <div className="header-cell">Change</div>
-          <div className="header-cell">Market capitalization</div>
+          <div className="header-cell">Change (24h)</div>
           <div className="header-cell">Volume (24h)</div>
-          <div className="header-cell">Exchange</div>
+          <div className="header-cell">Action</div>
         </div>
         {filteredCurrencies.map((currency, index) => (
           <div className="table-row" key={index}>
             <div className="cell currency-info">
-              <img src={currency.image} alt={currency.name} className="currency-icon" />
+              <img src={currency.image_url} alt={currency.name} className="currency-icon" />
               <div>
                 <span className="currency-name">{currency.name}</span>
-                <span className="currency-symbol">{currency.symbol.toUpperCase()}</span>
+                <span className="currency-symbol">{currency.id.toUpperCase()}</span>
               </div>
             </div>
-            <div className="cell">${currency.price_in_usd.toFixed(2)}</div>
+            <div className="cell">${formatPrice(currency.price_in_usd)}</div>
             <div className="cell">
               <span
                 className={`currency-change ${
-                  currency.price_change_percentage_24h > 0 ? 'positive' : 'negative'
+                  currency.price_change_percent_24h > 0 ? 'positive' : 'negative'
                 }`}
               >
-                {currency.price_change_percentage_24h > 0 ? '+' : ''}
-                {currency.price_change_percentage_24h.toFixed(2)}%
+                {currency.price_change_percent_24h > 0 ? '+' : ''}
+                {currency.price_change_percent_24h.toFixed(2)}%
               </span>
             </div>
-            <div className="cell">${currency.market_cap}</div>
-            <div className="cell">${currency.volume_24}</div>
+            <div className="cell">${formatPrice(currency.volume_24h)}</div>
             <div className="cell">
               <button onClick={() => handleBuyClick(currency)}>Buy</button>
             </div>
@@ -152,7 +160,6 @@ const AvailableCurrencies = () => {
             currency={selectedCurrency}
             portfolios={portfolios}
             onClose={handleCloseBuyModal}
-            onBuySuccess={handleBuySuccess}
           />
         )}
       </div>

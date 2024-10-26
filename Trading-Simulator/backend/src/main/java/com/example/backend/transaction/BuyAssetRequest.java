@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class BuyAssetRequest {
@@ -19,5 +21,5 @@ public class BuyAssetRequest {
     @NotNull(message = "Amount in USD is required")
     @Min(value = 0, message = "Amount must be positive")
     @JsonProperty("amountInUSD")
-    private Double amountInUSD;
+    private BigDecimal amountInUSD;
 }

@@ -10,7 +10,6 @@ const CurrenciesPage = () => {
   <div className="main-page">
    <Sidebar />
      <div className="currencies-page">
-
        <AvailableCurrencies />
      </div>
     </div>

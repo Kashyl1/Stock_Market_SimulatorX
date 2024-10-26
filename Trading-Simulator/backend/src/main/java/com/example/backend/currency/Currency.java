@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -26,20 +27,29 @@ public class Currency {
     @Column(nullable = false, length = 100, unique = true)
     private String name;
 
-    @Column(nullable = false, length = 100)
-    private String country;
-
-    @Column(columnDefinition = "text")
-    private String description;
-
-    @Column(nullable = false, length = 50)
-    private String source;
-
-    @Column(nullable = false, unique = true)
-    private String coinGeckoid;
-
     @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     @JsonIgnore
     private List<PortfolioAsset> portfolioAssets;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal priceChange;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal priceChangePercent;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal highPrice;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal lowPrice;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal volume;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal currentPrice;
+
+    @Column(nullable = true, length = 255)
+    private String imageUrl;
 }

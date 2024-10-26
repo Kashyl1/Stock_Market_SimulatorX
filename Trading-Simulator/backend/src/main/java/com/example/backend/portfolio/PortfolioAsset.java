@@ -1,11 +1,10 @@
 package com.example.backend.portfolio;
 
 import com.example.backend.currency.Currency;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -29,8 +28,14 @@ public class PortfolioAsset {
     @JoinColumn(name = "currencyid")
     private Currency currency;
 
-    private Double amount;
-    private Double currentPrice;
-    private Double averagePurchasePrice;
+    @Column(nullable = false, precision = 30, scale = 10)
+    private BigDecimal amount;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal currentPrice;
+
+    @Column(nullable = true, precision = 30, scale = 10)
+    private BigDecimal averagePurchasePrice;
+
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,5 @@
 package com.example.backend.transaction;
 
-import com.example.backend.CoinGecko.CoinGeckoService;
 import com.example.backend.auth.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,7 +19,6 @@ import java.util.Map;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final CoinGeckoService coinGeckoService;
     private final AuthenticationService authenticationService;
     private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
 
@@ -44,6 +42,7 @@ public class TransactionController {
         return ResponseEntity.ok(assets);
     }
 
+    // przypominajka
     @GetMapping("/history")
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionHistory(
             @PageableDefault(page = 0, size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -51,6 +50,7 @@ public class TransactionController {
         Page<TransactionHistoryDTO> transactions = transactionService.getTransactionHistory(pageable);
         return ResponseEntity.ok(transactions);
     }
+
     @GetMapping("/history/portfolio/{portfolioid}")
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionHistoryByPortfolio(
             @PathVariable Integer portfolioid,

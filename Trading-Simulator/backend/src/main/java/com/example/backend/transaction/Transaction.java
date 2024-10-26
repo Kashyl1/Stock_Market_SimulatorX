@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.example.backend.currency.Currency;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -29,11 +30,11 @@ public class Transaction {
     @Column(nullable = false, length = 10)
     private String transactionType;
 
-    @Column(nullable = false)
-    private Double amount;
+    @Column(nullable = false, precision = 30, scale = 10)
+    private BigDecimal amount;
 
-    @Column(nullable = false)
-    private Double rate;
+    @Column(nullable = false, precision = 30, scale = 10)
+    private BigDecimal rate;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;

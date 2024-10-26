@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -58,8 +59,8 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @Builder.Default
-    @Column(nullable = false)
-    private Double balance = 0.0;
+    @Column(nullable = false, precision = 19, scale = 3)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

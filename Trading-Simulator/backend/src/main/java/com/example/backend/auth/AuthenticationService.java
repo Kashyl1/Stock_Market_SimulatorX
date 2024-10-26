@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 
@@ -53,7 +54,7 @@ public class AuthenticationService {
                 .role(Role.ROLE_USER)
                 .verified(false)
                 .verificationToken(verificationToken)
-                .balance(0.0)
+                .balance(BigDecimal.ZERO)
                 .build();
 
         userRepository.save(user);

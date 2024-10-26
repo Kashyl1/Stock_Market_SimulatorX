@@ -2,6 +2,8 @@ package com.example.backend.portfolio;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -9,9 +11,9 @@ import lombok.*;
 @AllArgsConstructor
 public class PortfolioAssetDTO {
     private String currencyName;
-    private Double amount;
-    private Double averagePurchasePrice;
-    private Double currentPrice;
-    private Double gainOrLoss;
-    private String coinGeckoid;
+    private BigDecimal amount;
+    private BigDecimal averagePurchasePrice;
+    private BigDecimal currentPrice;
+    private BigDecimal gainOrLoss;
+    private Integer currencyid;
 }

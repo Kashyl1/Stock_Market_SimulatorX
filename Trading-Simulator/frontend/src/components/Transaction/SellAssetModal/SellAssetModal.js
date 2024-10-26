@@ -20,7 +20,7 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
     setLoading(true);
     try {
       const sellAmount = parseFloat(amount);
-      await sellAsset(portfolioid, currency.coinGeckoid, sellAmount);
+      await sellAsset(portfolioid, currency.currencyid, sellAmount);
       alert('Asset sold successfully');
       onSellSuccess();
       onClose();
