@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +67,9 @@ public class TransactionService {
 
     @Transactional
     public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD) {
+        if (amountInUSD == null || amountInUSD.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount in USD must be positive");
+        }
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
@@ -130,6 +134,13 @@ public class TransactionService {
 
     @Transactional
     public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency) {
+        if (currencyid == null) {
+            throw new IllegalArgumentException("Currency ID cannot be null");
+        }
+        if (amountOfCurrency == null || amountOfCurrency.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount of currency must be positive");
+        }
+
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
 
@@ -144,7 +155,7 @@ public class TransactionService {
             throw new RuntimeException("Current price not available for " + currencyid);
         }
 
-        BigDecimal amountInUSD = amountOfCurrency.multiply(rate);
+        BigDecimal amountInUSD = amountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
 
         PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
                 .orElseThrow(() -> new RuntimeException("You do not own this currency"));
@@ -153,7 +164,7 @@ public class TransactionService {
             throw new RuntimeException("Insufficient amount of currency to sell");
         }
 
-        BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrency);
+        BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrency).setScale(8, RoundingMode.HALF_UP);
         portfolioAsset.setAmount(newAmount);
         portfolioAsset.setUpdatedAt(LocalDateTime.now());
         portfolio.setUpdatedAt(LocalDateTime.now());
@@ -165,14 +176,15 @@ public class TransactionService {
             portfolioAssetRepository.save(portfolioAsset);
         }
 
-        currentUser.setBalance(currentUser.getBalance().add(amountInUSD));
+        BigDecimal newBalance = currentUser.getBalance().add(amountInUSD).setScale(8, RoundingMode.HALF_UP);
+        currentUser.setBalance(newBalance);
         userRepository.save(currentUser);
 
         Transaction transaction = Transaction.builder()
                 .currency(currency)
                 .transactionType("SELL")
-                .amount(amountOfCurrency)
-                .rate(rate)
+                .amount(amountOfCurrency.setScale(8, RoundingMode.HALF_UP))
+                .rate(rate.setScale(8, RoundingMode.HALF_UP))
                 .timestamp(LocalDateTime.now())
                 .user(currentUser)
                 .portfolio(portfolio)
@@ -181,8 +193,6 @@ public class TransactionService {
 
         transactionRepository.save(transaction);
     }
-
-
 
     public Page<TransactionHistoryDTO> getTransactionHistory(Pageable pageable) {
         String email = authenticationService.getCurrentUserEmail();
@@ -213,8 +223,10 @@ public class TransactionService {
 
     @Transactional
     public Portfolio getPortfolioByidAndUser(Integer portfolioid, User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         return portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
     }
-
 }
