@@ -10,15 +10,27 @@ const AddFundsForm = ({ onFundsAdded }) => {
     e.preventDefault();
     setMessage('');
     setError('');
-
+    if (!amount || parseFloat(amount) <= 0) {
+    setError('Amount must be greater than zero.');
+    return;
+  }
     try {
       const response = await addFunds(amount);
       setMessage('Funds added successfully');
       setAmount('');
       onFundsAdded();
     } catch (error) {
-      setError('Failed to add funds. Please try again.');
-    }
+        let errorMessage = 'Failed to add funds. Please try again.';
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response?.data) {
+          const errors = Object.values(error.response.data).join(' ');
+          if (errors) {
+            errorMessage = errors;
+          }
+        }
+        setError(errorMessage);
+      }
   };
 
   return (

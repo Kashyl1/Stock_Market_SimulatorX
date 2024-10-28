@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getBalance } from '../../../services/WalletService';
 
-const BalanceDisplay = () => {
+const BalanceDisplay = ({ refresh }) => {
   const [balance, setBalance] = useState(null);
   const [error, setError] = useState('');
 
@@ -16,7 +16,7 @@ const BalanceDisplay = () => {
     };
 
     fetchBalance();
-  }, []);
+  }, [refresh]);
 
   if (error) {
     return <p className="error-message">{error}</p>;

@@ -12,26 +12,73 @@ const ChangePasswordForm = () => {
 
   useEffect(() => {
     if (message) {
-      const timer = setTimeout(() => setMessage(''), 3000);
+      const timer = setTimeout(() => setMessage(''), 5000);
       return () => clearTimeout(timer);
     }
   }, [message]);
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!currentPassword) {
+      newErrors.currentPassword = 'Current password is required.';
+    }
+
+    if (!newPassword) {
+      newErrors.newPassword = 'New password is required.';
+    } else {
+      if (newPassword.length < 8) {
+        newErrors.newPassword = 'Password must be at least 8 characters long.';
+      }
+      if (!/[A-Z]/.test(newPassword)) {
+        newErrors.newPassword = 'Password must contain at least one uppercase letter.';
+      }
+      if (!/\d/.test(newPassword)) {
+        newErrors.newPassword = 'Password must contain at least one digit.';
+      }
+    }
+
+    if (!confirmNewPassword) {
+      newErrors.confirmNewPassword = 'Please confirm your new password.';
+    } else if (newPassword !== confirmNewPassword) {
+      newErrors.confirmNewPassword = 'New passwords do not match.';
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
-    if (newPassword !== confirmNewPassword) {
-      setErrors({ confirmNewPassword: 'New passwords do not match.' });
+    if (!validateForm()) {
       return;
     }
 
     try {
       const response = await changePassword(currentPassword, newPassword);
-      setMessage(response.message || response);
-      setMessageType(response.message === 'Password changed successfully' ? 'success' : 'error');
+      setMessage(response.message || 'Password changed successfully.');
+      setMessageType('success');
       setErrors({});
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
     } catch (error) {
-      setErrors({ form: 'An unexpected error occurred. Please try again later.' });
+      let errorMessage = 'An unexpected error occurred. Please try again later.';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data) {
+        const validationErrors = error.response.data;
+        const newErrors = {};
+        for (const field in validationErrors) {
+          newErrors[field] = validationErrors[field];
+        }
+        setErrors(newErrors);
+        errorMessage = '';
+      }
+      setMessage(errorMessage);
+      setMessageType('error');
     }
   };
 

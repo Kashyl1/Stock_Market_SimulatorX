@@ -37,9 +37,13 @@ const AvailableCurrencies = () => {
       setData(availableAssets.content);
       setIsLoading(false);
     } catch (err) {
-      setError('Failed to fetch available assets.');
-      setIsLoading(false);
-    }
+        let errorMessage = 'Failed to fetch available assets.';
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+        setError(errorMessage);
+        setIsLoading(false);
+      }
   };
 
   useEffect(() => {
@@ -95,7 +99,7 @@ const AvailableCurrencies = () => {
   );
 
   const formatPrice = (price) => {
-    if (price === undefined || price === null) return 'N/A';
+    if (price === undefined || price === null || isNaN(price)) return 'N/A';
     if (price >= 1) return price.toFixed(2);
     if (price >= 0.01) return price.toFixed(4);
     if (price >= 0.0001) return price.toFixed(6);

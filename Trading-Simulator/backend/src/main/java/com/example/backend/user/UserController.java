@@ -11,14 +11,12 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
-     * Endpoint do doładowania środków użytkownika
-     */
     @PostMapping("/add-funds")
     public ResponseEntity<BalanceResponse> addFunds(@RequestBody AddFundsRequest request) {
         BalanceResponse response = userService.addFunds(request.getAmount());
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/balance")
     public ResponseEntity<BalanceResponse> getBalance() {
         BalanceResponse response = userService.getBalance();

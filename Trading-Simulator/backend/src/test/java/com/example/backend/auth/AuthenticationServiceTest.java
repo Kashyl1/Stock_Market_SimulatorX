@@ -1,6 +1,8 @@
 package com.example.backend.auth;
 
-import com.example.backend.Exceptions.EmailAlreadyExistsException;
+import com.example.backend.analytics.EventTrackingService;
+import com.example.backend.exceptions.AccountNotVerifiedException;
+import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.config.JwtService;
 import com.example.backend.user.Role;
@@ -43,6 +45,9 @@ class AuthenticationServiceTest {
 
     @Mock
     private VerificationService verificationService;
+
+    @Mock
+    private EventTrackingService eventTrackingService;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -110,7 +115,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void authenticate_ShouldReturnErrorMessage_WhenUserIsNotVerified() {
+    void authenticate_ShouldThrowAccountNotVerifiedException_WhenUserIsNotVerified() {
         AuthenticationRequest request = new AuthenticationRequest("john.doe@example.com", "Password1");
 
         User user = User.builder()
@@ -122,10 +127,9 @@ class AuthenticationServiceTest {
 
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
 
-        AuthenticationResponse response = authenticationService.authenticate(request);
-
-        assertThat(response.getMessage()).isEqualTo("User is not verified!");
-        assertThat(response.getResend()).isTrue();
+        assertThrows(AccountNotVerifiedException.class, () -> {
+            authenticationService.authenticate(request);
+        });
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtService, never()).generateToken(any(User.class));

@@ -12,7 +12,11 @@ export const register = async (firstname, lastname, email, password) => {
     });
     return response.data;
   } catch (error) {
-    throw error;
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else {
+      throw { message: 'Network error' };
+    }
   }
 };
 
@@ -27,7 +31,11 @@ export const login = async (email, password) => {
     }
     return response.data;
   } catch (error) {
-    throw error;
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else {
+      throw { message: 'Network error' };
+    }
   }
 };
 
@@ -38,7 +46,11 @@ export const verifyAccount = async (token) => {
     });
     return response.data;
   } catch (error) {
-    throw error;
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else {
+      throw { message: 'Network error' };
+    }
   }
 };
 
@@ -47,6 +59,10 @@ export const resendVerificationEmail = async (email) => {
     const response = await axios.post(`${API_URL}/resend-verification`, { email });
     return response.data;
   } catch (error) {
-    throw error;
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else {
+      throw { message: 'Network error' };
+    }
   }
 };

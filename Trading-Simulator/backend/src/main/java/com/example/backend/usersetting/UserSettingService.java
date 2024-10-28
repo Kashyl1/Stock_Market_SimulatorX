@@ -2,8 +2,10 @@ package com.example.backend.usersetting;
 
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.auth.AuthenticationService;
+import com.example.backend.exceptions.ConfirmationTextMismatchException;
+import com.example.backend.exceptions.EmailSendingException;
+import com.example.backend.exceptions.InvalidPasswordException;
 import com.example.backend.portfolio.Portfolio;
-import com.example.backend.portfolio.PortfolioAsset;
 import com.example.backend.portfolio.PortfolioAssetRepository;
 import com.example.backend.portfolio.PortfolioRepository;
 import com.example.backend.transaction.TransactionRepository;
@@ -28,23 +30,18 @@ public class UserSettingService {
     private final PortfolioAssetRepository portfolioAssetRepository;
     private final VerificationService verificationService;
 
-    public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
+    public void changePassword(ChangePasswordRequest request) {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            return ChangePasswordResponse.builder()
-                    .message("Current password is incorrect")
-                    .build();
+            throw new InvalidPasswordException("Current password is incorrect");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-
-        return ChangePasswordResponse.builder()
-                .message("Password changed successfully")
-                .build();
     }
+
     @Transactional
     public String deleteUserAccount(String confirmText) {
         String email = authenticationService.getCurrentUserEmail();
@@ -52,7 +49,7 @@ public class UserSettingService {
 
         String expectedText = "Delete " + user.getEmail();
         if (!confirmText.equals(expectedText)) {
-            return "Confirmation text is incorrect.";
+            throw new ConfirmationTextMismatchException("Confirmation text is incorrect.");
         }
 
         transactionRepository.deleteAllByUser(user);
@@ -72,9 +69,7 @@ public class UserSettingService {
         User user = authenticationService.getCurrentUser(currentEmail);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            return ChangeEmailResponse.builder()
-                    .message("Current password is incorrect")
-                    .build();
+            throw new InvalidPasswordException("Current password is incorrect");
         }
 
         String newEmail = request.getNewEmail();
@@ -89,9 +84,7 @@ public class UserSettingService {
         try {
             verificationService.sendVerificationEmail(user, verificationToken);
         } catch (Exception e) {
-            return ChangeEmailResponse.builder()
-                    .message("Failed to send verification email")
-                    .build();
+            throw new EmailSendingException("Failed to send verification email");
         }
 
         return ChangeEmailResponse.builder()

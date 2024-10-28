@@ -14,7 +14,16 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
       setError('');
       onPortfolioCreated(newPortfolio);
     } catch (err) {
-      setError('Failed to create portfolio. Please try again.');
+      let errorMessage = 'Failed to create portfolio. Please try again.';
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data) {
+        const errors = Object.values(err.response.data).join(' ');
+        if (errors) {
+          errorMessage = errors;
+        }
+      }
+      setError(errorMessage);
     }
   };
 

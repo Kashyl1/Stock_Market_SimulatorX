@@ -23,27 +23,27 @@ const Verification = () => {
 
     const verifyAccountHandler = async (token) => {
         try {
-            const response = await verifyAccount(token);
-            setMessage(response);
+            await verifyAccount(token);
+            setMessage('Verification successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 5000);
         } catch (error) {
-            setMessage('Unable to verify. Please try again.');
+            setMessage(error.message || 'Unable to verify. Please try again.');
             setTimeout(() => navigate('/login'), 5000);
         }
     };
 
     return (
-    <div className="verification-page">
-    <div className="static-background"></div>
-        <div className="verification-container">
-            <FontAwesomeIcon icon={faEnvelope} />
-            <h2>Verification Status</h2>
-            <p>{message}</p>
-            <Link to="/login" className="resend-button">
-               If you didn't get redirected click on the link
-            </Link>
+        <div className="verification-page">
+            <div className="static-background"></div>
+            <div className="verification-container">
+                <FontAwesomeIcon icon={faEnvelope} />
+                <h2>Verification Status</h2>
+                <p>{message}</p>
+                <Link to="/login" className="resend-button">
+                    If you didn't get redirected click on the link
+                </Link>
+            </div>
         </div>
-     </div>
     );
 };
 

@@ -1,9 +1,8 @@
 package com.example.backend.usersetting;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,28 +13,24 @@ public class UserSettingController {
     private final UserSettingService userSettingService;
 
     @PostMapping("/change-password")
-    public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
-        try {
-            ChangePasswordResponse response = userSettingService.changePassword(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(ChangePasswordResponse.builder()
-                    .message("User is not authenticated")
-                    .build());
-        }
+    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        userSettingService.changePassword(request);
+        return ResponseEntity.ok(ChangePasswordResponse.builder()
+                .message("Password changed successfully")
+                .build());
     }
+
     @PostMapping("/delete-account")
     public ResponseEntity<String> deleteAccount(@RequestBody DeleteAccountRequest request) {
-        try {
-            String response = userSettingService.deleteUserAccount(request.getConfirmText());
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body("User is not authenticated or deletion failed.");
-        }
+        userSettingService.deleteUserAccount(request.getConfirmText());
+        return ResponseEntity.ok("User account and associated data have been deleted.");
     }
+
     @PostMapping("/change-email")
     public ResponseEntity<ChangeEmailResponse> changeEmail(@RequestBody ChangeEmailRequest request) {
-        ChangeEmailResponse response = userSettingService.changeEmail(request);
-        return ResponseEntity.ok(response);
+        userSettingService.changeEmail(request);
+        return ResponseEntity.ok(ChangeEmailResponse.builder()
+                .message("Email changed successfully. Please verify your new email. You will be redirected to main page in 5 seconds...")
+                .build());
     }
 }

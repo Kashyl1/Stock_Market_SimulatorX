@@ -44,10 +44,13 @@ const DeleteAccountForm = ({ setIsLoggedIn }) => {
           setMessageType('error');
         }
       } catch (error) {
-        console.error('Error while deleting account:', error);
-        setMessage('An error occurred while deleting the account. Please try again later.');
-        setMessageType('error');
-      }
+          let errorMessage = 'An error occurred while deleting the account. Please try again later.';
+          if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+          }
+          setMessage(errorMessage);
+          setMessageType('error');
+        }
     };
 
   return (

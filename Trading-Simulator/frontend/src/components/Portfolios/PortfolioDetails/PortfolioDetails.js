@@ -27,11 +27,15 @@ const PortfolioDetails = () => {
       const totalGainOrLossData = await getTotalPortfolioGainOrLoss(id);
       setTotalGainOrLoss(totalGainOrLossData);
     } catch (err) {
-      setError('Failed to fetch portfolio details.');
-    } finally {
-      setLoading(false);
-    }
-  };
+        let errorMessage = 'Failed to fetch portfolio details.';
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   useEffect(() => {
     fetchPortfolio();

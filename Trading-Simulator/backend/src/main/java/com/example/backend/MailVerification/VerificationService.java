@@ -1,10 +1,12 @@
 package com.example.backend.MailVerification;
 
+import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.user.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -20,15 +22,17 @@ import java.util.UUID;
 @Service
 public class VerificationService {
     private final JavaMailSender mailSender;
+
     private final Map<String, Instant> resendCooldowns = new HashMap<>();
+
     @Value("${app.base-url}")
     private String baseUrl;
+
     public String verificationToken() {
         return UUID.randomUUID().toString();
     }
 
-    @Async
-    public void sendVerificationEmail(User user, String verificationToken) throws MessagingException, UnsupportedEncodingException {
+    public void sendVerificationEmail(User user, String verificationToken) {
         String subject = "Activate Your Account at Royal Coin";
         String verificationUrl = baseUrl + "/verify?token=" + verificationToken;
 
@@ -56,19 +60,28 @@ public class VerificationService {
                 "<p style='font-size: small;'>If you have any questions, feel free to contact us at RoyalCoinSupport@gmail.com.</p>" +
                 "</body>" +
                 "</html>";
-
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+        MimeMessage mimeMessage;
+        try {
+            mimeMessage = mailSender.createMimeMessage();
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
+        }
 
         try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
             helper.setFrom("kamilsmtp@gmail.com", "Royal coin");
             helper.setTo(user.getEmail());
             helper.setSubject(subject);
             helper.setText(textMessage, htmlMessage);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Failed to send email to: " + user.getEmail(), e);
+            throw new EmailSendingException("Failed to construct email message for: " + user.getEmail());
         }
-        mailSender.send(mimeMessage);
+
+        try {
+            mailSender.send(mimeMessage);
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to send email to: " + user.getEmail());
+        }
     }
 
     public boolean canResendEmail(String email) {

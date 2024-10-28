@@ -1,11 +1,10 @@
 package com.example.backend.portfolio;
 
 import com.example.backend.auth.AuthenticationService;
-import com.example.backend.currency.CurrencyRepository;
+import com.example.backend.exceptions.PortfolioAlreadyExistsException;
+import com.example.backend.exceptions.PortfolioNotFoundException;
 import com.example.backend.user.User;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +28,7 @@ public class PortfolioService {
         User currentUser = authenticationService.getCurrentUser(email);
         Optional<Portfolio> existingPortfolio = portfolioRepository.findByUserAndName(currentUser, name);
         if (existingPortfolio.isPresent()) {
-            throw new RuntimeException("Portfolio with that name already exists");
+            throw new PortfolioAlreadyExistsException("Portfolio with that name already exists");
         }
         Portfolio portfolio = Portfolio.builder()
                 .user(currentUser)
@@ -65,7 +64,7 @@ public class PortfolioService {
     public PortfolioDTO getUserPortfolioByid(Integer portfolioid) {
         User currentUser = authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail());
         Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, currentUser)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         List<PortfolioAssetDTO> assets = portfolio.getPortfolioAssets().stream().map(asset -> new PortfolioAssetDTO(
                 asset.getCurrency().getName(),
@@ -76,22 +75,20 @@ public class PortfolioService {
                 asset.getCurrency().getCurrencyid()
         )).collect(Collectors.toList());
 
-        PortfolioDTO portfolioDTO = PortfolioDTO.builder()
+
+        return PortfolioDTO.builder()
                 .portfolioid(portfolio.getPortfolioid())
                 .name(portfolio.getName())
                 .portfolioAssets(assets)
                 .createdAt(portfolio.getCreatedAt())
                 .updatedAt(portfolio.getUpdatedAt())
                 .build();
-
-
-        return portfolioDTO;
     }
 
     @Transactional
     public List<PortfolioAssetDTO> getPortfolioAssetsWithGains(Integer portfolioid) {
         Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail()))
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         return portfolio.getPortfolioAssets().stream()
                 .map(asset -> {
@@ -117,7 +114,7 @@ public class PortfolioService {
     @Transactional
     public BigDecimal calculateTotalPortfolioGainOrLoss(Integer portfolioid) {
         Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail()))
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         BigDecimal totalInitialValue = BigDecimal.ZERO;
         BigDecimal totalCurrentValue = BigDecimal.ZERO;

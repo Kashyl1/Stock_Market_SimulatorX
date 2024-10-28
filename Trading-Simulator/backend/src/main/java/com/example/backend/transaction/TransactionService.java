@@ -1,5 +1,6 @@
 package com.example.backend.transaction;
 
+import com.example.backend.exceptions.*;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -50,7 +50,7 @@ public class TransactionService {
                         assetMap.put("price_in_usd", currency.getCurrentPrice());
                         assetMap.put("price_change_24h", currency.getPriceChange());
                         assetMap.put("price_change_percent_24h", currency.getPriceChangePercent());
-                        assetMap.put("volume_24h", currency.getVolume());
+                        assetMap.put("volume_24h", currency.getVolume().multiply(currency.getCurrentPrice()));
                         assetMap.put("image_url", currency.getImageUrl());
                         assetMap.put("currencyid", currency.getCurrencyid());
                         return assetMap;
@@ -59,7 +59,6 @@ public class TransactionService {
 
             return new PageImpl<>(assets, pageable, currencies.getTotalElements());
         } catch (Exception e) {
-            logger.error("Failed to get available assets with prices.", e);
             throw new RuntimeException("Failed to get available assets with prices.");
         }
     }
@@ -73,20 +72,20 @@ public class TransactionService {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         Currency currency = currencyRepository.findBySymbol(currencySymbol.toUpperCase())
-                .orElseThrow(() -> new RuntimeException("Currency not found in database"));
+                .orElseThrow(() -> new CurrencyNotFoundException("Currency not found in database"));
 
         BigDecimal rate = currency.getCurrentPrice();
         if (rate == null) {
-            throw new RuntimeException("Current price not available for " + currencySymbol);
+            throw new PriceNotAvailableException("Current price not available for " + currencySymbol);
         }
 
         BigDecimal amountOfCurrency = amountInUSD.divide(rate, 8, BigDecimal.ROUND_HALF_UP);
 
         if (currentUser.getBalance().compareTo(amountInUSD) < 0) {
-            throw new RuntimeException("Insufficient balance");
+            throw new InsufficientFundsException("Insufficient balance");
         }
 
         currentUser.setBalance(currentUser.getBalance().subtract(amountInUSD));
@@ -145,23 +144,24 @@ public class TransactionService {
         User currentUser = authenticationService.getCurrentUser(email);
 
         Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+
 
         Currency currency = currencyRepository.findById(currencyid)
-                .orElseThrow(() -> new RuntimeException("Currency not found in database"));
+                .orElseThrow(() -> new CurrencyNotFoundException("Currency not found in database"));
 
         BigDecimal rate = currency.getCurrentPrice();
         if (rate == null) {
-            throw new RuntimeException("Current price not available for " + currencyid);
+            throw new PriceNotAvailableException("Current price not available for currency ID: " + currencyid);
         }
 
         BigDecimal amountInUSD = amountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
 
         PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
-                .orElseThrow(() -> new RuntimeException("You do not own this currency"));
+                .orElseThrow(() -> new AssetNotOwnedException("You do not own this currency"));
 
         if (portfolioAsset.getAmount().compareTo(amountOfCurrency) < 0) {
-            throw new RuntimeException("Insufficient amount of currency to sell");
+            throw new InsufficientAssetAmountException("Insufficient amount of currency to sell");
         }
 
         BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrency).setScale(8, RoundingMode.HALF_UP);
@@ -227,6 +227,6 @@ public class TransactionService {
             throw new IllegalArgumentException("User cannot be null");
         }
         return portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
     }
 }

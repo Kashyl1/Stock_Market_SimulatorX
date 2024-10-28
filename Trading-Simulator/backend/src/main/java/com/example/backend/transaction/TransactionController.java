@@ -1,6 +1,5 @@
 package com.example.backend.transaction;
 
-import com.example.backend.auth.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,6 @@ import java.util.Map;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final AuthenticationService authenticationService;
-    private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
 
     @PostMapping("/buy-asset")
     public ResponseEntity<String> buyAsset(@Valid @RequestBody BuyAssetRequest request) {
@@ -37,7 +34,6 @@ public class TransactionController {
     @GetMapping("/available-assets")
     public ResponseEntity<Page<Map<String, Object>>> getAvailableAssets(
             @PageableDefault(page = 0, size = 50, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
-        logger.info("Received request for available assets: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
         Page<Map<String, Object>> assets = transactionService.getAvailableAssetsWithPrices(pageable);
         return ResponseEntity.ok(assets);
     }

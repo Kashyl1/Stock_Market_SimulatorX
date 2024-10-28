@@ -27,6 +27,5 @@ public class RegisterRequest {
     @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter")
     @Pattern(regexp = ".*\\d.*", message = "Password must contain at least one digit")
     private String password;
-    
 }
 

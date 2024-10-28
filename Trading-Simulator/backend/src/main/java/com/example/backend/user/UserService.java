@@ -1,6 +1,7 @@
 package com.example.backend.user;
 
 import com.example.backend.auth.AuthenticationService;
+import com.example.backend.exceptions.InvalidAmountException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,8 @@ public class UserService {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            return BalanceResponse.builder()
-                    .message("Amount must be greater than zero.")
-                    .balance(user.getBalance())
-                    .build();
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Amount must be greater than zero.");
         }
 
         user.setBalance(user.getBalance().add(amount));

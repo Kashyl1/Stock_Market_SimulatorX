@@ -4,7 +4,7 @@ import { login, resendVerificationEmail } from '../../../services/AuthService';
 import '../AuthForm.css';
 import './LoginForm.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import logo from '../../../assets/stock_logov2.png';
 
 const LoginForm = ({ setIsLoggedIn }) => {
@@ -12,39 +12,43 @@ const LoginForm = ({ setIsLoggedIn }) => {
     const [password, setPassword] = useState('');
     const [errormessage, setErrorMessage] = useState('');
     const [resendMessage, setResendMessage] = useState('');
-    const [canResend, setCanResend] = useState(true);
+    const [canResend, setCanResend] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
 
     useEffect(() => {
         let timer;
         if (resendTimer > 0) {
             timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-        } else {
+        } else if (resendTimer === 0 && !canResend) {
             setCanResend(true);
         }
         return () => clearTimeout(timer);
-    }, [resendTimer]);
+    }, [resendTimer, canResend]);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setErrorMessage('');
+        setResendMessage('');
         try {
             const response = await login(email, password);
             if (response.token) {
                 setIsLoggedIn(true);
                 navigate('/main');
-            } else {
-                setErrorMessage(response.message);
-                if (response.resend) {
-                    setResendMessage('Your account is not verified. Please verify your account.');
-                    setCanResend(false);
-                    setResendTimer(60);
-                }
             }
         } catch (error) {
-            setErrorMessage('Wrong email or password!');
             setIsLoggedIn(false);
+            if (error.status === 403 && error.message === 'User is not verified') {
+                setErrorMessage('Your account is not verified.');
+                setResendMessage('Please verify your account.');
+                setCanResend(true);
+                setResendTimer(60);
+            } else if (error.status === 401 && error.message === 'Invalid email or password') {
+                setErrorMessage('Wrong email or password!');
+            } else {
+                setErrorMessage(error.message || 'An unexpected error occurred.');
+            }
         }
     };
 
@@ -60,7 +64,13 @@ const LoginForm = ({ setIsLoggedIn }) => {
                     setResendMessage('Failed to resend verification email. Please try again later.');
                 }
             } catch (error) {
-                setResendMessage('Failed to resend verification email. Please try again later.');
+                let errorMessage = 'Failed to resend verification email. Please try again later.';
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                }
+                setResendMessage(errorMessage);
+                setCanResend(false);
+                setResendTimer(60);
             }
         }
     };
@@ -99,10 +109,10 @@ const LoginForm = ({ setIsLoggedIn }) => {
                         </div>
                     )}
                     <div className="form-footer">
-                          <button type="submit">Login</button>
-                          <Link to="/register" className="link-prompt">
+                        <button type="submit">Login</button>
+                        <Link to="/register" className="link-prompt">
                             <p>Don't have an account? Sign up</p>
-                          </Link>
+                        </Link>
                     </div>
                 </form>
             </div>

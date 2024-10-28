@@ -28,9 +28,18 @@ const ChangeEmailForm = ({ setIsLoggedIn }) => {
         setMessageType('error');
       }
     } catch (error) {
-      setMessage('An error occurred while changing the email. Please try again later.');
-      setMessageType('error');
-    }
+        let errorMessage = 'An error occurred while changing the email. Please try again later.';
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response?.data) {
+          const errors = Object.values(error.response.data).join(' ');
+          if (errors) {
+            errorMessage = errors;
+          }
+        }
+        setMessage(errorMessage);
+        setMessageType('error');
+      }
   };
 
   return (

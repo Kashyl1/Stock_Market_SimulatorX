@@ -1,13 +1,14 @@
 package com.example.backend.MailVerification;
 
+import com.example.backend.exceptions.AccountAlreadyVerifiedException;
+import com.example.backend.exceptions.EmailNotFoundException;
+import com.example.backend.exceptions.InvalidVerificationTokenException;
+import com.example.backend.exceptions.ResendEmailCooldownException;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 @RestController
@@ -23,7 +24,7 @@ public class VerificationMailController {
         Optional<User> userOptional = userRepository.findByVerificationToken(token);
 
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("Invalid verification token");
+            throw new InvalidVerificationTokenException("Invalid verification token");
         }
 
         User user = userOptional.get();
@@ -32,7 +33,7 @@ public class VerificationMailController {
             userRepository.save(user);
             return ResponseEntity.ok("Verification successful. You will be redirected to login in few seconds.");
         } else {
-            return ResponseEntity.ok("Account is already verified. You will be redirected to login.");
+            throw new AccountAlreadyVerifiedException("Account is already verified");
         }
     }
     @PostMapping("/resend-verification")
@@ -40,29 +41,25 @@ public class VerificationMailController {
         Optional<User> userOptional = userRepository.findByEmail(userRequest.getEmail());
 
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email not found");
+            throw new EmailNotFoundException("Email not found");
         }
 
         User user = userOptional.get();
         if (user.isVerified()) {
-            return ResponseEntity.badRequest().body("Account is already verified");
+            throw new AccountAlreadyVerifiedException("Account is already verified");
         }
 
         if (!verificationService.canResendEmail(user.getEmail())) {
-            return ResponseEntity.status(429).body("Please wait before requesting another verification email.");
+            throw new ResendEmailCooldownException("Please wait before requesting another verification email.");
         }
 
         String verificationToken = verificationService.verificationToken();
         user.setVerificationToken(verificationToken);
         userRepository.save(user);
 
-        try {
-            verificationService.sendVerificationEmail(user, verificationToken);
-            return ResponseEntity.ok().body("{\"success\": true}");
-        } catch (MessagingException e) {
-            return ResponseEntity.status(500).body("Failed to send verification email");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        verificationService.sendVerificationEmail(user, verificationToken);
+
+        ResendVerificationResponse response = new ResendVerificationResponse(true);
+        return ResponseEntity.ok(response);
     }
 }

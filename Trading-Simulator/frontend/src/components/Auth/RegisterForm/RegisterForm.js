@@ -18,25 +18,69 @@ const RegisterForm = () => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [errors, setErrors] = useState({});
     const [resendMessage, setResendMessage] = useState('');
-    const [canResend, setCanResend] = useState(true);
+    const [canResend, setCanResend] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
 
     useEffect(() => {
         let timer;
         if (resendTimer > 0) {
             timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-        } else {
+        } else if (resendTimer === 0 && !canResend) {
             setCanResend(true);
         }
         return () => clearTimeout(timer);
-    }, [resendTimer]);
+    }, [resendTimer, canResend]);
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.firstname.trim()) {
+            newErrors.firstname = 'First name is required';
+        }
+
+        if (!formData.lastname.trim()) {
+            newErrors.lastname = 'Last name is required';
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                newErrors.email = 'The email address is invalid';
+            }
+        }
+
+        if (!formData.password) {
+            newErrors.password = 'Password is required';
+        } else {
+            if (formData.password.length < 8) {
+                newErrors.password = 'Password must be at least 8 characters long';
+            }
+            if (!/[A-Z]/.test(formData.password)) {
+                newErrors.password = 'Password must contain at least one uppercase letter';
+            }
+            if (!/\d/.test(formData.password)) {
+                newErrors.password = 'Password must contain at least one digit';
+            }
+        }
+
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = 'Please confirm your password';
+        } else if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'Passwords do not match';
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setErrors({});
 
-        if (formData.password !== formData.confirmPassword) {
-            setErrors({ confirmPassword: 'Passwords do not match' });
+        if (!validateForm()) {
             return;
         }
 
@@ -44,7 +88,16 @@ const RegisterForm = () => {
             await register(formData.firstname, formData.lastname, formData.email, formData.password);
             setIsSubmitted(true);
         } catch (error) {
-            setErrors({ form: 'An error occurred during registration. Please try again later.' });
+            let errorMessage = 'An error occurred during registration. Please try again later.';
+            if (error.response?.status === 409) {
+                errorMessage = 'This email is already registered.';
+            } else if (error.response?.status === 400) {
+                errorMessage = 'Please ensure all fields are correctly filled.';
+            } else if (error.response?.status === 500) {
+                errorMessage = 'Internal server error. Please try again later.';
+            }
+
+            setErrors({ form: errorMessage });
         }
     };
 
@@ -65,7 +118,13 @@ const RegisterForm = () => {
                     setResendMessage('Failed to resend verification email. Please try again later.');
                 }
             } catch (error) {
-                setResendMessage('Failed to resend verification email. Please try again later.');
+                let errorMessage = 'Failed to resend verification email. Please try again later.';
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                }
+                setResendMessage(errorMessage);
+                setCanResend(false);
+                setResendTimer(60);
             }
         }
     };
@@ -80,12 +139,12 @@ const RegisterForm = () => {
                     <p>Once verified, you'll be able to sign in.</p>
                     {resendMessage && <p>{resendMessage}</p>}
                     <div className="verification-container_flex">
-                    <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
-                        {canResend ? 'Resend verification email' : `Wait ${resendTimer}s `}
-                    </button>
-                    <Link to="/login" className="link-prompt_verification">
-                        <a>Already have an account?</a>
-                    </Link>
+                        <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
+                            {canResend ? 'Resend verification email' : `Wait ${resendTimer}s `}
+                        </button>
+                        <Link to="/login" className="link-prompt_verification">
+                            <p>Already have an account?</p>
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -106,6 +165,7 @@ const RegisterForm = () => {
                             value={formData.firstname}
                             onChange={handleChange}
                             placeholder="First Name"
+                            className={errors.firstname ? 'error-input' : ''}
                         />
                         {errors.firstname && <div className="error-message">{errors.firstname}</div>}
                     </div>
@@ -117,6 +177,7 @@ const RegisterForm = () => {
                             value={formData.lastname}
                             onChange={handleChange}
                             placeholder="Last Name"
+                            className={errors.lastname ? 'error-input' : ''}
                         />
                         {errors.lastname && <div className="error-message">{errors.lastname}</div>}
                     </div>
@@ -128,6 +189,7 @@ const RegisterForm = () => {
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="Email"
+                            className={errors.email ? 'error-input' : ''}
                         />
                         {errors.email && <div className="error-message">{errors.email}</div>}
                     </div>
@@ -139,6 +201,7 @@ const RegisterForm = () => {
                             value={formData.password}
                             onChange={handleChange}
                             placeholder="Password"
+                            className={errors.password ? 'error-input' : ''}
                         />
                         {errors.password && <div className="error-message">{errors.password}</div>}
                     </div>
@@ -150,6 +213,7 @@ const RegisterForm = () => {
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             placeholder="Confirm Password"
+                            className={errors.confirmPassword ? 'error-input' : ''}
                         />
                         {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
                     </div>
