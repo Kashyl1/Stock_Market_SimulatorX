@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login, resendVerificationEmail } from '../../../services/AuthService';
+import { login, resendVerificationEmail, requestPasswordReset} from '../../../services/AuthService';
 import '../AuthForm.css';
 import './LoginForm.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,6 +14,9 @@ const LoginForm = ({ setIsLoggedIn }) => {
     const [resendMessage, setResendMessage] = useState('');
     const [canResend, setCanResend] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
+    const [resetMessage, setResetMessage] = useState('');
+    const [showResetForm, setShowResetForm] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
 
     useEffect(() => {
         let timer;
@@ -75,46 +78,89 @@ const LoginForm = ({ setIsLoggedIn }) => {
         }
     };
 
+    const handlePasswordReset = async () => {
+        console.log('Password reset button clicked');
+        try {
+            const response = await requestPasswordReset(resetEmail);
+            console.log('Response:', response);
+            setResetMessage('Password reset link has been sent to your email. Please check your inbox.');
+            setShowResetForm(false);
+        } catch (error) {
+            console.error('Error:', error);
+            let errorMessage = 'Failed to send password reset email. Please try again later.';
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            setResetMessage(errorMessage);
+        }
+    };
+
+
     return (
         <div className="auth-page">
             <div className="auth-container">
                 <img src={logo} alt="Logo" className="logo_login" />
                 <h2 className="auth-header">User login</h2>
-                <form onSubmit={handleSubmit} className="auth-form">
-                    <div className="input-group">
-                        <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                        />
-                    </div>
-                    <div className="input-group">
-                        <FontAwesomeIcon icon={faLock} className="input-icon" />
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
-                        />
-                    </div>
-                    {errormessage && <div className="error-message">{errormessage}</div>}
-                    {resendMessage && (
-                        <div className="resend-container">
-                            <p>{resendMessage}</p>
-                            <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
-                                {canResend ? 'Resend Verification Email' : `Wait ${resendTimer}s`}
-                            </button>
+                {!showResetForm ? (
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="input-group">
+                            <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Email"
+                            />
                         </div>
-                    )}
-                    <div className="form-footer">
-                        <button type="submit">Login</button>
-                        <Link to="/register" className="link-prompt">
-                            <p>Don't have an account? Sign up</p>
-                        </Link>
+                        <div className="input-group">
+                            <FontAwesomeIcon icon={faLock} className="input-icon" />
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Password"
+                            />
+                        </div>
+                        {errormessage && <div className="error-message">{errormessage}</div>}
+                        {resendMessage && (
+                            <div className="resend-container">
+                                <p>{resendMessage}</p>
+                                <button onClick={handleResendVerification} className="resend-button" disabled={!canResend}>
+                                    {canResend ? 'Resend Verification Email' : `Wait ${resendTimer}s`}
+                                </button>
+                            </div>
+                        )}
+                        {resetMessage && <div className="reset-message">{resetMessage}</div>}
+                        <div className="form-footer">
+                            <button type="submit">Login</button>
+                            <button type="button" onClick={() => setShowResetForm(true)} className="link-prompt">
+                                Forgot your password?
+                            </button>
+                            <Link to="/register" className="link-prompt">
+                                <p>Don't have an account? Sign up</p>
+                            </Link>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="reset-form">
+                        <h3>Reset Password</h3>
+                        <div className="input-group">
+                            <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+                            <input
+                                type="email"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                placeholder="Enter your email"
+                            />
+                        </div>
+                        <button onClick={handlePasswordReset} className="submit-button">
+                            Send Reset Link
+                        </button>
+                        <button onClick={() => setShowResetForm(false)} className="link-prompt">
+                            Back to Login
+                        </button>
                     </div>
-                </form>
+                )}
             </div>
         </div>
     );

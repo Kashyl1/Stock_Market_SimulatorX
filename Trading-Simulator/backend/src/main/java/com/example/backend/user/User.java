@@ -47,6 +47,8 @@ public class User implements UserDetails {
 
     private String verificationToken;
 
+    private String passwordResetToken;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

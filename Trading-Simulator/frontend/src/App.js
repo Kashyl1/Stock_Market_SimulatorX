@@ -12,6 +12,7 @@ import WalletPage from './pages/Wallet/WalletPage';
 import CurrenciesPage from './pages/Currencies/CurrenciesPage';
 import PortfoliosPage from './pages/PortfoliosPage/PortfoliosPage';
 import PortfolioDetails from './components/Portfolios/PortfolioDetails/PortfolioDetails';
+import ResetPasswordForm from './components/Auth/ResetPasswordForm/ResetPasswordForm';
 
 import axios from 'axios';
 
@@ -51,6 +52,7 @@ function App() {
                     <Route path="/verify" element={<VerificationPage />} />
                     <Route path="/login" element={<PublicRoute element={LoginPage} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />} />
                     <Route path="/register" element={<PublicRoute element={RegisterPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/reset-password" element={<ResetPasswordForm />} />
                     <Route path="/main" element={<PrivateRoute element={MainPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/settings/*" element={<PrivateRoute element={() => <UserSettingsPage setIsLoggedIn={setIsLoggedIn} />} isLoggedIn={isLoggedIn} />} />
                     <Route path="/wallet" element={<PrivateRoute element={WalletPage} isLoggedIn={isLoggedIn} />} />

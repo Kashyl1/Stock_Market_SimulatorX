@@ -5,6 +5,7 @@ import com.example.backend.exceptions.AccountNotVerifiedException;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.config.JwtService;
+import com.example.backend.exceptions.InvalidTokenException;
 import com.example.backend.user.Role;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
@@ -145,5 +146,41 @@ class AuthenticationServiceTest {
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtService, never()).generateToken(any(User.class));
+    }
+
+    @Test
+    void resetPassword_Success() {
+        // Arrange
+        String token = "valid-token";
+        String newPassword = "NewSecurePassword123!";
+        User user = User.builder()
+                .id(1)
+                .email("test@example.com")
+                .password("oldPassword")
+                .passwordResetToken(token)
+                .build();
+
+        when(userRepository.findByPasswordResetToken(token)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+        authenticationService.resetPassword(token, newPassword);
+
+        assertEquals("encodedNewPassword", user.getPassword());
+        assertNull(user.getPasswordResetToken());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void resetPassword_InvalidToken() {
+        String token = "invalid-token";
+        String newPassword = "NewSecurePassword123!";
+
+        when(userRepository.findByPasswordResetToken(token)).thenReturn(Optional.empty());
+
+        InvalidTokenException exception = assertThrows(InvalidTokenException.class, () ->
+                authenticationService.resetPassword(token, newPassword));
+
+        assertEquals("Invalid password reset token", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
     }
 }

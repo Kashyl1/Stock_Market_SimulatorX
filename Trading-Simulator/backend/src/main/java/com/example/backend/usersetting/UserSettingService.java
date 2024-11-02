@@ -2,9 +2,7 @@ package com.example.backend.usersetting;
 
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.auth.AuthenticationService;
-import com.example.backend.exceptions.ConfirmationTextMismatchException;
-import com.example.backend.exceptions.EmailSendingException;
-import com.example.backend.exceptions.InvalidPasswordException;
+import com.example.backend.exceptions.*;
 import com.example.backend.portfolio.Portfolio;
 import com.example.backend.portfolio.PortfolioAssetRepository;
 import com.example.backend.portfolio.PortfolioRepository;
@@ -91,5 +89,4 @@ public class UserSettingService {
                 .message("Email changed successfully. Please verify your new email. You will be redirected to main page in 5 seconds...")
                 .build();
     }
-
 }

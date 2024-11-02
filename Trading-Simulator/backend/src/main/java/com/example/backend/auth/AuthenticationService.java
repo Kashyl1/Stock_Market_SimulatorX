@@ -101,4 +101,15 @@ public class AuthenticationService {
             throw new UserNotAuthenticatedException("User not authenticated");
         }
     }
+
+    public void resetPassword(String token, String newPassword) {
+        User user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> new InvalidTokenException("Invalid password reset token"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        user.setPasswordResetToken(null);
+
+        userRepository.save(user);
+    }
 }

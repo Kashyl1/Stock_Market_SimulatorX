@@ -1,5 +1,6 @@
 package com.example.backend.auth;
 
+import com.example.backend.MailVerification.VerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService service;
+    private final VerificationService verificationService;
 
 
     @PostMapping("/register")
@@ -25,5 +27,17 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         AuthenticationResponse response = service.authenticate(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        verificationService.sendPasswordResetLink(request.getEmail());
+        return ResponseEntity.ok("Password reset link has been sent to your email.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        service.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok("Password has been successfully reset.");
     }
 }

@@ -89,11 +89,11 @@ const RegisterForm = () => {
             setIsSubmitted(true);
         } catch (error) {
             let errorMessage = 'An error occurred during registration. Please try again later.';
-            if (error.response?.status === 409) {
+            if (error.status === 409) {
                 errorMessage = 'This email is already registered.';
-            } else if (error.response?.status === 400) {
+            } else if (error.status === 400) {
                 errorMessage = 'Please ensure all fields are correctly filled.';
-            } else if (error.response?.status === 500) {
+            } else if (error.status === 500) {
                 errorMessage = 'Internal server error. Please try again later.';
             }
 
@@ -119,7 +119,7 @@ const RegisterForm = () => {
                 }
             } catch (error) {
                 let errorMessage = 'Failed to resend verification email. Please try again later.';
-                if (error.response?.data?.message) {
+                if (error.data?.message) {
                     errorMessage = error.response.data.message;
                 }
                 setResendMessage(errorMessage);
