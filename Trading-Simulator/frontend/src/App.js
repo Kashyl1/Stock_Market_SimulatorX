@@ -13,6 +13,7 @@ import CurrenciesPage from './pages/Currencies/CurrenciesPage';
 import PortfoliosPage from './pages/PortfoliosPage/PortfoliosPage';
 import PortfolioDetails from './components/Portfolios/PortfolioDetails/PortfolioDetails';
 import ResetPasswordForm from './components/Auth/ResetPasswordForm/ResetPasswordForm';
+import AlertsPage from './pages/AlertsPage/AlertsPage';
 
 import axios from 'axios';
 
@@ -59,6 +60,7 @@ function App() {
                     <Route path="/currencies" element={<PrivateRoute element={CurrenciesPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/portfolios" element={<PrivateRoute element={PortfoliosPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/portfolios/:id" element={<PortfolioDetails />} />
+                    <Route path="/alerts" element={<PrivateRoute element = {AlertsPage} isLoggedIn={isLoggedIn} />} />
                 </Routes>
             </div>
         </Router>

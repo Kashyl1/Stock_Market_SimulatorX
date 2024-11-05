@@ -146,6 +146,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(AlertNotFoundException.class)
+    public ResponseEntity<Object> handleAlertNotFoundException(AlertNotFoundException e) {
+        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<Object> handleUnauthorizedActionException(UnauthorizedActionException e) {
+        return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidAlertParametersException.class)
+    public ResponseEntity<Object> handleInvalidAlertParametersException(InvalidAlertParametersException e) {
+        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnsupportedAlertTypeException.class)
+    public ResponseEntity<Object> handleUnsupportedAlertTypeException(UnsupportedAlertTypeException e) {
+        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status) {
         Map<String, Object> errorBody = new HashMap<>();
         errorBody.put("timestamp", LocalDateTime.now());

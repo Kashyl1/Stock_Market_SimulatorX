@@ -38,7 +38,13 @@ public class SecurityConfig {
                                 "/{spring:[\\w-]+}",
                                 "/**/{spring:[\\w-]+}"
                         ).permitAll()
-                        .requestMatchers("/api/portfolios/**", "/api/transactions/**", "/api/user/balance", "/api/user-settings/**", "/api/user/add-funds").hasRole("USER")
+                        .requestMatchers
+                                ("/api/portfolios/**",
+                                "/api/transactions/**",
+                                "/api/user/balance",
+                                "/api/user-settings/**",
+                                "/api/user/add-funds",
+                                "/api/alerts/**").hasRole("USER")
                         .requestMatchers(EndpointRequest.to("health", "info", "caches", "metrics")).hasRole("USER")
                         .anyRequest().authenticated()
                 )

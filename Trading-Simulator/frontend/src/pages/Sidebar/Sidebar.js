@@ -30,6 +30,7 @@ const Sidebar = () => {
                     <Link to="/settings">
                         <FontAwesomeIcon icon={faCog} /> User Settings
                     </Link>
+                    <Link to="/alerts">(ikonka dzwonka? XD) Alerty Wrzuciłem to tutaj, ale możesz walnąć to gdzie indziej jak masz wizje</Link>
                 </div>
             </div>
     );

@@ -1,5 +1,8 @@
 package com.example.backend.MailVerification;
 
+import com.example.backend.alert.Alert;
+import com.example.backend.alert.AlertType;
+import com.example.backend.currency.Currency;
 import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.exceptions.UserNotFoundException;
 import com.example.backend.user.User;
@@ -15,6 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,6 +170,60 @@ public class VerificationService {
             sendPasswordResetEmail(user, resetToken);
         } catch (Exception e) {
             throw new EmailSendingException("Failed to send password reset email");
+        }
+    }
+
+    public void sendAlertEmail(User user, Currency currency, BigDecimal currentPrice, Alert alert) {
+        String subject = "Price Alert for " + currency.getName();
+
+        String alertMessage;
+        if (alert.getAlertType() == AlertType.PERCENTAGE) {
+            String direction = alert.getPercentageChange().compareTo(BigDecimal.ZERO) > 0 ? "increased" : "decreased";
+            alertMessage = String.format("The price of %s has %s by %.2f%%.\nCurrent price: $%.2f.",
+                    currency.getName(), direction, alert.getPercentageChange().abs(), currentPrice);
+        } else if (alert.getAlertType() == AlertType.PRICE) {
+            alertMessage = String.format("The price of %s has reached your set threshold: $%.2f.\nCurrent price: $%.2f.",
+                    currency.getName(), alert.getTargetPrice(), currentPrice);
+        } else {
+            alertMessage = "Your alert has been triggered.";
+        }
+
+        String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
+                alertMessage + "\n\n" +
+                "Best regards,\nRoyal Coin Team";
+
+        String htmlMessage = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<p>Hello " + user.getFirstname() + ",</p>" +
+                "<p>" + alertMessage.replace("\n", "<br>") + "</p>" +
+                "<br>" +
+                "<p>Best regards,<br>Royal Coin Team</p>" +
+                "<hr>" +
+                "<p style='font-size: small;'>If you have any questions, feel free to contact us at RoyalCoinSupport@gmail.com.</p>" +
+                "</body>" +
+                "</html>";
+
+        MimeMessage mimeMessage;
+        try {
+            mimeMessage = mailSender.createMimeMessage();
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
+        }
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+            helper.setFrom("kamilsmtp@gmail.com", "Royal Coin");
+            helper.setTo(user.getEmail());
+            helper.setSubject(subject);
+            helper.setText(textMessage, htmlMessage);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new EmailSendingException("Failed to construct email message for: " + user.getEmail());
+        }
+
+        try {
+            mailSender.send(mimeMessage);
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to send email to: " + user.getEmail());
         }
     }
 }

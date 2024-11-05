@@ -1,43 +1,42 @@
 package com.example.backend.alert;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import com.example.backend.user.User;
 import com.example.backend.currency.Currency;
+import com.example.backend.user.User;
+import jakarta.persistence.*;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Alerts")
+@Table(name = "alerts")
 public class Alert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer alertID;
+    private Integer alertId;
 
-    @ManyToOne
-    @JoinColumn(name = "userID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "currencyID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "currencyid", nullable = false)
     private Currency currency;
 
-    @Column(nullable = false, length = 10)
-    private String alertType;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AlertType alertType;
+
+    private BigDecimal percentageChange;
+
+    private BigDecimal targetPrice;
 
     @Column(nullable = false)
-    private Double threshold;
+    private boolean active;
 
-    @Column(nullable = false)
-    private Double percentageChange;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Column(nullable = false, precision = 30, scale = 10)
+    private BigDecimal initialPrice;
 }
