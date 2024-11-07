@@ -1,119 +1,169 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../Sidebar/Sidebar';
-import AlertList from '../../components/Alerts/AlertList';
-import CreateAlertModal from '../../components/Alerts/CreateAlertModal';
+import EmailAlertList from '../../components/Alerts/EmailAlerts/EmailAlertList';
+import TradeAlertList from '../../components/Alerts/TradeAlerts/TradeAlertList';
+import CreateEmailAlertModal from '../../components/Alerts/EmailAlerts/CreateEmailAlertModal';
+import CreateTradeAlertModal from '../../components/Alerts/TradeAlerts/CreateTradeAlertModal';
 import { getAvailableAssets } from '../../services/CurrenciesService';
-import { getUserAlerts } from '../../services/AlertService';
+import { getUserAlerts } from '../../services/MailAlertService';
+import { getUserTradeAlerts } from '../../services/TradeAlertService';
 import './AlertsPage.css';
 
 const AlertsPage = () => {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState(null);
-  const [currencies, setCurrencies] = useState([]);
-  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('email');
 
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [showCreateEmailModal, setShowCreateEmailModal] = useState(false);
+  const [emailAlerts, setEmailAlerts] = useState([]);
+  const [emailLoading, setEmailLoading] = useState(true);
+  const [emailError, setEmailError] = useState('');
 
-  const fetchCurrencies = async () => {
+  const [showCreateTradeModal, setShowCreateTradeModal] = useState(false);
+  const [tradeAlerts, setTradeAlerts] = useState([]);
+  const [tradeLoading, setTradeLoading] = useState(true);
+  const [tradeError, setTradeError] = useState('');
+  const [tradeCurrencies, setTradeCurrencies] = useState([]);
+
+  const fetchEmailAlerts = async () => {
+    setEmailLoading(true);
     try {
-      const availableCurrencies = await getAvailableAssets(0, 100);
-      setCurrencies(availableCurrencies.content);
+      const userEmailAlerts = await getUserAlerts();
+      setEmailAlerts(userEmailAlerts);
     } catch (err) {
-      setError('Failed to fetch currency list.');
+      const errorMessage = err.response?.data?.message || 'Failed to fetch email alerts.';
+      setEmailError(errorMessage);
+    } finally {
+      setEmailLoading(false);
     }
   };
 
-  const fetchAlerts = async () => {
-    setLoading(true);
+  const fetchTradeAlerts = async () => {
+    setTradeLoading(true);
     try {
-      const userAlerts = await getUserAlerts();
-      setAlerts(userAlerts);
+      const userTradeAlerts = await getUserTradeAlerts();
+      setTradeAlerts(userTradeAlerts);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to fetch alerts.';
-      setError(errorMessage);
+      const errorMessage = err.response?.data?.message || 'Failed to fetch trade alerts.';
+      setTradeError(errorMessage);
     } finally {
-      setLoading(false);
+      setTradeLoading(false);
+    }
+  };
+
+  const fetchTradeCurrencies = async () => {
+    try {
+      const availableCurrencies = await getAvailableAssets(0, 100);
+      setTradeCurrencies(availableCurrencies.content);
+    } catch (err) {
+      console.error('Failed to fetch currencies for trade alerts.');
     }
   };
 
   useEffect(() => {
-    fetchCurrencies();
-    fetchAlerts();
+    fetchEmailAlerts();
+    fetchTradeAlerts();
+    fetchTradeCurrencies();
   }, []);
 
-  const handleOpenCreateModal = (currency) => {
-    setSelectedCurrency(currency);
-    setShowCreateModal(true);
+  const handleOpenCreateEmailModal = () => {
+    setShowCreateEmailModal(true);
   };
 
-  const handleCloseCreateModal = () => {
-    setShowCreateModal(false);
-    setSelectedCurrency(null);
+  const handleCloseCreateEmailModal = () => {
+    setShowCreateEmailModal(false);
   };
 
-  const handleAlertCreated = (newAlert) => {
-    fetchAlerts();
+  const handleEmailAlertCreated = () => {
+    fetchEmailAlerts();
   };
 
-  const handleAlertDeactivated = () => {
-    fetchAlerts();
+  const handleEmailAlertDeactivated = () => {
+    fetchEmailAlerts();
   };
 
-  const handleAlertDeleted = () => {
-    fetchAlerts();
+  const handleEmailAlertDeleted = () => {
+    fetchEmailAlerts();
+  };
+
+  const handleOpenCreateTradeModal = () => {
+    setShowCreateTradeModal(true);
+  };
+
+  const handleCloseCreateTradeModal = () => {
+    setShowCreateTradeModal(false);
+  };
+
+  const handleTradeAlertCreated = () => {
+    fetchTradeAlerts();
+  };
+
+  const handleTradeAlertDeactivated = () => {
+    fetchTradeAlerts();
+  };
+
+  const handleTradeAlertDeleted = () => {
+    fetchTradeAlerts();
   };
 
   return (
     <div className="main-page">
       <Sidebar />
       <div className="alerts-page">
-        <h1>Your Price Alerts</h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="create-alert-button"
-        >
-          Create New Alert
-        </button>
-        {error && <p className="error-message">{error}</p>}
-        <AlertList
-          alerts={alerts}
-          loading={loading}
-          error={error}
-          onAlertDeactivated={handleAlertDeactivated}
-          onAlertDeleted={handleAlertDeleted}
-        />
-        {showCreateModal && !selectedCurrency && (
-          <div className="select-currency-modal">
-            <h2>Select Currency for Alert</h2>
-            <div className="currency-list">
-              {currencies.map((currency) => (
-                <div key={currency.currencyid} className="currency-item">
-                  <img
-                    src={currency.image_url}
-                    alt={currency.name}
-                    className="currency-icon"
-                  />
-                  <span>
-                    {currency.name} ({currency.symbol})
-                  </span>
-                  <button onClick={() => handleOpenCreateModal(currency)}>
-                    Select
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button onClick={handleCloseCreateModal} className="close-button">
-              Close
+        <h1>Your Alerts</h1>
+        <div className="tabs">
+          <button
+            className={activeTab === 'email' ? 'active' : ''}
+            onClick={() => setActiveTab('email')}
+          >
+            Email Alerts
+          </button>
+          <button
+            className={activeTab === 'trade' ? 'active' : ''}
+            onClick={() => setActiveTab('trade')}
+          >
+            Trade Alerts
+          </button>
+        </div>
+
+        {activeTab === 'email' && (
+          <>
+            <button onClick={handleOpenCreateEmailModal} className="create-alert-button">
+              Create New Email Alert
             </button>
-          </div>
+            {showCreateEmailModal && (
+              <CreateEmailAlertModal
+                onClose={handleCloseCreateEmailModal}
+                onAlertCreated={handleEmailAlertCreated}
+              />
+            )}
+            <EmailAlertList
+              alerts={emailAlerts}
+              loading={emailLoading}
+              error={emailError}
+              onAlertDeactivated={handleEmailAlertDeactivated}
+              onAlertDeleted={handleEmailAlertDeleted}
+            />
+          </>
         )}
-        {showCreateModal && selectedCurrency && (
-          <CreateAlertModal
-            currency={selectedCurrency}
-            onClose={handleCloseCreateModal}
-            onAlertCreated={handleAlertCreated}
-          />
+
+        {activeTab === 'trade' && (
+          <>
+            <button onClick={handleOpenCreateTradeModal} className="create-trade-alert-button">
+              Create New Trade Alert
+            </button>
+            {showCreateTradeModal && (
+              <CreateTradeAlertModal
+                onClose={handleCloseCreateTradeModal}
+                onTradeAlertCreated={handleTradeAlertCreated}
+              />
+            )}
+            <TradeAlertList
+              tradeAlerts={tradeAlerts}
+              loading={tradeLoading}
+              error={tradeError}
+              onTradeAlertDeactivated={handleTradeAlertDeactivated}
+              onTradeAlertDeleted={handleTradeAlertDeleted}
+            />
+          </>
         )}
       </div>
     </div>

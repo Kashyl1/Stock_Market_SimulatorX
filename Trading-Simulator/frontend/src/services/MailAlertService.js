@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = '/api/alerts';
+const API_URL = '/api/alerts/email';
 
 export const createAlert = async (alertData) => {
   const token = localStorage.getItem('jwtToken');

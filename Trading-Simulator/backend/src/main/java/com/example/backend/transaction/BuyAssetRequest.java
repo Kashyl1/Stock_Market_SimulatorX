@@ -15,11 +15,16 @@ public class BuyAssetRequest {
     @NotNull(message = "Portfolio ID is required")
     @JsonProperty("portfolioid")
     private Integer portfolioid;
+
     @NotBlank(message = "Currency symbol is required")
     @JsonProperty("currencyid")
-    private String currencyid;
-    @NotNull(message = "Amount in USD is required")
+    private String currencyid; // SYMBOL NIE ID xd
+
     @Min(value = 0, message = "Amount must be positive")
     @JsonProperty("amountInUSD")
     private BigDecimal amountInUSD;
+
+    @Min(value = 0, message = "Amount must be positive")
+    @JsonProperty("amountOfCurrency")
+    private BigDecimal amountOfCurrency;
 }

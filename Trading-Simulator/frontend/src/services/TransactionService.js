@@ -2,31 +2,47 @@ import axios from 'axios';
 
 const API_URL = '/api/transactions';
 
-export const buyAsset = async (portfolioid, currencyid, amountInUSD) => {
+export const buyAsset = async (portfolioid, currencyid, amountInUSD, amountOfCurrency) => {
   const token = localStorage.getItem('jwtToken');
-  const response = await axios.post(
-    `${API_URL}/buy-asset`,
-    { portfolioid, currencyid, amountInUSD },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const purchaseData = { portfolioid, currencyid };
+
+  if (amountInUSD !== null && amountInUSD !== undefined) {
+    purchaseData.amountInUSD = amountInUSD;
+    purchaseData.amountOfCurrency = null;
+  } else if (amountOfCurrency !== null && amountOfCurrency !== undefined) {
+    purchaseData.amountOfCurrency = amountOfCurrency;
+    purchaseData.amountInUSD = null;
+  } else {
+    throw new Error('Either amountInUSD or amountOfCurrency must be provided.');
+  }
+
+  const response = await axios.post(`${API_URL}/buy-asset`, purchaseData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };
 
-export const sellAsset = async (portfolioid, currencyid, amount) => {
+export const sellAsset = async (portfolioid, currencyid, amount, priceInUSD) => {
   const token = localStorage.getItem('jwtToken');
-  const response = await axios.post(
-    `${API_URL}/sell-asset`,
-    { portfolioid, currencyid, amount },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const sellData = { portfolioid, currencyid };
+
+  if (amount !== null && amount !== undefined) {
+    sellData.amount = amount;
+    sellData.priceInUSD = null;
+  } else if (priceInUSD !== null && priceInUSD !== undefined) {
+    sellData.priceInUSD = priceInUSD;
+    sellData.amount = null;
+  } else {
+    throw new Error('Either amount or priceInUSD must be provided.');
+  }
+
+  const response = await axios.post(`${API_URL}/sell-asset`, sellData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };
 

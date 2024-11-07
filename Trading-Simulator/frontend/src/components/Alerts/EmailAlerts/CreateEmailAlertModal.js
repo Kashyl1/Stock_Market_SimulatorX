@@ -1,19 +1,42 @@
-import React, { useState } from 'react';
-import { createAlert } from '../../services/AlertService';
-import './CreateAlertModal.css';
+import React, { useState, useEffect } from 'react';
+import { createAlert } from '../../../services/MailAlertService';
+import { getAvailableAssets } from '../../../services/CurrenciesService';
+import './CreateEmailAlertModal.css';
 
-const CreateAlertModal = ({ currency, onClose, onAlertCreated }) => {
-  const [alertType, setAlertType] = useState('PERCENTAGE');
+const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
+  const [mailAlertType, setMailAlertType] = useState('PERCENTAGE');
   const [percentageChange, setPercentageChange] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currencies, setCurrencies] = useState([]);
+  const [selectedCurrencyId, setSelectedCurrencyId] = useState('');
+
+  useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const availableCurrencies = await getAvailableAssets(0, 100);
+        setCurrencies(availableCurrencies.content);
+        if (availableCurrencies.content.length > 0) {
+          setSelectedCurrencyId(availableCurrencies.content[0].currencyid);
+        }
+      } catch (err) {
+        setError('Failed to fetch currencies.');
+      }
+    };
+    fetchCurrencies();
+  }, []);
 
   const handleCreateAlert = async () => {
     setError('');
 
+    if (!selectedCurrencyId) {
+      setError('Please select a currency.');
+      return;
+    }
+
     if (
-      alertType === 'PERCENTAGE' &&
+      mailAlertType === 'PERCENTAGE' &&
       (!percentageChange || isNaN(percentageChange) || parseFloat(percentageChange) === 0)
     ) {
       setError('Percentage change must be a non-zero number.');
@@ -21,7 +44,7 @@ const CreateAlertModal = ({ currency, onClose, onAlertCreated }) => {
     }
 
     if (
-      alertType === 'PRICE' &&
+      mailAlertType === 'PRICE' &&
       (!targetPrice || isNaN(targetPrice) || parseFloat(targetPrice) <= 0)
     ) {
       setError('Target price must be a number greater than zero.');
@@ -29,10 +52,10 @@ const CreateAlertModal = ({ currency, onClose, onAlertCreated }) => {
     }
 
     const alertData = {
-      currencyid: currency.currencyid,
-      alertType,
-      percentageChange: alertType === 'PERCENTAGE' ? parseFloat(percentageChange) : null,
-      targetPrice: alertType === 'PRICE' ? parseFloat(targetPrice) : null,
+      currencyid: selectedCurrencyId,
+      emailAlertType: mailAlertType,
+      percentageChange: mailAlertType === 'PERCENTAGE' ? parseFloat(percentageChange) : null,
+      targetPrice: mailAlertType === 'PRICE' ? parseFloat(targetPrice) : null,
     };
 
     setLoading(true);
@@ -49,25 +72,44 @@ const CreateAlertModal = ({ currency, onClose, onAlertCreated }) => {
     }
   };
 
+  const selectedCurrency = currencies.find((c) => c.currencyid === selectedCurrencyId);
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Create Alert for {currency.name}</h2>
+        <h2>Create Email Alert</h2>
+
+        <label>
+          Select Currency:
+          <select
+            value={selectedCurrencyId}
+            onChange={(e) => setSelectedCurrencyId(e.target.value)}
+          >
+            {currencies.map((currency) => (
+              <option key={currency.currencyid} value={currency.currencyid}>
+                {currency.name} ({currency.symbol})
+              </option>
+            ))}
+          </select>
+        </label>
+
         <p>
           <strong>Current Price:</strong> $
-          {currency.price_in_usd ? currency.price_in_usd.toFixed(2) : 'N/A'}
+          {selectedCurrency && selectedCurrency.currentPrice
+            ? selectedCurrency.currentPrice.toFixed(2)
+            : 'N/A'}
         </p>
+
         <label>
           Alert Type:
           <select
-            value={alertType}
-            onChange={(e) => setAlertType(e.target.value)}
+            value={mailAlertType}
+            onChange={(e) => setMailAlertType(e.target.value)}
           >
             <option value="PERCENTAGE">Percentage</option>
             <option value="PRICE">Price</option>
           </select>
         </label>
-        {alertType === 'PERCENTAGE' && (
+        {mailAlertType === 'PERCENTAGE' && (
           <label>
             Percentage Change (%):
             <input
@@ -78,7 +120,7 @@ const CreateAlertModal = ({ currency, onClose, onAlertCreated }) => {
             />
           </label>
         )}
-        {alertType === 'PRICE' && (
+        {mailAlertType === 'PRICE' && (
           <label>
             Target Price ($):
             <input
@@ -103,4 +145,4 @@ const CreateAlertModal = ({ currency, onClose, onAlertCreated }) => {
   );
 };
 
-export default CreateAlertModal;
+export default CreateEmailAlertModal;

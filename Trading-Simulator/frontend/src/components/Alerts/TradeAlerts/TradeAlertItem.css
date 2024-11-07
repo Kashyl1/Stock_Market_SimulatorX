@@ -1,0 +1,32 @@
+.trade-alert-item {
+  border: 1px solid #ccc;
+  padding: 16px;
+  margin: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trade-alert-details p {
+  margin: 4px 0;
+}
+
+.trade-alert-actions button {
+  margin-left: 8px;
+}
+
+.deactivate-button {
+  background-color: #f0ad4e;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}

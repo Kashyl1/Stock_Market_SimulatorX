@@ -20,8 +20,11 @@ public class SellAssetRequest {
     @JsonProperty("currencyid")
     private Integer currencyid;
 
-    @NotNull(message = "Amount is required")
     @Min(value = 0, message = "Amount must be positive")
     @JsonProperty("amount")
     private BigDecimal amount;
+
+    @JsonProperty("priceInUSD")
+    @Min(value = 0, message = "USD must be positive")
+    private BigDecimal priceInUSD;
 }

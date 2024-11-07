@@ -1,4 +1,4 @@
-package com.example.backend.alert;
+package com.example.backend.alert.mail;
 
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
@@ -15,25 +15,25 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AlertService {
+public class EmailAlertService {
 
-    private final AlertRepository alertRepository;
+    private final EmailAlertRepository emailAlertRepository;
     private final CurrencyRepository currencyRepository;
     private final AuthenticationService authenticationService;
 
     @Transactional
-    public AlertResponse createAlert(CreateAlertRequest request) {
+    public EmailAlertResponse createAlert(CreateEmailAlertRequest request) {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
 
         Currency currency = currencyRepository.findById(request.getCurrencyid())
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found"));
 
-        if (request.getAlertType() == AlertType.PERCENTAGE) {
+        if (request.getEmailAlertType() == EmailAlertType.PERCENTAGE) {
             if (request.getPercentageChange() == null || request.getPercentageChange().compareTo(BigDecimal.ZERO) == 0) {
                 throw new InvalidAlertParametersException("Percentage change must be provided and non-zero for percentage alerts");
             }
-        } else if (request.getAlertType() == AlertType.PRICE) {
+        } else if (request.getEmailAlertType() == EmailAlertType.PRICE) {
             if (request.getTargetPrice() == null || request.getTargetPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new InvalidAlertParametersException("Target price must be provided and greater than zero for price alerts");
             }
@@ -46,76 +46,78 @@ public class AlertService {
             throw new PriceNotAvailableException("Current price is not available for the selected currency");
         }
 
-        Alert alert = Alert.builder()
+        EmailAlert emailAlert = EmailAlert.builder()
                 .user(user)
                 .currency(currency)
-                .alertType(request.getAlertType())
+                .emailAlertType(request.getEmailAlertType())
                 .percentageChange(request.getPercentageChange())
                 .targetPrice(request.getTargetPrice())
                 .active(true)
                 .initialPrice(currentPrice)
                 .build();
 
-        alertRepository.save(alert);
+        emailAlertRepository.save(emailAlert);
 
-        return AlertResponse.builder()
-                .alertId(alert.getAlertId())
+        return EmailAlertResponse.builder()
+                .alertId(emailAlert.getAlertId())
                 .currencyId(currency.getCurrencyid())
                 .currencyName(currency.getName())
-                .alertType(alert.getAlertType())
-                .percentageChange(alert.getPercentageChange())
-                .targetPrice(alert.getTargetPrice())
-                .active(alert.isActive())
+                .emailAlertType(emailAlert.getEmailAlertType())
+                .percentageChange(emailAlert.getPercentageChange())
+                .targetPrice(emailAlert.getTargetPrice())
+                .active(emailAlert.isActive())
                 .build();
     }
 
-    public List<AlertResponse> getUserAlerts() {
+    public List<EmailAlertResponse> getUserAlerts() {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
 
-        return alertRepository.findByUser(user).stream()
+        return emailAlertRepository.findByUser(user).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public void deactivateAlert(Integer alertId) {
-        Alert alert = alertRepository.findById(alertId)
+        EmailAlert emailAlert = emailAlertRepository.findById(alertId)
                 .orElseThrow(() -> new AlertNotFoundException("Alert not found"));
 
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
-        if (!alert.getUser().equals(user)) {
+        if (!emailAlert.getUser().equals(user)) {
             throw new UnauthorizedActionException("You do not have permission to modify this alert");
         }
 
-        alert.setActive(false);
-        alertRepository.save(alert);
+        emailAlert.setActive(false);
+        emailAlertRepository.save(emailAlert);
     }
 
-    private AlertResponse mapToResponse(Alert alert) {
-        return AlertResponse.builder()
-                .alertId(alert.getAlertId())
-                .currencyId(alert.getCurrency().getCurrencyid())
-                .currencyName(alert.getCurrency().getName())
-                .alertType(alert.getAlertType())
-                .percentageChange(alert.getPercentageChange())
-                .targetPrice(alert.getTargetPrice())
-                .active(alert.isActive())
+    private EmailAlertResponse mapToResponse(EmailAlert emailAlert) {
+        return EmailAlertResponse.builder()
+                .alertId(emailAlert.getAlertId())
+                .currencyId(emailAlert.getCurrency().getCurrencyid())
+                .currencyName(emailAlert.getCurrency().getName())
+                .emailAlertType(emailAlert.getEmailAlertType())
+                .percentageChange(emailAlert.getPercentageChange())
+                .targetPrice(emailAlert.getTargetPrice())
+                .active(emailAlert.isActive())
+                .initialPrice(emailAlert.getInitialPrice())
                 .build();
     }
 
+
     @Transactional
     public void deleteAlert(Integer alertId) {
-        Alert alert = alertRepository.findById(alertId)
+        EmailAlert emailAlert = emailAlertRepository.findById(alertId)
                 .orElseThrow(() -> new AlertNotFoundException("Alert not found"));
 
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
-        if (!alert.getUser().equals(user)) {
+        if (!emailAlert.getUser().equals(user)) {
             throw new UnauthorizedActionException("You do not have permission to delete this alert");
         }
 
-        alertRepository.delete(alert);
+        emailAlertRepository.delete(emailAlert);
     }
 }

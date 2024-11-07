@@ -1,8 +1,8 @@
 import React from 'react';
-import { deactivateAlert, deleteAlert } from '../../services/AlertService';
-import './AlertItem.css';
+import { deactivateAlert, deleteAlert } from '../../../services/MailAlertService';
+import './EmailAlertItem.css';
 
-const AlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
+const EmailAlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
   const handleDeactivate = async () => {
     if (window.confirm('Are you sure you want to deactivate this alert?')) {
       try {
@@ -30,20 +30,23 @@ const AlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
   };
 
   return (
-    <div className="alert-item">
-      <div className="alert-details">
+    <div className="email-alert-item">
+      <div className="email-alert-details">
         <p>
           <strong>Currency:</strong> {alertData.currencyName}
         </p>
         <p>
-          <strong>Type:</strong> {alertData.alertType === 'PERCENTAGE' ? 'Percentage' : 'Price'}
+          <strong>Created At Price:</strong> ${alertData.initialPrice.toFixed(2)}
         </p>
-        {alertData.alertType === 'PERCENTAGE' && (
+        <p>
+          <strong>Type:</strong> {alertData.emailAlertType === 'PERCENTAGE' ? 'Percentage' : 'Price'}
+        </p>
+        {alertData.emailAlertType === 'PERCENTAGE' && (
           <p>
             <strong>Change:</strong> {alertData.percentageChange}%
           </p>
         )}
-        {alertData.alertType === 'PRICE' && (
+        {alertData.emailAlertType === 'PRICE' && (
           <p>
             <strong>Target Price:</strong> ${alertData.targetPrice.toFixed(2)}
           </p>
@@ -52,7 +55,7 @@ const AlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
           <strong>Status:</strong> {alertData.active ? 'Active' : 'Triggered'}
         </p>
       </div>
-      <div className="alert-actions">
+      <div className="email-alert-actions">
         {alertData.active ? (
           <button onClick={handleDeactivate} className="deactivate-button">
             Deactivate
@@ -67,4 +70,4 @@ const AlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
   );
 };
 
-export default AlertItem;
+export default EmailAlertItem;

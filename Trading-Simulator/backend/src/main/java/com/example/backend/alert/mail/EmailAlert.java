@@ -1,4 +1,4 @@
-package com.example.backend.alert;
+package com.example.backend.alert.mail;
 
 import com.example.backend.currency.Currency;
 import com.example.backend.user.User;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @Table(name = "alerts")
-public class Alert {
+public class EmailAlert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer alertId;
@@ -28,7 +28,7 @@ public class Alert {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AlertType alertType;
+    private EmailAlertType emailAlertType;
 
     private BigDecimal percentageChange;
 

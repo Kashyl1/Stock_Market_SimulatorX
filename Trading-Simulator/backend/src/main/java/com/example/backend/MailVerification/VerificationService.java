@@ -1,7 +1,9 @@
 package com.example.backend.MailVerification;
 
-import com.example.backend.alert.Alert;
-import com.example.backend.alert.AlertType;
+import com.example.backend.alert.mail.EmailAlert;
+import com.example.backend.alert.mail.EmailAlertType;
+import com.example.backend.alert.trade.TradeAlert;
+import com.example.backend.alert.trade.TradeAlertType;
 import com.example.backend.currency.Currency;
 import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.exceptions.UserNotFoundException;
@@ -14,12 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -173,17 +175,17 @@ public class VerificationService {
         }
     }
 
-    public void sendAlertEmail(User user, Currency currency, BigDecimal currentPrice, Alert alert) {
+    public void sendAlertEmail(User user, Currency currency, BigDecimal currentPrice, EmailAlert emailAlert) {
         String subject = "Price Alert for " + currency.getName();
 
         String alertMessage;
-        if (alert.getAlertType() == AlertType.PERCENTAGE) {
-            String direction = alert.getPercentageChange().compareTo(BigDecimal.ZERO) > 0 ? "increased" : "decreased";
+        if (emailAlert.getEmailAlertType() == EmailAlertType.PERCENTAGE) {
+            String direction = emailAlert.getPercentageChange().compareTo(BigDecimal.ZERO) > 0 ? "increased" : "decreased";
             alertMessage = String.format("The price of %s has %s by %.2f%%.\nCurrent price: $%.2f.",
-                    currency.getName(), direction, alert.getPercentageChange().abs(), currentPrice);
-        } else if (alert.getAlertType() == AlertType.PRICE) {
+                    currency.getName(), direction, emailAlert.getPercentageChange().abs(), currentPrice);
+        } else if (emailAlert.getEmailAlertType() == EmailAlertType.PRICE) {
             alertMessage = String.format("The price of %s has reached your set threshold: $%.2f.\nCurrent price: $%.2f.",
-                    currency.getName(), alert.getTargetPrice(), currentPrice);
+                    currency.getName(), emailAlert.getTargetPrice(), currentPrice);
         } else {
             alertMessage = "Your alert has been triggered.";
         }
@@ -197,6 +199,62 @@ public class VerificationService {
                 "<p>Hello " + user.getFirstname() + ",</p>" +
                 "<p>" + alertMessage.replace("\n", "<br>") + "</p>" +
                 "<br>" +
+                "<p>Best regards,<br>Royal Coin Team</p>" +
+                "<hr>" +
+                "<p style='font-size: small;'>If you have any questions, feel free to contact us at RoyalCoinSupport@gmail.com.</p>" +
+                "</body>" +
+                "</html>";
+
+        MimeMessage mimeMessage;
+        try {
+            mimeMessage = mailSender.createMimeMessage();
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
+        }
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+            helper.setFrom("kamilsmtp@gmail.com", "Royal Coin");
+            helper.setTo(user.getEmail());
+            helper.setSubject(subject);
+            helper.setText(textMessage, htmlMessage);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new EmailSendingException("Failed to construct email message for: " + user.getEmail());
+        }
+
+        try {
+            mailSender.send(mimeMessage);
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to send email to: " + user.getEmail());
+        }
+    }
+
+    public void sendTradeExecutedEmail(User user, Currency currency, TradeAlert tradeAlert, BigDecimal tradeAmountUSD, TradeAlertType tradeAlertType) {
+        String subject = "Trade Executed: " + tradeAlertType + " " + currency.getName();
+
+        String tradeType = tradeAlertType == TradeAlertType.BUY ? "Buy" : "Sell";
+        String tradeAmountDescription = "$" + tradeAmountUSD.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString();
+
+        String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
+                "Your automatic trade has been executed successfully.\n" +
+                "Trade Type: " + tradeType + "\n" +
+                "Currency: " + currency.getName() + " (" + currency.getSymbol() + ")\n" +
+                "Trade Amount: " + tradeAmountDescription + "\n" +
+                "Current Price: $" + currency.getCurrentPrice().setScale(2, BigDecimal.ROUND_HALF_UP) + "\n" +
+                "Timestamp: " + LocalDateTime.now() + "\n\n" +
+                "Best regards,\nRoyal Coin Team";
+
+        String htmlMessage = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<p>Hello " + user.getFirstname() + ",</p>" +
+                "<p>Your automatic trade has been executed successfully.</p>" +
+                "<ul>" +
+                "<li><strong>Trade Type:</strong> " + tradeType + "</li>" +
+                "<li><strong>Currency:</strong> " + currency.getName() + " (" + currency.getSymbol() + ")</li>" +
+                "<li><strong>Trade Amount:</strong> " + tradeAmountDescription + "</li>" +
+                "<li><strong>Current Price:</strong> $" + currency.getCurrentPrice().setScale(2, BigDecimal.ROUND_HALF_UP) + "</li>" +
+                "<li><strong>Timestamp:</strong> " + LocalDateTime.now() + "</li>" +
+                "</ul>" +
                 "<p>Best regards,<br>Royal Coin Team</p>" +
                 "<hr>" +
                 "<p style='font-size: small;'>If you have any questions, feel free to contact us at RoyalCoinSupport@gmail.com.</p>" +

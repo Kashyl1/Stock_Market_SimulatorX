@@ -65,13 +65,28 @@ public class TransactionService {
 
 
     @Transactional
-    public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD) {
-        if (amountInUSD == null || amountInUSD.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount in USD must be positive");
+    public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD, BigDecimal amountOfCurrency, User user) {
+
+        BigDecimal finalAmountInUSD = null;
+        BigDecimal finalAmountOfCurrency = null;
+
+        if (amountInUSD != null && amountOfCurrency != null) {
+            throw new IllegalArgumentException("Please provide either amountInUSD or amountOfCurrency, not both.");
+        } else if (amountInUSD != null) {
+            if (amountInUSD.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Amount in USD must be positive");
+            }
+            finalAmountInUSD = amountInUSD;
+        } else if (amountOfCurrency != null) {
+            if (amountOfCurrency.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Amount of currency must be positive");
+            }
+            finalAmountOfCurrency = amountOfCurrency;
+        } else {
+            throw new IllegalArgumentException("Either amountInUSD or amountOfCurrency must be provided.");
         }
-        String email = authenticationService.getCurrentUserEmail();
-        User currentUser = authenticationService.getCurrentUser(email);
-        Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
+
+        Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         Currency currency = currencyRepository.findBySymbol(currencySymbol.toUpperCase())
@@ -82,70 +97,130 @@ public class TransactionService {
             throw new PriceNotAvailableException("Current price not available for " + currencySymbol);
         }
 
-        BigDecimal amountOfCurrency = amountInUSD.divide(rate, 8, BigDecimal.ROUND_HALF_UP);
+        if (finalAmountInUSD != null) {
+            BigDecimal amountOfCurrencyCalculated = finalAmountInUSD.divide(rate, 8, BigDecimal.ROUND_HALF_UP);
 
-        if (currentUser.getBalance().compareTo(amountInUSD) < 0) {
-            throw new InsufficientFundsException("Insufficient balance");
+            if (user.getBalance().compareTo(finalAmountInUSD) < 0) {
+                throw new InsufficientFundsException("Insufficient balance");
+            }
+
+            user.setBalance(user.getBalance().subtract(finalAmountInUSD));
+            userRepository.save(user);
+
+            PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
+                    .orElse(PortfolioAsset.builder()
+                            .portfolio(portfolio)
+                            .currency(currency)
+                            .amount(BigDecimal.ZERO)
+                            .averagePurchasePrice(BigDecimal.ZERO)
+                            .currentPrice(rate)
+                            .updatedAt(LocalDateTime.now())
+                            .build());
+
+            BigDecimal totalAmount = portfolioAsset.getAmount().add(amountOfCurrencyCalculated);
+            BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
+                    .add(finalAmountInUSD);
+
+            BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
+                    ? amountOfCurrencyCalculated
+                    : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
+
+            portfolioAsset.setAmount(totalAmount);
+            portfolioAsset.setAveragePurchasePrice(newAveragePrice);
+            portfolioAsset.setCurrentPrice(rate);
+            portfolioAsset.setUpdatedAt(LocalDateTime.now());
+
+            portfolio.setUpdatedAt(LocalDateTime.now());
+            portfolioRepository.save(portfolio);
+            portfolioAssetRepository.save(portfolioAsset);
+
+            Transaction transaction = Transaction.builder()
+                    .currency(currency)
+                    .transactionType("BUY")
+                    .amount(amountOfCurrencyCalculated)
+                    .rate(rate)
+                    .timestamp(LocalDateTime.now())
+                    .user(user)
+                    .portfolio(portfolio)
+                    .build();
+
+            transactionRepository.save(transaction);
+
+        } else if (finalAmountOfCurrency != null) {
+            BigDecimal amountInUSDCalculated = finalAmountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
+
+            if (user.getBalance().compareTo(amountInUSDCalculated) < 0) {
+                throw new InsufficientFundsException("Insufficient balance");
+            }
+
+            user.setBalance(user.getBalance().subtract(amountInUSDCalculated));
+            userRepository.save(user);
+
+            PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
+                    .orElse(PortfolioAsset.builder()
+                            .portfolio(portfolio)
+                            .currency(currency)
+                            .amount(BigDecimal.ZERO)
+                            .averagePurchasePrice(BigDecimal.ZERO)
+                            .currentPrice(rate)
+                            .updatedAt(LocalDateTime.now())
+                            .build());
+
+            BigDecimal totalAmount = portfolioAsset.getAmount().add(finalAmountOfCurrency);
+            BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
+                    .add(amountInUSDCalculated);
+
+            BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
+                    ? finalAmountOfCurrency
+                    : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
+
+            portfolioAsset.setAmount(totalAmount);
+            portfolioAsset.setAveragePurchasePrice(newAveragePrice);
+            portfolioAsset.setCurrentPrice(rate);
+            portfolioAsset.setUpdatedAt(LocalDateTime.now());
+
+            portfolio.setUpdatedAt(LocalDateTime.now());
+            portfolioRepository.save(portfolio);
+            portfolioAssetRepository.save(portfolioAsset);
+
+            Transaction transaction = Transaction.builder()
+                    .currency(currency)
+                    .transactionType("BUY")
+                    .amount(finalAmountOfCurrency)
+                    .rate(rate)
+                    .timestamp(LocalDateTime.now())
+                    .user(user)
+                    .portfolio(portfolio)
+                    .build();
+
+            transactionRepository.save(transaction);
         }
-
-        currentUser.setBalance(currentUser.getBalance().subtract(amountInUSD));
-        userRepository.save(currentUser);
-
-        PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
-                .orElse(PortfolioAsset.builder()
-                        .portfolio(portfolio)
-                        .currency(currency)
-                        .amount(BigDecimal.ZERO)
-                        .averagePurchasePrice(BigDecimal.ZERO)
-                        .currentPrice(rate)
-                        .updatedAt(LocalDateTime.now())
-                        .build());
-
-        BigDecimal totalAmount = portfolioAsset.getAmount().add(amountOfCurrency);
-        BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
-                .add(amountInUSD);
-
-        BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
-                ? amountOfCurrency
-                : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
-
-        portfolioAsset.setAmount(totalAmount);
-        portfolioAsset.setAveragePurchasePrice(newAveragePrice);
-        portfolioAsset.setCurrentPrice(rate);
-        portfolioAsset.setUpdatedAt(LocalDateTime.now());
-
-        portfolio.setUpdatedAt(LocalDateTime.now());
-        portfolioRepository.save(portfolio);
-        portfolioAssetRepository.save(portfolioAsset);
-
-        Transaction transaction = Transaction.builder()
-                .currency(currency)
-                .transactionType("BUY")
-                .amount(amountOfCurrency)
-                .rate(rate)
-                .timestamp(LocalDateTime.now())
-                .user(currentUser)
-                .portfolio(portfolio)
-                .build();
-
-        transactionRepository.save(transaction);
     }
 
     @Transactional
-    public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency) {
-        if (currencyid == null) {
-            throw new IllegalArgumentException("Currency ID cannot be null");
-        }
-        if (amountOfCurrency == null || amountOfCurrency.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount of currency must be positive");
+    public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency, BigDecimal priceInUSD, User user) {
+
+        BigDecimal finalAmountOfCurrency = null;
+        BigDecimal finalPriceInUSD = null;
+
+        if (amountOfCurrency != null && priceInUSD != null) {
+            throw new IllegalArgumentException("Please provide either amountOfCurrency or priceInUSD, not both.");
+        } else if (amountOfCurrency != null) {
+            if (amountOfCurrency.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Amount of currency must be positive");
+            }
+            finalAmountOfCurrency = amountOfCurrency;
+        } else if (priceInUSD != null) {
+            if (priceInUSD.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Price in USD must be positive");
+            }
+            finalPriceInUSD = priceInUSD;
+        } else {
+            throw new IllegalArgumentException("Either amountOfCurrency or priceInUSD must be provided.");
         }
 
-        String email = authenticationService.getCurrentUserEmail();
-        User currentUser = authenticationService.getCurrentUser(email);
-
-        Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, currentUser)
+        Portfolio portfolio = portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
-
 
         Currency currency = currencyRepository.findById(currencyid)
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found in database"));
@@ -155,43 +230,85 @@ public class TransactionService {
             throw new PriceNotAvailableException("Current price not available for currency ID: " + currencyid);
         }
 
-        BigDecimal amountInUSD = amountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
 
-        PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
-                .orElseThrow(() -> new AssetNotOwnedException("You do not own this currency"));
+        if (finalAmountOfCurrency != null) {
+            BigDecimal amountInUSDCalculated = finalAmountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
 
-        if (portfolioAsset.getAmount().compareTo(amountOfCurrency) < 0) {
-            throw new InsufficientAssetAmountException("Insufficient amount of currency to sell");
+            PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
+                    .orElseThrow(() -> new AssetNotOwnedException("You do not own this currency"));
+
+            if (portfolioAsset.getAmount().compareTo(finalAmountOfCurrency) < 0) {
+                throw new InsufficientAssetAmountException("Insufficient amount of currency to sell");
+            }
+
+            BigDecimal newAmount = portfolioAsset.getAmount().subtract(finalAmountOfCurrency).setScale(8, RoundingMode.HALF_UP);
+            portfolioAsset.setAmount(newAmount);
+            portfolioAsset.setUpdatedAt(LocalDateTime.now());
+            portfolio.setUpdatedAt(LocalDateTime.now());
+            portfolioRepository.save(portfolio);
+
+            if (newAmount.compareTo(BigDecimal.ZERO) == 0) {
+                portfolioAssetRepository.delete(portfolioAsset);
+            } else {
+                portfolioAssetRepository.save(portfolioAsset);
+            }
+
+            BigDecimal newBalance = user.getBalance().add(amountInUSDCalculated).setScale(8, RoundingMode.HALF_UP);
+            user.setBalance(newBalance);
+            userRepository.save(user);
+
+            Transaction transaction = Transaction.builder()
+                    .currency(currency)
+                    .transactionType("SELL")
+                    .amount(finalAmountOfCurrency.setScale(8, RoundingMode.HALF_UP))
+                    .rate(rate.setScale(8, RoundingMode.HALF_UP))
+                    .timestamp(LocalDateTime.now())
+                    .user(user)
+                    .portfolio(portfolio)
+                    .build();
+
+            transactionRepository.save(transaction);
+
+        } else if (finalPriceInUSD != null) {
+            BigDecimal amountOfCurrencyCalculated = finalPriceInUSD.divide(rate, 8, RoundingMode.HALF_UP);
+
+            PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
+                    .orElseThrow(() -> new AssetNotOwnedException("You do not own this currency"));
+
+            if (portfolioAsset.getAmount().compareTo(amountOfCurrencyCalculated) < 0) {
+                throw new InsufficientAssetAmountException("Insufficient amount of currency to sell");
+            }
+
+            BigDecimal amountInUSDCalculated = amountOfCurrencyCalculated.multiply(rate).setScale(8, RoundingMode.HALF_UP);
+
+            BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrencyCalculated).setScale(8, RoundingMode.HALF_UP);
+            portfolioAsset.setAmount(newAmount);
+            portfolioAsset.setUpdatedAt(LocalDateTime.now());
+            portfolio.setUpdatedAt(LocalDateTime.now());
+            portfolioRepository.save(portfolio);
+
+            if (newAmount.compareTo(BigDecimal.ZERO) == 0) {
+                portfolioAssetRepository.delete(portfolioAsset);
+            } else {
+                portfolioAssetRepository.save(portfolioAsset);
+            }
+
+            BigDecimal newBalance = user.getBalance().add(amountInUSDCalculated).setScale(8, RoundingMode.HALF_UP);
+            user.setBalance(newBalance);
+            userRepository.save(user);
+
+            Transaction transaction = Transaction.builder()
+                    .currency(currency)
+                    .transactionType("SELL")
+                    .amount(amountOfCurrencyCalculated.setScale(8, RoundingMode.HALF_UP))
+                    .rate(rate.setScale(8, RoundingMode.HALF_UP))
+                    .timestamp(LocalDateTime.now())
+                    .user(user)
+                    .portfolio(portfolio)
+                    .build();
+
+            transactionRepository.save(transaction);
         }
-
-        BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrency).setScale(8, RoundingMode.HALF_UP);
-        portfolioAsset.setAmount(newAmount);
-        portfolioAsset.setUpdatedAt(LocalDateTime.now());
-        portfolio.setUpdatedAt(LocalDateTime.now());
-        portfolioRepository.save(portfolio);
-
-        if (newAmount.compareTo(BigDecimal.ZERO) == 0) {
-            portfolioAssetRepository.delete(portfolioAsset);
-        } else {
-            portfolioAssetRepository.save(portfolioAsset);
-        }
-
-        BigDecimal newBalance = currentUser.getBalance().add(amountInUSD).setScale(8, RoundingMode.HALF_UP);
-        currentUser.setBalance(newBalance);
-        userRepository.save(currentUser);
-
-        Transaction transaction = Transaction.builder()
-                .currency(currency)
-                .transactionType("SELL")
-                .amount(amountOfCurrency.setScale(8, RoundingMode.HALF_UP))
-                .rate(rate.setScale(8, RoundingMode.HALF_UP))
-                .timestamp(LocalDateTime.now())
-                .user(currentUser)
-                .portfolio(portfolio)
-                .build();
-        logger.info("Selling asset for currency ID: {}", currencyid);
-
-        transactionRepository.save(transaction);
     }
 
     public Page<TransactionHistoryDTO> getTransactionHistory(Pageable pageable) {

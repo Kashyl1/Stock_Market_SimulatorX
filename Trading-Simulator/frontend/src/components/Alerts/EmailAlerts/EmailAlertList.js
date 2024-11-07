@@ -1,10 +1,10 @@
 import React from 'react';
-import AlertItem from './AlertItem';
-import './AlertList.css';
+import EmailAlertItem from './EmailAlertItem';
+import './EmailAlertList.css';
 
-const AlertList = ({ alerts, loading, error, onAlertDeactivated, onAlertDeleted }) => {
+const EmailAlertList = ({ alerts, loading, error, onAlertDeactivated, onAlertDeleted }) => {
   if (loading) {
-    return <p>Loading alerts...</p>;
+    return <p>Loading email alerts...</p>;
   }
 
   if (error) {
@@ -12,13 +12,13 @@ const AlertList = ({ alerts, loading, error, onAlertDeactivated, onAlertDeleted 
   }
 
   if (alerts.length === 0) {
-    return <p>You have no set alerts.</p>;
+    return <p>You have no set email alerts.</p>;
   }
 
   return (
-    <div className="alert-list">
+    <div className="email-alert-list">
       {alerts.map((alert) => (
-        <AlertItem
+        <EmailAlertItem
           key={alert.alertId}
           alertData={alert}
           onAlertDeactivated={onAlertDeactivated}
@@ -29,4 +29,4 @@ const AlertList = ({ alerts, loading, error, onAlertDeactivated, onAlertDeleted 
   );
 };
 
-export default AlertList;
+export default EmailAlertList;
