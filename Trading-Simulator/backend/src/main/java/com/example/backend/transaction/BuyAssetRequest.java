@@ -1,6 +1,7 @@
 package com.example.backend.transaction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,11 +21,11 @@ public class BuyAssetRequest {
     @JsonProperty("currencyid")
     private String currencyid; // SYMBOL NIE ID xd
 
-    @Min(value = 0, message = "Amount must be positive")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Amount in USD must be positive")
     @JsonProperty("amountInUSD")
     private BigDecimal amountInUSD;
 
-    @Min(value = 0, message = "Amount must be positive")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Amount of currency must be positive")
     @JsonProperty("amountOfCurrency")
     private BigDecimal amountOfCurrency;
 }

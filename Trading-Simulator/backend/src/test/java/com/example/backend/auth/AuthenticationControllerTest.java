@@ -1,5 +1,6 @@
 package com.example.backend.auth;
 
+import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.config.JwtAuthenticationFilter;
 import com.example.backend.exceptions.AccountNotVerifiedException;
 import com.example.backend.exceptions.AuthenticationFailedException;
@@ -9,6 +10,7 @@ import com.example.backend.user.Role;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,6 +53,9 @@ public class AuthenticationControllerTest {
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    private VerificationService verificationService;
 
     @Test
     public void register_Success() throws Exception {
