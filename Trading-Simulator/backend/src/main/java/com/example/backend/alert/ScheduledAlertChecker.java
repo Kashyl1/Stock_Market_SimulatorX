@@ -8,6 +8,7 @@ import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
 import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,17 @@ public class ScheduledAlertChecker {
     private final VerificationService verificationService;
     private final TradeAlertRepository tradeAlertRepository;
     private final TransactionService transactionService;
+    private final UserRepository userRepository;
+    private final TradeAlertService tradeAlertService;
 
     @Scheduled(fixedRate = 1000 * 45)
+    public void checkAllAlerts() {
+        checkEmailAlerts();
+        checkTradeAlerts();
+    }
+
     @Transactional
-    public void checkAlerts() {
+    public void checkEmailAlerts() {
         List<EmailAlert> activeEmailAlerts = emailAlertRepository.findByActiveTrue();
 
         for (EmailAlert emailAlert : activeEmailAlerts) {
@@ -83,8 +91,10 @@ public class ScheduledAlertChecker {
                     verificationService.sendAlertEmail(user, currency, currentPrice, emailAlert);
                     logger.info("Alert triggered for user {}.", user.getEmail());
                 } catch (EmailSendingException e) {
+                    logger.error("Failed to send alert email to user {}: {}", user.getEmail(), e.getMessage());
                     continue;
                 } catch (Exception e) {
+                    logger.error("Unexpected error while processing email alert for user {}: {}", user.getEmail(), e.getMessage());
                     continue;
                 }
 
@@ -92,6 +102,10 @@ public class ScheduledAlertChecker {
                 emailAlertRepository.save(emailAlert);
             }
         }
+    }
+
+    @Transactional
+    public void checkTradeAlerts() {
         List<TradeAlert> activeTradeAlerts = tradeAlertRepository.findByActiveTrue();
 
         for (TradeAlert tradeAlert : activeTradeAlerts) {
@@ -116,7 +130,6 @@ public class ScheduledAlertChecker {
                             .orElse(null);
 
                     if (portfolioAsset == null) {
-
                         continue;
                     }
 
@@ -130,7 +143,6 @@ public class ScheduledAlertChecker {
                     if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
                         if (currentPrice.compareTo(targetPriceValue) >= 0) {
                             shouldTrigger = true;
-
                         }
                     } else if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
                         BigDecimal targetBuyPrice = averagePurchasePrice.multiply(
@@ -138,7 +150,6 @@ public class ScheduledAlertChecker {
                         );
                         if (currentPrice.compareTo(targetBuyPrice) <= 0) {
                             shouldTrigger = true;
-
                         }
                     }
                     break;
@@ -149,11 +160,9 @@ public class ScheduledAlertChecker {
                     if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
                         if (currentPrice.compareTo(conditionPrice) <= 0) {
                             shouldTrigger = true;
-
                         }
                     } else if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
                         if (currentPrice.compareTo(conditionPrice) >= 0) {
-
                             shouldTrigger = true;
                         }
                     }
@@ -162,45 +171,18 @@ public class ScheduledAlertChecker {
 
             if (shouldTrigger) {
                 try {
-                    executeTradeAlert(tradeAlert, currentPrice);
+                    if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
+                        tradeAlertService.executeBuyFromReserved(tradeAlert, currentPrice);
+                    } else if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
+                        tradeAlertService.executeSellFromReserved(tradeAlert, currentPrice);
+                    }
                     tradeAlert.setActive(false);
                     tradeAlertRepository.save(tradeAlert);
                 } catch (Exception e) {
+                    logger.error("Failed to execute trade alert {}: {}", tradeAlert.getTradeAlertId(), e.getMessage());
                     continue;
                 }
             }
-        }
-
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void executeTradeAlert(TradeAlert tradeAlert, BigDecimal currentPrice) {
-
-        TradeAlertType alertType = tradeAlert.getTradeAlertType();
-        BigDecimal tradeAmount = tradeAlert.getTradeAmount();
-        User user = tradeAlert.getUser();
-
-        if (alertType == TradeAlertType.BUY) {
-            transactionService.buyAsset(
-                    tradeAlert.getPortfolio().getPortfolioid(),
-                    tradeAlert.getCurrency().getSymbol(),
-                    tradeAmount,
-                    null,
-                    user
-            );
-
-            verificationService.sendTradeExecutedEmail(user, tradeAlert.getCurrency(), tradeAlert, tradeAmount, alertType);
-
-        } else if (alertType == TradeAlertType.SELL) {
-            transactionService.sellAsset(
-                    tradeAlert.getPortfolio().getPortfolioid(),
-                    tradeAlert.getCurrency().getCurrencyid(),
-                    null,
-                    tradeAmount,
-                    user
-            );
-            verificationService.sendTradeExecutedEmail(user, tradeAlert.getCurrency(), tradeAlert, tradeAmount, alertType);
-
         }
     }
 }

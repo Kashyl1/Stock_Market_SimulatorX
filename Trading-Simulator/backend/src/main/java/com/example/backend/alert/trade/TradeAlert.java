@@ -19,7 +19,7 @@ public class TradeAlert {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer tradeAlertId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userid", nullable = false)
     private User user;
 
@@ -27,7 +27,7 @@ public class TradeAlert {
     @JoinColumn(name = "portfolioid", nullable = false)
     private Portfolio portfolio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currencyid", nullable = false)
     private Currency currency;
 

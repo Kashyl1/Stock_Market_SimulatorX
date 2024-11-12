@@ -36,7 +36,8 @@ public class SecurityConfig {
                                 "/asset-manifest.json",
                                 "/robots.txt",
                                 "/{spring:[\\w-]+}",
-                                "/**/{spring:[\\w-]+}"
+                                "/**/{spring:[\\w-]+}",
+                                "/googlee83276a39faa6454.html"
                         ).permitAll()
                         .requestMatchers
                                 ("/api/portfolios/**",

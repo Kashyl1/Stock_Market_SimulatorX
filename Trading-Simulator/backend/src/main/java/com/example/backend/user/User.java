@@ -64,6 +64,10 @@ public class User implements UserDetails {
     @Column(nullable = false, precision = 19, scale = 3)
     private BigDecimal balance = BigDecimal.ZERO;
 
+    @Builder.Default
+    @Column(nullable = false, precision = 19, scale = 3)
+    private BigDecimal reservedBalance = BigDecimal.ZERO;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

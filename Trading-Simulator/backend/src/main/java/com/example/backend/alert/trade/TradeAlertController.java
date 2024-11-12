@@ -15,7 +15,7 @@ public class TradeAlertController {
 
     private final TradeAlertService tradeAlertService;
 
-    @PostMapping("/create") // PRZYPOMINAJKA BYM DODAŁ JAKĄŚ REZERWACJE ŚRODKÓW MAM 2K DAJE BUY NA 1K TO MAM 1K PORTFEL DO PÓKI NIE ANULUJE
+    @PostMapping("/create")
     public ResponseEntity<TradeAlertResponse> createTradeAlert(@Valid @RequestBody CreateTradeAlertRequest request) {
         TradeAlert tradeAlert = tradeAlertService.createTradeAlert(request);
         TradeAlertResponse response = TradeAlertResponse.fromTradeAlert(tradeAlert);
