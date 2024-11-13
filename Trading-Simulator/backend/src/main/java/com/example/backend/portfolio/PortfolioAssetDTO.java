@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PortfolioAssetDTO {
     private String currencyName;
+    private String imageUrl; // i to
     private BigDecimal amount;
     private BigDecimal averagePurchasePrice;
     private BigDecimal currentPrice;

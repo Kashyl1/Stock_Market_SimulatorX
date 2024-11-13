@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortfolio } from '../../../services/PortfolioService';
 import '../Portfolios.css';
+import './CreatePortfolio.css';
 
 const CreatePortfolio = ({ onPortfolioCreated }) => {
   const [name, setName] = useState('');

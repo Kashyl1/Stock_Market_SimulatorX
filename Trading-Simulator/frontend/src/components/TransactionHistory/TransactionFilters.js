@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
 import './TransactionFilters.css';
 
-const TransactionFilters = ({ onFilterChange }) => {
-  const [transactionType, setTransactionType] = useState('');
-
-  const handleTypeChange = (e) => {
-    setTransactionType(e.target.value);
-    onFilterChange({ transactionType: e.target.value });
+const TransactionFilters = ({ filters, onFilterChange }) => {
+  const handleTransactionTypeChange = (e) => {
+    onFilterChange({
+      ...filters,
+      transactionType: e.target.value,
+    });
   };
 
   return (
     <div className="transaction-filters">
-      <label>
-        Transaction Type:
-        <select value={transactionType} onChange={handleTypeChange}>
-          <option value="">All</option>
-          <option value="BUY">Buy</option>
-          <option value="SELL">Sell</option>
-        </select>
-      </label>
+      <select
+        value={filters.transactionType}
+        onChange={handleTransactionTypeChange}
+      >
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+      </select>
     </div>
   );
 };

@@ -3,7 +3,9 @@ import { useParams } from 'react-router-dom';
 import { getPortfolioByid, getPortfolioAssetsWithGains, getTotalPortfolioGainOrLoss } from '../../../services/PortfolioService';
 import SellAssetModal from '../../../components/Transaction/SellAssetModal/SellAssetModal';
 import TransactionHistory from '../../../components/TransactionHistory/TransactionHistory';
+import TransactionHistoryHeightAdjuster from './TransactionHistoryHeightAdjuster';
 import './PortfolioDetails.css';
+import Sidebar from '../../../pages/Sidebar/Sidebar';
 
 const PortfolioDetails = () => {
   const { id } = useParams();
@@ -86,47 +88,72 @@ const PortfolioDetails = () => {
   };
 
   return (
-    <div className="portfolio-details">
-      <h2>{portfolio.name}</h2>
-      <p>Created At: {formatDateTime(portfolio.createdAt)}</p>
-      <p>Updated At: {formatDateTime(portfolio.updatedAt)}</p>
-      <h3>Assets:</h3>
-      {assetsWithGains && assetsWithGains.length > 0 ? (
-        <div className="assets-list">
-          {assetsWithGains.map((asset) => (
-            <div key={asset.currencyName} className="asset-card">
-              <h4>{asset.currencyName}</h4>
-              <p>Amount: {asset.amount}</p>
-              <p>Average Purchase Price: ${asset.averagePurchasePrice.toFixed(2)}</p>
-              <p>Current Price: ${asset.currentPrice.toFixed(2)}</p>
-              <p>Gain/Loss: {asset.gainOrLoss >= 0 ? '+' : ''}${asset.gainOrLoss.toFixed(2)}</p>
-              <button onClick={() => handleSellClick(asset)}>Sell</button>
+    <div className="main-page">
+      <Sidebar />
+      <div className="portfolio-details">
+        <h2>{portfolio.name}</h2>
+        <p>Created At: {formatDateTime(portfolio.createdAt)}</p>
+        <p>Updated At: {formatDateTime(portfolio.updatedAt)}</p>
+        <h3>Assets:</h3>
+        {assetsWithGains && assetsWithGains.length > 0 ? (
+          <div className="assets-table">
+            <div className="table-header">
+              <div className="header-cell">Name</div>
+              <div className="header-cell">Amount</div>
+              <div className="header-cell">Average Purchase Price</div>
+              <div className="header-cell">Current Price</div>
+              <div className="header-cell">Gain/Loss</div>
+              <div className="header-cell">Action</div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <p>No assets found in this portfolio.</p>
-      )}
 
-      <h3>Total Portfolio Gain/Loss: {totalGainOrLoss >= 0 ? '+' : ''}${totalGainOrLoss.toFixed(2)}</h3>
+            {assetsWithGains.map((asset) => (
+              <div className="table-row" key={asset.currencyName}>
+                <div className="cell currency-info">
+                  <img src={asset.imageUrl} alt={asset.currencyName} className="currency-icon" />
+                  <span className="currency-name">{asset.currencyName}</span>
+                </div>
+                <div className="cell">{asset.amount}</div>
+                <div className="cell">${asset.averagePurchasePrice.toFixed(2)}</div>
+                <div className="cell">${asset.currentPrice.toFixed(2)}</div>
+                <div className="cell">
+                  <span className={`currency-change ${asset.gainOrLoss >= 0 ? 'positive' : 'negative'}`}>
+                    {asset.gainOrLoss >= 0 ? '+' : ''}${asset.gainOrLoss.toFixed(2)}
+                  </span>
+                </div>
+                <div className="cell">
+                  <button className="action-button" onClick={() => handleSellClick(asset)}>Sell</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No assets found in this portfolio.</p>
+        )}
 
-      <button onClick={toggleTransactionHistory}>
-        {showTransactionHistory ? 'Hide' : 'View'} Transaction History
-      </button>
+        <button
+          onClick={toggleTransactionHistory}
+          className="toggle-button"
+        >
+          {showTransactionHistory ? 'Hide' : 'View'} Transaction History
+        </button>
 
-      {showTransactionHistory && (
-        <TransactionHistory portfolioid={portfolio.portfolioid} />
-      )}
+        {showTransactionHistory && (
+          <TransactionHistory portfolioid={portfolio.portfolioid} />
+        )}
 
-      {showSellModal && selectedCurrency && (
-        <SellAssetModal
-          currency={selectedCurrency}
-          portfolioid={portfolio.portfolioid}
-          currentAmount={selectedCurrency.amount}
-          onClose={handleCloseModal}
-          onSellSuccess={handleSellSuccess}
-        />
-      )}
+        {showSellModal && selectedCurrency && (
+          <SellAssetModal
+            currency={selectedCurrency}
+            portfolioid={portfolio.portfolioid}
+            currentAmount={selectedCurrency.amount}
+            onClose={handleCloseModal}
+            onSellSuccess={handleSellSuccess}
+          />
+        )}
+      </div>
+
+
+      <TransactionHistoryHeightAdjuster showTransactionHistory={showTransactionHistory} />
     </div>
   );
 };

@@ -122,6 +122,7 @@ const AvailableCurrencies = () => {
           <div className="header-cell">Price</div>
           <div className="header-cell">Change (24h)</div>
           <div className="header-cell">Volume (24h)</div>
+          <div className="header-cell">Exchange</div>
           <div className="header-cell">Action</div>
         </div>
         {filteredCurrencies.map((currency, index) => (
@@ -145,6 +146,7 @@ const AvailableCurrencies = () => {
               </span>
             </div>
             <div className="cell">${formatPrice(currency.volume_24h)}</div>
+            <div className="cell">${formatPrice(currency.volume_24h)}</div> {/* Tutaj kapitalizacja */}
             <div className="cell">
               <button onClick={() => handleBuyClick(currency)}>Buy</button>
             </div>
