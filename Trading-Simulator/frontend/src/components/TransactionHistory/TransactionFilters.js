@@ -11,14 +11,16 @@ const TransactionFilters = ({ filters, onFilterChange }) => {
 
   return (
     <div className="transaction-filters">
-      <select
-        value={filters.transactionType}
-        onChange={handleTransactionTypeChange}
-      >
-        <option value="BUY">BUY</option>
-        <option value="SELL">SELL</option>
-      </select>
-    </div>
+          <label htmlFor="transactionType">Transaction type:</label>
+          <select
+            id="transactionType"
+            value={filters.transactionType}
+            onChange={handleTransactionTypeChange}
+          >
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+        </div>
   );
 };
 
