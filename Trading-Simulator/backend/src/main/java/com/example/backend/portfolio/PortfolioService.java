@@ -50,6 +50,7 @@ public class PortfolioService {
         return portfolios.stream().map(portfolio -> {
             List<PortfolioAssetDTO> assets = portfolio.getPortfolioAssets().stream().map(asset -> new PortfolioAssetDTO(
                     asset.getCurrency().getName(),
+                    asset.getCurrency().getImageUrl(), // tu
                     asset.getAmount(),
                     asset.getAveragePurchasePrice(),
                     asset.getCurrentPrice(),
@@ -68,6 +69,7 @@ public class PortfolioService {
 
         List<PortfolioAssetDTO> assets = portfolio.getPortfolioAssets().stream().map(asset -> new PortfolioAssetDTO(
                 asset.getCurrency().getName(),
+                asset.getCurrency().getImageUrl(), //tu
                 asset.getAmount(),
                 asset.getAveragePurchasePrice(),
                 asset.getCurrentPrice(),
@@ -100,6 +102,7 @@ public class PortfolioService {
 
                     return PortfolioAssetDTO.builder()
                             .currencyName(asset.getCurrency().getName())
+                            .imageUrl(asset.getCurrency().getImageUrl()) //tutaj
                             .amount(amount)
                             .averagePurchasePrice(asset.getAveragePurchasePrice())
                             .currentPrice(currentCurrencyPrice)

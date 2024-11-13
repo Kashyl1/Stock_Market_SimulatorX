@@ -16,12 +16,12 @@ const TransactionHistory = ({ portfolioid }) => {
   const [error, setError] = useState('');
 
   const [filters, setFilters] = useState({
-    transactionType: '',
+    transactionType: 'BUY',  // Ustawienie domyślnego filtra na "BUY"
   });
 
   useEffect(() => {
     fetchTransactions();
-  }, [page, sortBy, sortDir, filters]);
+  }, [page, sortBy, sortDir, filters]); // fetchTransactions będzie wywoływane po zmianie page, sortu i filtrów
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -32,7 +32,6 @@ const TransactionHistory = ({ portfolioid }) => {
         size,
         sortBy,
         sortDir,
-        transactionType: filters.transactionType,
       };
 
       let response;
@@ -42,7 +41,12 @@ const TransactionHistory = ({ portfolioid }) => {
         response = await getTransactionHistory(params);
       }
 
-      setTransactions(response.content);
+      // Filtrujemy po stronie klienta, jeśli transactionType jest ustawiony
+      const filteredTransactions = filters.transactionType
+        ? response.content.filter(tx => tx.transactionType === filters.transactionType)
+        : response.content;
+
+      setTransactions(filteredTransactions);
       setTotalPages(response.totalPages);
     } catch (err) {
       setError('Failed to fetch transaction history.');
@@ -62,15 +66,14 @@ const TransactionHistory = ({ portfolioid }) => {
   };
 
   const handleFilterChange = (newFilters) => {
+    console.log("Updated filters:", newFilters); // Logowanie w celu debugowania
     setFilters(newFilters);
-    setPage(0);
+    setPage(0); // Resetowanie strony przy zmianie filtra
   };
 
   return (
     <div className="transaction-history">
-      <h2>Transaction History {portfolioid ? `for Portfolio id: ${portfolioid}` : ''}</h2>
-
-      <TransactionFilters onFilterChange={handleFilterChange} />
+      <TransactionFilters filters={filters} onFilterChange={handleFilterChange} /> {/* Przekazanie filtrów do TransactionFilters */}
 
       {loading ? (
         <p>Loading transactions...</p>

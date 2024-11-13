@@ -1,52 +1,51 @@
 import React from 'react';
 import './TransactionTable.css';
 
-const TransactionTable = ({ transactions, onSortChange, sortBy, sortDir }) => {
-
-  const handleSort = (column) => {
-    if (sortBy === column) {
-      onSortChange(column, sortDir === 'asc' ? 'desc' : 'asc');
-    } else {
-      onSortChange(column, 'desc');
-    }
-  };
-
-  const renderSortIcon = (column) => {
-    if (sortBy !== column) return null;
-    return sortDir === 'asc' ? ' 🔼' : ' 🔽';
-  };
+const TransactionTable = ({ transactions }) => {
 
   return (
-    <table className="transaction-table">
-      <thead>
-        <tr>
-          <th onClick={() => handleSort('transactionType')}>Type{renderSortIcon('transactionType')}</th>
-          <th onClick={() => handleSort('currencyName')}>Currency{renderSortIcon('currencyName')}</th>
-          <th onClick={() => handleSort('amount')}>Amount{renderSortIcon('amount')}</th>
-          <th onClick={() => handleSort('rate')}>Rate{renderSortIcon('rate')}</th>
-          <th onClick={() => handleSort('timestamp')}>Date{renderSortIcon('timestamp')}</th>
-          <th onClick={() => handleSort('portfolioName')}>Portfolio{renderSortIcon('portfolioName')}</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div className="assets-table">
+      <div className="table-header">
+        <div className="header-cell">
+          Type
+        </div>
+        <div className="header-cell">
+          Currency
+        </div>
+        <div className="header-cell">
+          Amount
+        </div>
+        <div className="header-cell">
+          Rate
+        </div>
+        <div className="header-cell">
+          Date
+        </div>
+        <div className="header-cell">
+          Portfolio
+        </div>
+      </div>
+
+
+      <div className="table-body">
         {transactions.length === 0 ? (
-          <tr>
-            <td colSpan="6">No transactions found.</td>
-          </tr>
+          <div className="table-row">
+            <div className="cell" colSpan="6">No transactions found</div>
+          </div>
         ) : (
-          transactions.map(tx => (
-            <tr key={tx.transactionid}>
-              <td>{tx.transactionType}</td>
-              <td>{tx.currencyName}</td>
-              <td>{tx.amount}</td>
-              <td>${tx.rate.toFixed(2)}</td>
-              <td>{new Date(tx.timestamp).toLocaleString()}</td>
-              <td>{tx.portfolioName}</td>
-            </tr>
+          transactions.map((tx) => (
+            <div className="table-row" key={tx.transactionid}>
+              <div className="cell">{tx.transactionType}</div>
+              <div className="cell">{tx.currencyName}</div>
+              <div className="cell">{tx.amount}</div>
+              <div className="cell">${tx.rate.toFixed(2)}</div>
+              <div className="cell">{new Date(tx.timestamp).toLocaleString()}</div>
+              <div className="cell">{tx.portfolioName}</div>
+            </div>
           ))
         )}
-      </tbody>
-    </table>
+      </div>
+    </div>
   );
 };
 

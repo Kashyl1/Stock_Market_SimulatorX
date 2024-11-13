@@ -1,38 +1,43 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 import logo from '../../assets/stock_logov2.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faCoins, faWallet, faBriefcase, faCog } from '@fortawesome/free-solid-svg-icons';
-
+import { faHome, faCoins, faWallet, faBriefcase, faCog, faBell, faHistory } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
     return (
             <div className="sidebar_main">
-                    <div className="logo-container">
-                        <Link to="/main">
-                            <img src={logo} alt="Logo" className="logo" />
-                        </Link>
-                    </div>
-                <div className="menu-links">
-                    <Link to="/main">
-                        <FontAwesomeIcon icon={faHome} /> Main Page
-                    </Link>
-                    <Link to="/currencies">
-                        <FontAwesomeIcon icon={faCoins} /> Crypto
-                    </Link>
-                    <Link to="/wallet">
-                        <FontAwesomeIcon icon={faWallet} /> Wallet
-                    </Link>
-                    <Link to="/portfolios">
-                        <FontAwesomeIcon icon={faBriefcase} /> Go to Portfolios
-                    </Link>
-                    <Link to="/settings">
-                        <FontAwesomeIcon icon={faCog} /> User Settings
-                    </Link>
-                    <Link to="/alerts">(ikonka dzwonka? XD) Alerty Wrzuciłem to tutaj, ale możesz walnąć to gdzie indziej jak masz wizje</Link>
-                </div>
+              <div className="logo-container">
+                <NavLink to="/main">
+                  <img src={logo} alt="Logo" className="logo" />
+                </NavLink>
+              </div>
+              <div className="menu-links">
+                <NavLink to="/main" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faHome} /> Main Page
+                </NavLink>
+                <NavLink to="/currencies" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faCoins} /> Crypto
+                </NavLink>
+                <NavLink to="/wallet" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faWallet} /> Wallet
+                </NavLink>
+                <NavLink to="/portfolios" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faBriefcase} /> Go to Portfolios
+                </NavLink>
+                <NavLink to="/alerts" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faBell} /> Notifications
+                </NavLink>
+                <NavLink to="/history" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faHistory} /> History
+                </NavLink>
+                <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faCog} /> User Settings
+                </NavLink>
+              </div>
             </div>
+
     );
 };
 

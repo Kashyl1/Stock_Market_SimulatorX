@@ -1,18 +1,68 @@
+/* TransactionTable.css */
+
+/* Style for the table container */
 .transaction-table {
   width: 100%;
   border-collapse: collapse;
+  background-color: rgba(0, 0, 0, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.transaction-table th, .transaction-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
+/* Table headers */
 .transaction-table th {
+  padding: 12px;
+  text-align: left;
+  background-color: #d4af37;
+  font-size: 1.1em;
+  font-family: 'Cinzel', serif;
+  color: #000;
   cursor: pointer;
-  background-color: #f2f2f2;
+  transition: background-color 0.3s ease;
 }
+
 
 .transaction-table th:hover {
-  background-color: #e2e2e2;
+  background-color: #c09c31;
+}
+
+
+.transaction-table td {
+  padding: 10px;
+  text-align: left;
+  border-top: 1px solid #333;
+}
+
+
+.transaction-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+.transaction-table th span {
+  font-size: 1.2em;
+  margin-left: 8px;
+}
+
+
+.transaction-table tbody td {
+  text-align: center;
+  color: #fff;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 20px 0;
+}
+
+
+.transaction-table tbody tr td[colspan="6"] {
+  font-size: 1.4em;
+  color: #d4af37;
+}
+
+
+@media (max-width: 768px) {
+  .transaction-table th, .transaction-table td {
+    font-size: 0.9em;
+    padding: 8px;
+  }
 }

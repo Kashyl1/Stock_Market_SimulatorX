@@ -1,7 +1,56 @@
+
 .transaction-filters {
-  margin-bottom: 10px;
+
+
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: none;
+  margin-bottom: 15px;
+
 }
+
 
 .transaction-filters label {
   margin-right: 10px;
+}
+
+
+.transaction-filters select {
+  padding: 6px 8px;
+  width: auto;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #222;
+  color: #fff;
+  font-size: 0.9em;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+  margin-left: 10px;
+}
+
+
+.transaction-filters select:hover {
+  border-color: #d4af37;
+}
+
+/* Focus effect for select dropdown */
+.transaction-filters select:focus {
+  outline: none;
+  border-color: #c09c31;
+}
+
+
+@media (max-width: 768px) {
+  .transaction-filters {
+    padding: 6px 10px;
+  }
+
+  .transaction-filters label {
+    font-size: 0.8em;
+  }
+
+  .transaction-filters select {
+    font-size: 0.8em;
+  }
 }

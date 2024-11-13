@@ -1,6 +1,6 @@
 .table-container {
-  width: 100%;
-  max-width: 1200px;
+  width: 115%;
+
   margin: 0 auto;
   border-collapse: collapse;
   padding: 20px;
@@ -47,6 +47,10 @@ text-decoration: none;
   transition: background-color 0.3s;
 }
 
+.cell button:hover {
+  background-color: #c09c31;
+
+}
 
 .currency-icon {
   width: 25px;

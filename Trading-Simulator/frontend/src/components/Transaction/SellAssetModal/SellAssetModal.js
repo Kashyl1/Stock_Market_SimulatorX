@@ -12,12 +12,14 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
   const handleSell = async () => {
     setError('');
 
-    if (sellType === 'Crypto') {
-      if (!amount || parseFloat(amount) <= 0) {
+    const sellAmount = sellType === 'All' ? currentAmount : parseFloat(amount);
+
+    if (sellType === 'Crypto' || sellType === 'All') {
+      if (!sellAmount || sellAmount <= 0) {
         setError('Please enter a valid amount of cryptocurrency.');
         return;
       }
-      if (parseFloat(amount) > currentAmount) {
+      if (sellAmount > currentAmount) {
         setError('You cannot sell more than you own.');
         return;
       }
@@ -31,7 +33,7 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
     const sellData = {
       portfolioid,
       currencyid: currency.currencyid,
-      amount: sellType === 'Crypto' ? parseFloat(amount) : null,
+      amount: sellType === 'Crypto' || sellType === 'All' ? sellAmount : null,
       priceInUSD: sellType === 'USD' ? parseFloat(priceInUSD) : null,
     };
 
@@ -62,34 +64,59 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
     }
   };
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Sell {currency.name}</h2>
+  const handleSellAll = () => {
+    setAmount(currentAmount.toString());
+  };
 
-        <div className="sell-type-selector">
+  const usdValue = currentAmount * currency.currentPrice;
+  const estimatedUsdValue = (sellType === 'All' ? currentAmount : parseFloat(amount || 0)) * currency.currentPrice;
+
+  return (
+    <div className="sam-overlay">
+      <div className="sam-modal">
+        <h2>Sell</h2>
+
+        <div className="sam-sell-type-selector">
           <label>
             <input
               type="radio"
               value="Crypto"
               checked={sellType === 'Crypto'}
-              onChange={() => setSellType('Crypto')}
+              onChange={() => {
+                setSellType('Crypto');
+                setAmount('');
+              }}
             />
-            Sell {currency.symbol}
+            Sello {currency.currencyName}
           </label>
           <label>
             <input
               type="radio"
               value="USD"
               checked={sellType === 'USD'}
-              onChange={() => setSellType('USD')}
+              onChange={() => {
+                setSellType('USD');
+                setAmount('');
+              }}
             />
             Sell for USD
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="All"
+              checked={sellType === 'All'}
+              onChange={() => {
+                setSellType('All');
+                handleSellAll();
+              }}
+            />
+            Sell All
           </label>
         </div>
 
         {sellType === 'Crypto' && (
-          <label>
+          <label className="sam-input-label">
             Amount to Sell ({currency.symbol}):
             <input
               type="number"
@@ -97,11 +124,12 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
               onChange={(e) => setAmount(e.target.value)}
               min="0"
               step="0.0001"
+              className="sam-input"
             />
           </label>
         )}
         {sellType === 'USD' && (
-          <label>
+          <label className="sam-input-label">
             Price in USD:
             <input
               type="number"
@@ -109,21 +137,32 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
               onChange={(e) => setPriceInUSD(e.target.value)}
               min="0"
               step="0.01"
+              className="sam-input"
             />
           </label>
         )}
+        {sellType === 'All' && (
+          <p className="sam-info">
+            You are selling all your holdings of {currency.currencyName}
+          </p>
+        )}
 
         <p>
-          <strong>Current Amount:</strong> {currentAmount} {currency.symbol}
+          <strong>Current Amount:</strong> {currentAmount}
+          <br /> <br />
+          <strong>Current Value:</strong>~${usdValue.toFixed(2)} USD
         </p>
+        {sellType === 'Crypto' && amount && (
+          <p>Estimated Value: ${estimatedUsdValue.toFixed(2)} USD</p>
+        )}
 
-        {error && <p className="error-message">{error}</p>}
+        {error && <p className="sam-error-message">{error}</p>}
 
-        <div className="modal-buttons">
-          <button onClick={handleSell} disabled={loading}>
+        <div className="sam-modal-buttons">
+          <button onClick={handleSell} disabled={loading} className="sam-confirm-button">
             {loading ? 'Processing...' : 'Confirm Sell'}
           </button>
-          <button onClick={onClose} disabled={loading}>
+          <button onClick={onClose} disabled={loading} className="sam-cancel-button">
             Cancel
           </button>
         </div>

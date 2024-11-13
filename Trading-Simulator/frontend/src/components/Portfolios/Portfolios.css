@@ -11,10 +11,14 @@
 }
 
 .portfolio-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   border: 1px solid #ddd;
   padding: 15px;
   border-radius: 5px;
   width: 250px;
+  text-align: center;
 }
 
 .portfolio-card h3 {
@@ -22,16 +26,18 @@
 }
 
 .portfolio-card button {
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
+   font-family: "Cinzel", serif;
+   font-optical-sizing: auto;
+   font-size: 1rem;
+   font-style: normal;
+   background-color: #d4af37;
+   transition: background-color 0.3s ease;
+   border-radius: 6px;
+
 }
 
 .portfolio-card button:hover {
-  background-color: #0056b3;
+  background-color: #b58c2e;
 }
 
 .portfolio-details-section {

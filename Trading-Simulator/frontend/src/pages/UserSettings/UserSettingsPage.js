@@ -5,9 +5,12 @@ import ChangePasswordForm from '../../components/UserSettings/ChangePasswordForm
 import DeleteAccountForm from '../../components/UserSettings/DeleteAccountForm/DeleteAccountForm';
 import ChangeEmailForm from '../../components/UserSettings/ChangeEmailForm/ChangeEmailForm';
 import './UserSettingsPage.css';
+import Sidebar from '../../pages/Sidebar/Sidebar';
 
 const UserSettingsPage = ({ setIsLoggedIn }) => {
   return (
+  <div className="main-page">
+   <Sidebar />
     <div className="settings-page">
       <UserSettingsSidebar />
       <div className="settings-content">
@@ -18,6 +21,7 @@ const UserSettingsPage = ({ setIsLoggedIn }) => {
         </Routes>
       </div>
     </div>
+     </div>
   );
 };
 
