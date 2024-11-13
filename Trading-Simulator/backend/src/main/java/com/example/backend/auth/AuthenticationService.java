@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,6 +70,9 @@ public class AuthenticationService {
                             request.getEmail(),
                             request.getPassword()
                     ));
+
+        } catch (LockedException e) {
+            throw new AccountBlockedException("Account is blocked");
         } catch (AuthenticationException e) {
             throw new AuthenticationFailedException("Invalid email or password");
         }

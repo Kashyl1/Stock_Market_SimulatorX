@@ -68,6 +68,9 @@ public class User implements UserDetails {
     @Column(nullable = false, precision = 19, scale = 3)
     private BigDecimal reservedBalance = BigDecimal.ZERO;
 
+    @Column(nullable = false)
+    private boolean blocked = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -91,7 +94,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !blocked;
     }
 
     @Override
@@ -103,6 +106,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
 }

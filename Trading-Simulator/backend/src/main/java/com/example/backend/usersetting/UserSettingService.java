@@ -1,6 +1,9 @@
 package com.example.backend.usersetting;
 
 import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.alert.mail.EmailAlert;
+import com.example.backend.alert.mail.EmailAlertRepository;
+import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.*;
 import com.example.backend.portfolio.Portfolio;
@@ -27,6 +30,8 @@ public class UserSettingService {
     private final PortfolioRepository portfolioRepository;
     private final PortfolioAssetRepository portfolioAssetRepository;
     private final VerificationService verificationService;
+    private final TradeAlertRepository tradeAlertRepository;
+    private final EmailAlertRepository emailAlertRepository;
 
     public void changePassword(ChangePasswordRequest request) {
         String email = authenticationService.getCurrentUserEmail();
@@ -50,16 +55,32 @@ public class UserSettingService {
             throw new ConfirmationTextMismatchException("Confirmation text is incorrect.");
         }
 
+        deleteUserCompletely(user);
+
+        return "User account and associated data have been deleted.";
+    }
+
+    @Transactional
+    public void deleteUser(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        deleteUserCompletely(user);
+    }
+
+    @Transactional
+    public void deleteUserCompletely(User user) {
         transactionRepository.deleteAllByUser(user);
+        emailAlertRepository.deleteAllByUser(user);
 
         List<Portfolio> portfolios = portfolioRepository.findByUser(user);
         for (Portfolio portfolio : portfolios) {
             portfolioAssetRepository.deleteAllByPortfolio(portfolio);
+            tradeAlertRepository.deleteAllByPortfolio(portfolio);
+
         }
         portfolioRepository.deleteAll(portfolios);
-        userRepository.delete(user);
 
-        return "User account and associated data have been deleted.";
+        userRepository.delete(user);
     }
 
     public ChangeEmailResponse changeEmail(ChangeEmailRequest request) {

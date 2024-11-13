@@ -12,17 +12,17 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "alerts")
+@Table(name = "email_alerts")
 public class EmailAlert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer alertId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userid", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currencyid", nullable = false)
     private Currency currency;
 

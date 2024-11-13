@@ -15,22 +15,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Object> handleEmailAlreadyExists(EmailAlreadyExistsException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(PortfolioNotFoundException.class)
     public ResponseEntity<Object> handlePortfolioNotFoundException(PortfolioNotFoundException e) {
         return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -142,8 +126,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<String> handleInvalidToken(InvalidTokenException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    public ResponseEntity<Object> handleInvalidToken(InvalidTokenException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AlertNotFoundException.class)
@@ -164,6 +148,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnsupportedAlertTypeException.class)
     public ResponseEntity<Object> handleUnsupportedAlertTypeException(UnsupportedAlertTypeException e) {
         return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccountBlockedException.class)
+    public ResponseEntity<Object> handleAccountBlocked(AccountBlockedException e) {
+        return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status) {

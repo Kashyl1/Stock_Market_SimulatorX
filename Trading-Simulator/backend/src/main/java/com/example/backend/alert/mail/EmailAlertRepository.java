@@ -8,4 +8,6 @@ import java.util.List;
 public interface EmailAlertRepository extends JpaRepository<EmailAlert, Integer> {
     List<EmailAlert> findByActiveTrue();
     List<EmailAlert> findByUser(User user);
+    void deleteAllByUser(User user);
+
 }
