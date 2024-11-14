@@ -39,14 +39,14 @@ const HomePage = () => {
                <a href="#about-us" onClick={(e) => scrollToSection(e, 90)}>About us</a>
                <a href="#education" onClick={(e) => scrollToSection(e, 100)}>Education</a>
             </div>
+             <div className="button-container">
+               <Link to="/login" className="button">Login</Link>
+               <Link to="/register" className="button">Register</Link>
+              </div>
           </div>
       <header id="home" className="header">
         <h1>Get started in crypto trading <span>without risking your own money</span></h1>
         <p>Sign up for a free Demo account today to gain real market experience with Demo funds!</p>
-        <div className="button-container">
-          <Link to="/login" className="button">Login</Link>
-          <Link to="/register" className="button">Register</Link>
-        </div>
       </header>
       <section className="features">
         <div className="feature">
