@@ -155,6 +155,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<Object> handleTransactionNotFoundException(TransactionNotFoundException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+
     private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status) {
         Map<String, Object> errorBody = new HashMap<>();
         errorBody.put("timestamp", LocalDateTime.now());

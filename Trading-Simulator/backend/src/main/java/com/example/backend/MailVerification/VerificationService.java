@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -284,4 +285,62 @@ public class VerificationService {
             throw new EmailSendingException("Failed to send email to: " + user.getEmail());
         }
     }
+
+    public void sendSuspiciousTransactionEmail(User user, Integer transactionId, Currency currency, BigDecimal amount, BigDecimal rate, String transactionType) {
+        String subject = "Important: Suspicious Transaction Detected in Your Royal Coin Account";
+        String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
+                "We have detected a suspicious transaction in your Royal Coin account.\n" +
+                "Transaction Details:\n" +
+                "Transaction ID: " + transactionId + "\n" +
+                "Transaction Type: " + transactionType + "\n" +
+                "Currency: " + currency.getName() + " (" + currency.getSymbol() + ")\n" +
+                "Amount: $" + amount.setScale(2, RoundingMode.HALF_UP) + "\n" +
+                "Rate: $" + rate.setScale(2, RoundingMode.HALF_UP) + "\n" +
+                "If you did not authorize this transaction, please contact our support team immediately.\n\n" +
+                "Best regards,\nRoyal Coin Team";
+
+        String htmlMessage = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<p>Hello " + user.getFirstname() + ",</p>" +
+                "<p>We have detected a <strong>suspicious transaction</strong> in your <strong>Royal Coin</strong> account.</p>" +
+                "<h3>Transaction Details:</h3>" +
+                "<ul>" +
+                "<li><strong>Transaction ID:</strong> " + transactionId + "</li>" +
+                "<li><strong>Transaction Type:</strong> " + transactionType + "</li>" +
+                "<li><strong>Currency:</strong> " + currency.getName() + " (" + currency.getSymbol() + ")</li>" +
+                "<li><strong>Amount:</strong> " + amount.setScale(2, RoundingMode.HALF_UP) + "</li>" +
+                "<li><strong>Rate:</strong> $" + rate.setScale(8, RoundingMode.HALF_UP) + "</li>" +
+                "<li><strong>Total price:</strong> $" + amount.multiply(rate).setScale(2, RoundingMode.HALF_UP) + "</li>" +
+                "</ul>" +
+                "<p>If you did not authorize this transaction, please contact our support team immediately.</p>" +
+                "<p>Best regards,<br>Royal Coin Team</p>" +
+                "<hr>" +
+                "<p style='font-size: small;'>If you have any questions, feel free to contact us at <a href='mailto:RoyalCoinSupport@gmail.com'>RoyalCoinSupport@gmail.com</a>.</p>" +
+                "</body>" +
+                "</html>";
+
+        MimeMessage mimeMessage;
+        try {
+            mimeMessage = mailSender.createMimeMessage();
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
+        }
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+            helper.setFrom("no-reply@royalcoin.com", "Royal Coin");
+            helper.setTo(user.getEmail());
+            helper.setSubject(subject);
+            helper.setText(textMessage, htmlMessage);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new EmailSendingException("Failed to construct email message for: " + user.getEmail());
+        }
+
+        try {
+            mailSender.send(mimeMessage);
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to send email to: " + user.getEmail());
+        }
+    }
+
 }

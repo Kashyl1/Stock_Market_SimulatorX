@@ -1,5 +1,6 @@
 package com.example.backend.transaction;
 
+import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.exceptions.*;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
@@ -37,6 +38,8 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final AuthenticationService authenticationService;
+    private final TransactionMapper transactionMapper;
+    private final VerificationService verificationService;
 
     public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
         try {
@@ -327,15 +330,7 @@ public class TransactionService {
     }
 
     private Page<TransactionHistoryDTO> mapTransactionsToDTO(Page<Transaction> transactions) {
-        return transactions.map(transaction -> TransactionHistoryDTO.builder()
-                .transactionid(transaction.getTransactionid())
-                .transactionType(transaction.getTransactionType())
-                .amount(transaction.getAmount())
-                .rate(transaction.getRate())
-                .timestamp(transaction.getTimestamp())
-                .currencyName(transaction.getCurrency().getName())
-                .portfolioName(transaction.getPortfolio().getName())
-                .build());
+        return transactions.map(transactionMapper::toDTO);
     }
 
     @Transactional
@@ -345,5 +340,107 @@ public class TransactionService {
         }
         return portfolioRepository.findByPortfolioidAndUser(portfolioid, user)
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionHistoryDTO> getAllTransactions(Pageable pageable) {
+        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        return mapTransactionsToDTO(transactions);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionHistoryDTO> getTransactionsByUser(Integer userid, Pageable pageable) {
+        User user = userRepository.findById(userid)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        Page<Transaction> transactions = transactionRepository.findByUser(user, pageable);
+        return mapTransactionsToDTO(transactions);
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionHistoryDTO getTransactionById(Integer transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found with id: " + transactionId));
+        return transactionMapper.toDTO(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionHistoryDTO> getTransactionsByPortfolio(Integer portfolioid, Pageable pageable) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioid)
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        Page<Transaction> transactions = transactionRepository.findByPortfolio(portfolio, pageable);
+        return mapTransactionsToDTO(transactions);
+    }
+
+    @Transactional
+    public void markTransactionAsSuspicious(Integer transactionid, boolean suspicious) {
+        Transaction transaction = transactionRepository.findById(transactionid)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+        if (transaction.isSuspicious() == suspicious) {
+            logger.info("Transaction {} already has suspicious status: {}", transactionid, suspicious);
+            return;
+        }
+
+        transaction.setSuspicious(suspicious);
+        transactionRepository.save(transaction);
+
+        if (suspicious) {
+            getTransactionDataForEmail(transaction);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionHistoryDTO> getSuspiciousTransactions(BigDecimal thresholdAmount) {
+        List<Transaction> transactions = transactionRepository.findByAmountGreaterThan(thresholdAmount);
+        return transactions.stream()
+                .map(transactionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void markHighValueTransaction(BigDecimal thresholdAmount) {
+        List<Transaction> transactions = transactionRepository.findByAmountGreaterThan(thresholdAmount);
+        for (Transaction transaction : transactions) {
+            User user = transaction.getUser();
+            LocalDateTime accountCreatedTime = user.getCreatedAt();
+            LocalDateTime twoWeeksAgo = LocalDateTime.now().minusWeeks(2);
+            boolean isNewUser = accountCreatedTime.isAfter(twoWeeksAgo);
+
+            if (!transaction.isSuspicious() && isNewUser) {
+                transaction.setSuspicious(true);
+                transactionRepository.save(transaction);
+                getTransactionDataForEmail(transaction);
+            }
+        }
+    }
+
+    @Transactional
+    public void markFrequentTransactions() {
+        LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
+        List<User> users = userRepository.findAll();
+
+        for (User user : users) {
+            List<Transaction> recentTransactions = transactionRepository.findByTimestampBetween(user, oneHourAgo);
+            if (recentTransactions.size() > 100) {
+                for (Transaction transaction : recentTransactions) {
+                    if (!transaction.isSuspicious()) {
+                        transaction.setSuspicious(true);
+                        transactionRepository.save(transaction);
+                        getTransactionDataForEmail(transaction);
+                    }
+                }
+            }
+            user.setBlocked(true);
+            userRepository.save(user);
+        }
+    }
+
+    public void getTransactionDataForEmail(Transaction transaction) {
+        User user = transaction.getUser();
+        Currency currency = transaction.getCurrency();
+        BigDecimal amount = transaction.getAmount();
+        BigDecimal rate = transaction.getRate();
+        String transactionType = transaction.getTransactionType();
+        int transactionId = transaction.getTransactionid();
+        verificationService.sendSuspiciousTransactionEmail(user, transactionId, currency, amount, rate, transactionType);
     }
 }

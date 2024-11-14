@@ -10,33 +10,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
-public class AdminController {
+public class AdminUserController {
 
     private final UserService userService;
     private final UserSettingService userSettingService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users")
+    @GetMapping
     public Page<UserDTO> getAllUsers(Pageable pageable) {
         return userService.getAllUsers(pageable);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public UserDTO getUserById(@PathVariable Integer id) {
         return userService.getUserById(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/users/{id}")
+    @PutMapping("/{id}")
     public UserDTO updateUser(@PathVariable Integer id, @RequestBody UpdateUserRequest request) {
         return userService.updateUser(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
         userSettingService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
@@ -49,7 +49,7 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/users/{id}/block")
+    @PutMapping("/{id}/block")
     public ResponseEntity<String> blockUser(@PathVariable Integer id, @RequestBody BlockUserRequest request) {
         userService.setUserBlockedStatus(id, request.isBlocked());
         String status = request.isBlocked() ? "blocked" : "unblocked";

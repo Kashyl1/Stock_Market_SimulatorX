@@ -18,4 +18,8 @@ public class TransactionHistoryDTO {
     private LocalDateTime timestamp;
     private String currencyName;
     private String portfolioName;
+    private boolean suspicious;
+    private String userEmail;
+    private BigDecimal totalPrice;
+    private Integer portfolioid;
 }

@@ -46,4 +46,7 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "portfolioid", nullable = false)
     private Portfolio portfolio;
+
+    @Column(nullable = false)
+    private boolean suspicious = false;
 }
