@@ -16,12 +16,12 @@ const TransactionHistory = ({ portfolioid }) => {
   const [error, setError] = useState('');
 
   const [filters, setFilters] = useState({
-    transactionType: 'BUY',  // Ustawienie domyślnego filtra na "BUY"
+    transactionType: 'BUY',
   });
 
   useEffect(() => {
     fetchTransactions();
-  }, [page, sortBy, sortDir, filters]); // fetchTransactions będzie wywoływane po zmianie page, sortu i filtrów
+  }, [page, sortBy, sortDir, filters]);
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -41,7 +41,7 @@ const TransactionHistory = ({ portfolioid }) => {
         response = await getTransactionHistory(params);
       }
 
-      // Filtrujemy po stronie klienta, jeśli transactionType jest ustawiony
+
       const filteredTransactions = filters.transactionType
         ? response.content.filter(tx => tx.transactionType === filters.transactionType)
         : response.content;
@@ -66,14 +66,14 @@ const TransactionHistory = ({ portfolioid }) => {
   };
 
   const handleFilterChange = (newFilters) => {
-    console.log("Updated filters:", newFilters); // Logowanie w celu debugowania
+    console.log("Updated filters:", newFilters);
     setFilters(newFilters);
-    setPage(0); // Resetowanie strony przy zmianie filtra
+    setPage(0);
   };
 
   return (
     <div className="transaction-history">
-      <TransactionFilters filters={filters} onFilterChange={handleFilterChange} /> {/* Przekazanie filtrów do TransactionFilters */}
+      <TransactionFilters filters={filters} onFilterChange={handleFilterChange} />
 
       {loading ? (
         <p>Loading transactions...</p>

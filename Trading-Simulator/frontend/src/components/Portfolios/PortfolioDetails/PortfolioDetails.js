@@ -17,6 +17,7 @@ const PortfolioDetails = () => {
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [showSellModal, setShowSellModal] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const fetchPortfolio = async () => {
     try {
@@ -29,15 +30,16 @@ const PortfolioDetails = () => {
       const totalGainOrLossData = await getTotalPortfolioGainOrLoss(id);
       setTotalGainOrLoss(totalGainOrLossData);
     } catch (err) {
-        let errorMessage = 'Failed to fetch portfolio details.';
-        if (err.response?.data?.message) {
-          errorMessage = err.response.data.message;
-        }
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
+      let errorMessage = 'Failed to fetch portfolio details.';
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
       }
-    };
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      setInitialized(true);
+    }
+  };
 
   useEffect(() => {
     fetchPortfolio();
@@ -152,8 +154,10 @@ const PortfolioDetails = () => {
         )}
       </div>
 
-
-      <TransactionHistoryHeightAdjuster showTransactionHistory={showTransactionHistory} />
+      <TransactionHistoryHeightAdjuster
+        showTransactionHistory={showTransactionHistory}
+        initialized={initialized}
+      />
     </div>
   );
 };

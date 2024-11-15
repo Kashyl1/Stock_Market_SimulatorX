@@ -9,6 +9,12 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
 
   const handleCreatePortfolio = async (e) => {
     e.preventDefault();
+
+    if (name.length > 12) {
+      setError('Portfolio name cannot exceed 12 characters.');
+      return;
+    }
+
     try {
       const newPortfolio = await createPortfolio(name);
       setName('');
@@ -28,6 +34,18 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
     }
   };
 
+  const handleNameChange = (e) => {
+    const newName = e.target.value;
+
+
+    if (newName.length <= 12) {
+      setName(newName);
+      setError('');
+    } else {
+      setError('Portfolio name cannot exceed 12 characters.');
+    }
+  };
+
   return (
     <form onSubmit={handleCreatePortfolio} className="create-portfolio-form">
       <h2>Create New Portfolio</h2>
@@ -35,11 +53,11 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
         type="text"
         placeholder="Portfolio Name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={handleNameChange}
         required
         className="portfolio-input"
       />
-      <button type="submit" className="portfolio-button">
+      <button type="submit" className="portfolio-button" disabled={name.length > 12}>
         Create Portfolio
       </button>
       {error && <p className="error-message">{error}</p>}
