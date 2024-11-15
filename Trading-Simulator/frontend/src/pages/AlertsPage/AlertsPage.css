@@ -1,21 +1,74 @@
 .alerts-page {
+  flex: 1 1;
   padding: 20px;
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  color: #f1f1f1;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.alerts-page h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 2em;
+  color: #d4af37;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .create-alert-button {
-  background-color: #333333;
+  font-family: 'Cinzel', serif;
+  font-optical-sizing: auto;
+  font-size: 1rem;
+  font-style: normal;
+  background-color: #d4af37;
+  transition: background-color 0.3s ease;
+  border-radius: 6px;
+  padding: 10px 20px;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  color: white;
   cursor: pointer;
+  margin-top: 20px;
   margin-bottom: 20px;
+}
+
+.tabs button:hover,
+.create-trade-alert-button:hover,
+.create-alert-button:hover {
+  background-color: #b58c2e;
+}
+
+.tabs button {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  background-color: #555555;
+  color: white;
+  cursor: pointer;
+  margin: 0 5px;
   transition: background-color 0.3s ease;
 }
 
-.create-alert-button:hover {
-  background-color: #555555;
+.create-trade-alert-button  {
+  font-family: 'Cinzel', serif;
+  font-optical-sizing: auto;
+  font-size: 1rem;
+  font-style: normal;
+  background-color: #d4af37;
+  transition: background-color 0.3s ease;
+  border-radius: 6px;
+  padding: 10px 20px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.tabs button:hover {
+
+}
+
+.tabs .active {
+  background-color: #d4af37;
 }
 
 .select-currency-modal {
@@ -35,7 +88,7 @@
   background-color: #2c2c2c;
   color: #f5f5f5;
   padding: 20px;
-  border-radius: 5px;
+  border-radius: 6px;
   max-height: 80%;
   overflow-y: auto;
   max-width: 600px;
@@ -47,7 +100,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #555555; /* Darker border for separation */
+  border-bottom: 1px solid #555555;
 }
 
 .currency-item:last-child {
@@ -62,8 +115,8 @@
 
 .close-button {
   margin-top: 20px;
-  background-color: #555555; /* Dark close button */
-  color: #e0e0e0; /* Light text */
+  background-color: #555555;
+  color: #e0e0e0;
   border: none;
   padding: 10px 15px;
   border-radius: 5px;
@@ -72,10 +125,10 @@
 }
 
 .close-button:hover {
-  background-color: #777777; /* Slightly lighter on hover */
+  background-color: #777777;
 }
 
 .error-message {
-  color: #ff6666; /* Red color for error messages */
+  color: #ff6666;
   margin-top: 10px;
 }

@@ -30,42 +30,25 @@ const EmailAlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
   };
 
   return (
-    <div className="email-alert-item">
-      <div className="email-alert-details">
-        <p>
-          <strong>Currency:</strong> {alertData.currencyName}
-        </p>
-        <p>
-          <strong>Created At Price:</strong> ${alertData.initialPrice.toFixed(2)}
-        </p>
-        <p>
-          <strong>Type:</strong> {alertData.emailAlertType === 'PERCENTAGE' ? 'Percentage' : 'Price'}
-        </p>
-        {alertData.emailAlertType === 'PERCENTAGE' && (
-          <p>
-            <strong>Change:</strong> {alertData.percentageChange}%
-          </p>
-        )}
-        {alertData.emailAlertType === 'PRICE' && (
-          <p>
-            <strong>Target Price:</strong> ${alertData.targetPrice.toFixed(2)}
-          </p>
-        )}
-        <p>
-          <strong>Status:</strong> {alertData.active ? 'Active' : 'Triggered'}
-        </p>
+    <div className="table-row">
+      <div className="cell">{alertData.currencyName}</div>
+      <div className="cell">${alertData.initialPrice.toFixed(2)}</div>
+      <div className="cell">
+        {alertData.emailAlertType === 'PERCENTAGE' ? 'Percentage' : 'Price'}
       </div>
-      <div className="email-alert-actions">
+      <div className="cell">
+        {alertData.emailAlertType === 'PERCENTAGE' ? `${alertData.percentageChange}%` : `$${alertData.targetPrice.toFixed(2)}`}
+      </div>
+      <div className="cell"></div>
+      <div className="cell">
         {alertData.active ? (
-          <button onClick={handleDeactivate} className="deactivate-button">
-            Deactivate
-          </button>
+          <button onClick={handleDeactivate} className="deactivate-button">Deactivate</button>
         ) : (
-          <button onClick={handleDelete} className="delete-button">
-            Delete
-          </button>
+          <button onClick={handleDelete} className="delete-button">Delete</button>
         )}
+        <div className="cell">{alertData.active ? 'Active' : 'Triggered'}</div>
       </div>
+
     </div>
   );
 };
