@@ -17,14 +17,29 @@ const EmailAlertList = ({ alerts, loading, error, onAlertDeactivated, onAlertDel
 
   return (
     <div className="email-alert-list">
-      {alerts.map((alert) => (
-        <EmailAlertItem
-          key={alert.alertId}
-          alertData={alert}
-          onAlertDeactivated={onAlertDeactivated}
-          onAlertDeleted={onAlertDeleted}
-        />
-      ))}
+      <div className="assets-table">
+
+        <div className="table-header">
+          <div className="header-cell">Currency</div>
+          <div className="header-cell">Initial Price</div>
+          <div className="header-cell">Alert Type</div>
+          <div className="header-cell">Target Price / Change</div>
+          <div className="header-cell"></div>
+          <div className="header-cell">Actions</div>
+        </div>
+
+
+        <div className="table-body">
+          {alerts.map((alert) => (
+            <EmailAlertItem
+              key={alert.alertId}
+              alertData={alert}
+              onAlertDeactivated={onAlertDeactivated}
+              onAlertDeleted={onAlertDeleted}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

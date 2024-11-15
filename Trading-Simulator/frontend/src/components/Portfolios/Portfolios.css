@@ -1,4 +1,3 @@
-/* src/pages/Portfolios.css */
 
 .portfolios-page {
   padding: 20px;
@@ -33,7 +32,10 @@
    background-color: #d4af37;
    transition: background-color 0.3s ease;
    border-radius: 6px;
-
+   padding: 0.75rem;
+   border: none;
+   color: white;
+   cursor: pointer;
 }
 
 .portfolio-card button:hover {

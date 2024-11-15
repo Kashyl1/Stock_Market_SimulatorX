@@ -11,6 +11,7 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
   const [loading, setLoading] = useState(false);
   const [currencies, setCurrencies] = useState([]);
   const [selectedCurrencyId, setSelectedCurrencyId] = useState('');
+  const [selectedCurrency, setSelectedCurrency] = useState(null);
 
   useEffect(() => {
     const fetchCurrencies = async () => {
@@ -18,14 +19,23 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
         const availableCurrencies = await getAvailableAssets(0, 100);
         setCurrencies(availableCurrencies.content);
         if (availableCurrencies.content.length > 0) {
-          setSelectedCurrencyId(availableCurrencies.content[0].currencyid);
+          const defaultCurrency = availableCurrencies.content[0];
+          setSelectedCurrencyId(defaultCurrency.currencyid);
+          setSelectedCurrency(defaultCurrency);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to fetch currencies.');
       }
     };
     fetchCurrencies();
   }, []);
+
+  useEffect(() => {
+    if (selectedCurrencyId && currencies.length > 0) {
+      const selected = currencies.find((c) => c.currencyid === parseInt(selectedCurrencyId));
+      setSelectedCurrency(selected || null);
+    }
+  }, [selectedCurrencyId, currencies]);
 
   const handleCreateAlert = async () => {
     setError('');
@@ -72,7 +82,11 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
     }
   };
 
-  const selectedCurrency = currencies.find((c) => c.currencyid === selectedCurrencyId);
+  const handleCurrencyChange = (e) => {
+    const newCurrencyId = e.target.value;
+    setSelectedCurrencyId(newCurrencyId);
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -80,10 +94,7 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
 
         <label>
           Select Currency:
-          <select
-            value={selectedCurrencyId}
-            onChange={(e) => setSelectedCurrencyId(e.target.value)}
-          >
+          <select value={selectedCurrencyId} onChange={handleCurrencyChange}>
             {currencies.map((currency) => (
               <option key={currency.currencyid} value={currency.currencyid}>
                 {currency.name} ({currency.symbol})
@@ -94,8 +105,8 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
 
         <p>
           <strong>Current Price:</strong> $
-          {selectedCurrency && selectedCurrency.currentPrice
-            ? selectedCurrency.currentPrice.toFixed(2)
+          {selectedCurrency && selectedCurrency.price_in_usd
+            ? selectedCurrency.price_in_usd.toFixed(2)
             : 'N/A'}
         </p>
 

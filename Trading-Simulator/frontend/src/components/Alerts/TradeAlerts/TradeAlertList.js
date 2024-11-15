@@ -17,14 +17,27 @@ const TradeAlertList = ({ tradeAlerts, loading, error, onTradeAlertDeactivated, 
 
   return (
     <div className="trade-alert-list">
-      {tradeAlerts.map((tradeAlert) => (
-        <TradeAlertItem
-          key={tradeAlert.tradeAlertId}
-          tradeAlertData={tradeAlert}
-          onTradeAlertDeactivated={onTradeAlertDeactivated}
-          onTradeAlertDeleted={onTradeAlertDeleted}
-        />
-      ))}
+      <div className="assets-table">
+        <div className="table-header">
+          <div className="header-cell">Currency</div>
+          <div className="header-cell">Initial Price</div>
+          <div className="header-cell">Alert Type</div>
+          <div className="header-cell">Target Price / Change</div>
+          <div className="header-cell">Trade Amount</div>
+          <div className="header-cell">Trigger</div>
+        </div>
+
+        <div className="table-body">
+          {tradeAlerts.map((tradeAlert) => (
+            <TradeAlertItem
+              key={tradeAlert.tradeAlertId}
+              tradeAlertData={tradeAlert}
+              onTradeAlertDeactivated={onTradeAlertDeactivated}
+              onTradeAlertDeleted={onTradeAlertDeleted}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

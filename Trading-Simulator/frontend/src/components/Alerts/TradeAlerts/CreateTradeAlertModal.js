@@ -145,14 +145,14 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
         </label>
 
         <label>
-          Condition Value:
+          Condition Value ({conditionType === 'PERCENTAGE' ? '%' : '$'}):
           <input
             type="number"
             value={conditionValue}
             onChange={(e) => setConditionValue(e.target.value)}
             step="0.01"
           />
-          {conditionType === 'PERCENTAGE' ? '%' : '$'}
+
         </label>
 
         <label>
@@ -172,10 +172,11 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
           <button onClick={handleCreateAlert} disabled={loading}>
             {loading ? 'Creating...' : 'Create Alert'}
           </button>
-          <button onClick={onClose} disabled={loading}>
+          <button onClick={onClose} disabled={loading} className="cancel-button">
             Cancel
           </button>
         </div>
+
       </div>
     </div>
   );
