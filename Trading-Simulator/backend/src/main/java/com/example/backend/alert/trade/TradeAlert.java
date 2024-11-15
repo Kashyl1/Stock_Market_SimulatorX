@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class TradeAlert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer tradeAlertId;
+    private Integer tradeAlertid;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userid", nullable = false)

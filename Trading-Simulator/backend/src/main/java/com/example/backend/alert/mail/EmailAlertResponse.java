@@ -16,18 +16,6 @@ public class EmailAlertResponse {
     private BigDecimal targetPrice;
     private boolean active;
     private BigDecimal initialPrice;
-
-    private EmailAlertResponse mapToResponse(EmailAlert emailAlert) {
-        return EmailAlertResponse.builder()
-                .alertId(emailAlert.getAlertId())
-                .currencyId(emailAlert.getCurrency().getCurrencyid())
-                .currencyName(emailAlert.getCurrency().getName())
-                .emailAlertType(emailAlert.getEmailAlertType())
-                .percentageChange(emailAlert.getPercentageChange())
-                .targetPrice(emailAlert.getTargetPrice())
-                .active(emailAlert.isActive())
-                .build();
-    }
 }
 
 

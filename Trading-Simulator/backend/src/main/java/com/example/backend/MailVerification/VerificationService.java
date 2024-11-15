@@ -1,5 +1,6 @@
 package com.example.backend.MailVerification;
 
+import com.example.backend.alert.global.GlobalAlert;
 import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertType;
 import com.example.backend.alert.trade.TradeAlert;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -313,6 +315,55 @@ public class VerificationService {
                 "<li><strong>Total price:</strong> $" + amount.multiply(rate).setScale(2, RoundingMode.HALF_UP) + "</li>" +
                 "</ul>" +
                 "<p>If you did not authorize this transaction, please contact our support team immediately.</p>" +
+                "<p>Best regards,<br>Royal Coin Team</p>" +
+                "<hr>" +
+                "<p style='font-size: small;'>If you have any questions, feel free to contact us at <a href='mailto:RoyalCoinSupport@gmail.com'>RoyalCoinSupport@gmail.com</a>.</p>" +
+                "</body>" +
+                "</html>";
+
+        MimeMessage mimeMessage;
+        try {
+            mimeMessage = mailSender.createMimeMessage();
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
+        }
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+            helper.setFrom("no-reply@royalcoin.com", "Royal Coin");
+            helper.setTo(user.getEmail());
+            helper.setSubject(subject);
+            helper.setText(textMessage, htmlMessage);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new EmailSendingException("Failed to construct email message for: " + user.getEmail());
+        }
+
+        try {
+            mailSender.send(mimeMessage);
+        } catch (MailException e) {
+            throw new EmailSendingException("Failed to send email to: " + user.getEmail());
+        }
+    }
+
+    public void sendGlobalAlertEmail(User user, GlobalAlert globalAlert) {
+        String subject = "Important Notification from Royal Coin";
+
+        String message = globalAlert.getMessage();
+        String scheduledDate = globalAlert.getScheduledFor() != null
+                ? globalAlert.getScheduledFor().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                : "immediately";
+
+        String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
+                message + "\n\n" +
+                "This notification is scheduled for: " + scheduledDate + ".\n\n" +
+                "Best regards,\nRoyal Coin Team";
+
+        String htmlMessage = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<p>Hello " + user.getFirstname() + ",</p>" +
+                "<p>" + message.replace("\n", "<br>") + "</p>" +
+                "<p>This notification is scheduled for: <strong>" + scheduledDate + "</strong>.</p>" +
+                "<br>" +
                 "<p>Best regards,<br>Royal Coin Team</p>" +
                 "<hr>" +
                 "<p style='font-size: small;'>If you have any questions, feel free to contact us at <a href='mailto:RoyalCoinSupport@gmail.com'>RoyalCoinSupport@gmail.com</a>.</p>" +

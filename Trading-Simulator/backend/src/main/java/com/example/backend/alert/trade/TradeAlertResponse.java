@@ -22,7 +22,7 @@ public class TradeAlertResponse {
 
     public static TradeAlertResponse fromTradeAlert(TradeAlert tradeAlert) {
         return TradeAlertResponse.builder()
-                .tradeAlertId(tradeAlert.getTradeAlertId())
+                .tradeAlertId(tradeAlert.getTradeAlertid())
                 .portfolioId(tradeAlert.getPortfolio().getPortfolioid())
                 .portfolioName(tradeAlert.getPortfolio().getName())
                 .currencyId(tradeAlert.getCurrency().getCurrencyid())

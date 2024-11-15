@@ -1,5 +1,8 @@
 package com.example.backend.alert;
 
+import com.example.backend.alert.global.GlobalAlert;
+import com.example.backend.alert.global.GlobalAlertRepository;
+import com.example.backend.alert.global.GlobalAlertService;
 import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertRepository;
 import com.example.backend.currency.Currency;
@@ -20,6 +23,7 @@ import com.example.backend.alert.trade.*;
 import com.example.backend.portfolio.Portfolio;
 import com.example.backend.portfolio.PortfolioAsset;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -33,11 +37,14 @@ public class ScheduledAlertChecker {
     private final TransactionService transactionService;
     private final UserRepository userRepository;
     private final TradeAlertService tradeAlertService;
+    private final GlobalAlertRepository globalAlertRepository;
+
 
     @Scheduled(fixedRate = 1000 * 45)
     public void checkAllAlerts() {
         checkEmailAlerts();
         checkTradeAlerts();
+        checkGlobalAlerts();
     }
 
     @Transactional
@@ -173,16 +180,41 @@ public class ScheduledAlertChecker {
                 try {
                     if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
                         tradeAlertService.executeBuyFromReserved(tradeAlert, currentPrice);
-                    } else if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
+                    } else {
                         tradeAlertService.executeSellFromReserved(tradeAlert, currentPrice);
                     }
                     tradeAlert.setActive(false);
                     tradeAlertRepository.save(tradeAlert);
                 } catch (Exception e) {
-                    logger.error("Failed to execute trade alert {}: {}", tradeAlert.getTradeAlertId(), e.getMessage());
+                    logger.error("Failed to execute trade alert {}: {}", tradeAlert.getTradeAlertid(), e.getMessage());
                     continue;
                 }
             }
+        }
+    }
+
+    @Transactional
+    public void checkGlobalAlerts() {
+        List<GlobalAlert> activeGlobalAlerts = globalAlertRepository.findAllByActiveTrue();
+
+        for (GlobalAlert globalAlert : activeGlobalAlerts) {
+            if (globalAlert.getScheduledFor() != null && globalAlert.getScheduledFor().isAfter(LocalDateTime.now())) {
+                continue;
+            }
+
+            List<User> users = userRepository.findAll();
+
+            for (User user : users) {
+                try {
+                    verificationService.sendGlobalAlertEmail(user, globalAlert);
+                    logger.info("Global alert sent to user {}.", user.getEmail());
+                } catch (Exception e) {
+                    logger.error("Failed to send global alert email to user {}: {}", user.getEmail(), e.getMessage());
+                }
+            }
+
+            globalAlert.setActive(false);
+            globalAlertRepository.save(globalAlert);
         }
     }
 }

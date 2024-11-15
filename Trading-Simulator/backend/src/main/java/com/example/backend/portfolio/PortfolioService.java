@@ -1,26 +1,38 @@
 package com.example.backend.portfolio;
 
+import com.example.backend.admin.UpdatePortfolioRequest;
+import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.PortfolioAlreadyExistsException;
 import com.example.backend.exceptions.PortfolioNotFoundException;
+import com.example.backend.exceptions.UserNotFoundException;
+import com.example.backend.transaction.TransactionRepository;
 import com.example.backend.user.User;
+import com.example.backend.user.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PortfolioService {
 
-    @Autowired
-    private PortfolioRepository portfolioRepository;
+    private final PortfolioRepository portfolioRepository;
+    private final AuthenticationService authenticationService;
+    private final PortfolioMapper portfolioMapper;
+    private final UserRepository userRepository;
+    private final PortfolioAssetRepository portfolioAssetRepository;
+    private final TransactionRepository transactionRepository;
+    private final TradeAlertRepository tradeAlertRepository;
 
-    @Autowired
-    private AuthenticationService authenticationService;
 
     @Transactional
     public Portfolio createPortfolio(String name) {
@@ -133,5 +145,48 @@ public class PortfolioService {
         }
 
         return totalCurrentValue.subtract(totalInitialValue);
+    }
+
+    @Transactional
+    public Page<PortfolioDTO> getAllPortfolios(Pageable pageable) {
+        return portfolioRepository.findAll(pageable).map(portfolioMapper::toDTO);
+    }
+
+    @Transactional
+    public PortfolioDTO getPortfolioById(Integer portfolioid) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioid)
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        return portfolioMapper.toDTO(portfolio);
+    }
+
+    @Transactional
+    public Page<PortfolioDTO> getPortfoliosByUserId(Integer userid, Pageable pageable) {
+        User user = userRepository.findById(userid)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return portfolioRepository.findByUser(user, pageable).map(portfolioMapper::toDTO);
+
+    }
+
+    @Transactional
+    public void deletePortfolioById(Integer portfolioid) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioid)
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        transactionRepository.deleteAllByPortfolio(portfolio);
+        tradeAlertRepository.deleteAllByPortfolio(portfolio);
+
+        portfolioAssetRepository.deleteAllByPortfolio(portfolio);
+        portfolioRepository.delete(portfolio);
+    }
+
+    @Transactional
+    public PortfolioDTO updatePortfolio(Integer portfolioId, UpdatePortfolioRequest request) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            portfolio.setName(request.getName());
+            portfolio.setUpdatedAt(LocalDateTime.now());
+            portfolioRepository.save(portfolio);
+        }
+        return portfolioMapper.toDTO(portfolio);
     }
 }

@@ -13,9 +13,9 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
 
     Page<Transaction> findByUser(User user, Pageable pageable);
-
     Page<Transaction> findByUserAndPortfolio(User user, Portfolio portfolio, Pageable pageable);
     void deleteAllByUser(User user);
+    void deleteAllByPortfolio(Portfolio portfolio);
     Page<Transaction> findByPortfolio(Portfolio portfolio, Pageable pageable);
     List<Transaction> findByAmountGreaterThan(BigDecimal amount);
     List<Transaction> findByTimestampBetween(User user, LocalDateTime end);

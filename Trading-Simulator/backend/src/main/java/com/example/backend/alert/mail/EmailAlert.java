@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class EmailAlert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer alertId;
+    private Integer alertid;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userid", nullable = false)
