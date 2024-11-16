@@ -24,7 +24,7 @@ const TradeAlertList = ({ tradeAlerts, loading, error, onTradeAlertDeactivated, 
           <div className="header-cell">Alert Type</div>
           <div className="header-cell">Target Price / Change</div>
           <div className="header-cell">Trade Amount</div>
-          <div className="header-cell">Trigger</div>
+          <div className="header-cell">Actions</div>
         </div>
 
         <div className="table-body">

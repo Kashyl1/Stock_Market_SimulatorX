@@ -1,6 +1,4 @@
 .table-container {
-  width: 115%;
-
   margin: 0 auto;
   border-collapse: collapse;
   padding: 20px;
@@ -116,7 +114,7 @@ text-decoration: none;
 
 
 .search-input {
-  width: 100%;
+  width: 98.5%;
   padding: 10px;
   margin-bottom: 20px;
   border: 2px solid #d4af37;

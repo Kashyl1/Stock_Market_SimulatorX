@@ -1,0 +1,93 @@
+.user-settings {
+  display: flex;
+  align-items: flex-start;
+  padding: 30px;
+}
+
+.user-settings h2 {
+  color: #d4af37;
+  font-family: 'Cinzel', serif;
+  margin-bottom: 30px;
+  font-size: 2em;
+}
+
+
+.user-settings-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  color: #ffffff;
+  font-family: 'Cinzel', serif;
+  margin-left: 20px;
+}
+
+.input-group-settings {
+  margin-bottom: 25px;
+}
+
+.input-group-settings label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  color: #ffffff;
+}
+
+.input-group-settings input {
+  width: 80%;
+  padding: 10px;
+  font-size: 0.9em;
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+
+.input-group-settings input:focus {
+  border-color: #c09c31;
+  background-color: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.user-settings-form button {
+  width: 40%;
+  padding: 15px;
+  background-color: #d4af37;
+  font-family: 'Cinzel', serif;
+  font-size: 1.2em;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.user-settings-form p {
+  margin-bottom: 10px;
+  font-size: 1.2em;
+
+}
+
+.user-settings-form button:hover {
+  background-color: #c09c31;
+}
+
+.user-settings-form .success-message {
+  color: #4caf50;
+  font-size: 1em;
+  margin-top: 15px;
+  text-align: left;
+}
+
+.user-settings-form .error-message {
+  color: #ff4d4f;
+  font-size: 1em;
+  margin-top: 15px;
+  text-align: left;
+}
+
+.error-input {
+  border-color: #ff4d4f;
+}

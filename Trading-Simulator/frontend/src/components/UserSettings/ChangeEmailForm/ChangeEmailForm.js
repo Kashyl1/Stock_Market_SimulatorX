@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { changeEmail } from '../../../services/UserSettings';
 import { useNavigate } from 'react-router-dom';
-import './ChangeEmailForm.css';
+import './UserSettingForms.css';
 
 const ChangeEmailForm = ({ setIsLoggedIn }) => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -43,8 +43,8 @@ const ChangeEmailForm = ({ setIsLoggedIn }) => {
   };
 
   return (
-    <form onSubmit={handleChangeEmail} className="change-email-form">
-      <div className="input-group">
+    <form onSubmit={handleChangeEmail} className="user-settings-form">
+      <div className="input-group-settings">
         <label htmlFor="currentPassword">Current Password</label>
         <input
           type="password"
@@ -54,7 +54,7 @@ const ChangeEmailForm = ({ setIsLoggedIn }) => {
           required
         />
       </div>
-      <div className="input-group">
+      <div className="input-group-settings">
         <label htmlFor="newEmail">New Email</label>
         <input
           type="email"

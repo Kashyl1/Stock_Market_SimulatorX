@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { changePassword } from '../../../services/UserSettings';
-import './ChangePasswordForm.css';
+
 
 const ChangePasswordForm = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -83,8 +83,8 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <form onSubmit={handleChangePassword} className="change-password-form">
-      <div className="input-group">
+    <form onSubmit={handleChangePassword} className="user-settings-form">
+      <div className="input-group-settings">
         <label htmlFor="currentPassword">Current Password</label>
         <input
           type="password"
@@ -96,7 +96,7 @@ const ChangePasswordForm = () => {
         />
         {errors.currentPassword && <div className="error-message">{errors.currentPassword}</div>}
       </div>
-      <div className="input-group">
+      <div className="input-group-settings">
         <label htmlFor="newPassword">New Password</label>
         <input
           type="password"
@@ -108,7 +108,7 @@ const ChangePasswordForm = () => {
         />
         {errors.newPassword && <div className="error-message">{errors.newPassword}</div>}
       </div>
-      <div className="input-group">
+      <div className="input-group-settings">
         <label htmlFor="confirmNewPassword">Confirm New Password</label>
         <input
           type="password"
