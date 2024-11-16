@@ -35,6 +35,10 @@
   background-color: #b58c2e;
 }
 
+.tabs {
+  margin-left: -5px;
+}
+
 .tabs button {
   font-family: 'Cinzel', serif;
   font-size: 1rem;

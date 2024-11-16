@@ -10,21 +10,16 @@ const HistoryPage = () => {
   const fetchTransactionHistory = async () => {
     setHistoryLoading(true);
     try {
-
       const response = await getTransactionHistory();
-      console.log('Response from API:', response);
-
 
       if (response.content && Array.isArray(response.content)) {
         setTransactionHistory(response.content);
-        console.log('Transactions:', response.content);
       } else {
-        console.log('No transactions in response content.');
+        console.error('No transactions in response content.');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to fetch transaction history.';
       setHistoryError(errorMessage);
-      console.error('Error fetching transaction history:', errorMessage);
     } finally {
       setHistoryLoading(false);
     }
@@ -34,10 +29,11 @@ const HistoryPage = () => {
     fetchTransactionHistory();
   }, []);
 
-return (
+  return (
     <div className="main-page">
       <Sidebar />
       <div className="portfolio-details">
+        <h1>Full History</h1>
         {historyLoading && <p>Loading...</p>}
         {historyError && <p className="error">{historyError}</p>}
 

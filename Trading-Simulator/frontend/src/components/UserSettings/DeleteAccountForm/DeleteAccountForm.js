@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { deleteAccount } from '../../../services/UserSettings';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
-import './DeleteAccountForm.css';
+
 
 const DeleteAccountForm = ({ setIsLoggedIn }) => {
   const [confirmText, setConfirmText] = useState('');
@@ -54,9 +54,9 @@ const DeleteAccountForm = ({ setIsLoggedIn }) => {
     };
 
   return (
-    <form onSubmit={handleDeleteAccount} className="delete-account-form">
+    <form onSubmit={handleDeleteAccount} className="user-settings-form">
       <p>To delete your account, please type "Delete {userEmail}" below to confirm.</p>
-      <div className="input-group">
+      <div className="input-group-settings">
         <input
           type="text"
           value={confirmText}

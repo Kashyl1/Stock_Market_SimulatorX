@@ -2,7 +2,7 @@ import React from 'react';
 import AvailableCurrencies from '../../components/Currencies/AvailableCurrencies/AvailableCurrencies';
 import '../../components/Currencies/AvailableCurrencies/AvailableCurrencies.css';
 import Sidebar from '../../pages/Sidebar/Sidebar';
-
+import './CurrenciesPage.css';
 
 const CurrenciesPage = () => {
   return (
