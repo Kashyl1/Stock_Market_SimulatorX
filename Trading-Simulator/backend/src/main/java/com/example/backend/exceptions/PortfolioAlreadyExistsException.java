@@ -1,6 +1,13 @@
 package com.example.backend.exceptions;
 
-public class PortfolioAlreadyExistsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+/**
+ * Thrown when a user tries to create a portfolio that already exists.
+ */
+@ResponseStatus(HttpStatus.CONFLICT)
+public class PortfolioAlreadyExistsException extends AppException {
     public PortfolioAlreadyExistsException(String message) {
         super(message);
     }

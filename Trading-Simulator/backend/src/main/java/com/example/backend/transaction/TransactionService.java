@@ -11,6 +11,8 @@ import com.example.backend.portfolio.PortfolioAssetRepository;
 import com.example.backend.portfolio.PortfolioRepository;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "Transaction Service", description = "Service for handling transactions such as buying and selling assets")
 public class TransactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
@@ -41,6 +44,7 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
     private final VerificationService verificationService;
 
+    @Operation(summary = "Show assets", description = "Processes the asset show")
     public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
         try {
             Page<Currency> currencies = currencyRepository.findAll(pageable);
@@ -68,6 +72,7 @@ public class TransactionService {
 
 
     @Transactional
+    @Operation(summary = "Buy an asset", description = "Processes the purchase of an asset")
     public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD, BigDecimal amountOfCurrency, User user) {
 
         BigDecimal finalAmountInUSD = null;
@@ -201,6 +206,7 @@ public class TransactionService {
     }
 
     @Transactional
+    @Operation(summary = "Sell an asset", description = "Processes the sale of an asset")
     public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency, BigDecimal priceInUSD, User user) {
 
         BigDecimal finalAmountOfCurrency = null;
@@ -314,6 +320,7 @@ public class TransactionService {
         }
     }
 
+    @Operation(summary = "Show Transaction history for user", description = "Processes the transaction history show by user")
     public Page<TransactionHistoryDTO> getTransactionHistory(Pageable pageable) {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
@@ -321,6 +328,7 @@ public class TransactionService {
         return mapTransactionsToDTO(transactions);
     }
 
+    @Operation(summary = "Show Transaction history for portfolio", description = "Processes the transaction history show by portfolio")
     public Page<TransactionHistoryDTO> getTransactionHistoryByPortfolio(Integer portfolioid, Pageable pageable) {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
@@ -333,6 +341,7 @@ public class TransactionService {
         return transactions.map(transactionMapper::toDTO);
     }
 
+    @Operation(summary = "Get portfolio by user ID (admin)", description = "Show user portfolio (admin use)")
     @Transactional
     public Portfolio getPortfolioByidAndUser(Integer portfolioid, User user) {
         if (user == null) {
@@ -342,12 +351,14 @@ public class TransactionService {
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
     }
 
+    @Operation(summary = "Get all transactions", description = "Show all transactions that have been made (admin use)")
     @Transactional(readOnly = true)
     public Page<TransactionHistoryDTO> getAllTransactions(Pageable pageable) {
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         return mapTransactionsToDTO(transactions);
     }
 
+    @Operation(summary = "Get all user transactions", description = "Show all user transactions (admin use)")
     @Transactional(readOnly = true)
     public Page<TransactionHistoryDTO> getTransactionsByUser(Integer userid, Pageable pageable) {
         User user = userRepository.findById(userid)
@@ -356,6 +367,7 @@ public class TransactionService {
         return mapTransactionsToDTO(transactions);
     }
 
+    @Operation(summary = "Get transaction by user ID (admin)", description = "Show user transactions by ID (admin use)")
     @Transactional(readOnly = true)
     public TransactionHistoryDTO getTransactionById(Integer transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
@@ -363,6 +375,7 @@ public class TransactionService {
         return transactionMapper.toDTO(transaction);
     }
 
+    @Operation(summary = "Get transaction by portfolio ID (admin)", description = "Show user transaction by portfolio ID (admin use)")
     @Transactional(readOnly = true)
     public Page<TransactionHistoryDTO> getTransactionsByPortfolio(Integer portfolioid, Pageable pageable) {
         Portfolio portfolio = portfolioRepository.findById(portfolioid)
@@ -371,6 +384,7 @@ public class TransactionService {
         return mapTransactionsToDTO(transactions);
     }
 
+    @Operation(summary = "Mark transaction as suspicious (admin)", description = "Admin can mark user transaction as suspicious (admin use)")
     @Transactional
     public void markTransactionAsSuspicious(Integer transactionid, boolean suspicious) {
         Transaction transaction = transactionRepository.findById(transactionid)
@@ -388,6 +402,7 @@ public class TransactionService {
         }
     }
 
+    @Operation(summary = "Get all suspicious transactions (admin)", description = "Show suspicious transactions (admin use)")
     @Transactional(readOnly = true)
     public List<TransactionHistoryDTO> getSuspiciousTransactions(BigDecimal thresholdAmount) {
         List<Transaction> transactions = transactionRepository.findByAmountGreaterThan(thresholdAmount);
@@ -396,6 +411,7 @@ public class TransactionService {
                 .collect(Collectors.toList());
     }
 
+    @Operation(summary = "Mark transaction as high value", description = "Update transaction and mark it as high value")
     @Transactional
     public void markHighValueTransaction(BigDecimal thresholdAmount) {
         List<Transaction> transactions = transactionRepository.findByAmountGreaterThan(thresholdAmount);
@@ -413,6 +429,7 @@ public class TransactionService {
         }
     }
 
+    @Operation(summary = "Mark transactions as frequent", description = "Mark transactions as frequent if user did over 100 transaction in 60 minutes")
     @Transactional
     public void markFrequentTransactions() {
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
@@ -434,6 +451,7 @@ public class TransactionService {
         }
     }
 
+    @Operation(summary = "Get data from transaction", description = "Get data about user and transaction to send email")
     public void getTransactionDataForEmail(Transaction transaction) {
         User user = transaction.getUser();
         Currency currency = transaction.getCurrency();

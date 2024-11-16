@@ -13,15 +13,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Tag(name = "Security Configuration", description = "Configuration for security and authorization")
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
+    @Tag(name = "Security Filter Chain", description = "Configures the security filter chain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -39,10 +43,14 @@ public class SecurityConfig {
                                 "/robots.txt",
                                 "/{spring:[\\w-]+}",
                                 "/**/{spring:[\\w-]+}",
-                                "/googlee83276a39faa6454.html"
+                                "/googlee83276a39faa6454.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
                         ).permitAll()
-                        .requestMatchers
-                                ("/api/portfolios/**",
+                        .requestMatchers(
+                                "/api/portfolios/**",
                                 "/api/transactions/**",
                                 "/api/user/balance",
                                 "/api/user-settings/**",

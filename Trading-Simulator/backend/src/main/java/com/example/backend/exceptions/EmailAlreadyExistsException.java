@@ -1,6 +1,13 @@
 package com.example.backend.exceptions;
 
-public class EmailAlreadyExistsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+/**
+ * Thrown when an email address is already associated with an existing account.
+ */
+@ResponseStatus(HttpStatus.CONFLICT)
+public class EmailAlreadyExistsException extends AppException {
     public EmailAlreadyExistsException(String message) {
         super(message);
     }

@@ -70,7 +70,6 @@ public class PortfolioControllerIntegrationTest {
 
         AuthenticationResponse tokenResponse = objectMapper.readValue(authResponse, AuthenticationResponse.class);
         String token = tokenResponse.getToken();
-
         CreatePortfolioRequest portfolioRequest = CreatePortfolioRequest.builder()
                 .name("My Portfolio")
                 .build();

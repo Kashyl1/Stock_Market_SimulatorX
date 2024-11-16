@@ -1,172 +1,67 @@
 package com.example.backend.exceptions;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(PortfolioNotFoundException.class)
-    public ResponseEntity<Object> handlePortfolioNotFoundException(PortfolioNotFoundException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                HttpStatus.BAD_REQUEST.value(),
+                errors
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(CurrencyNotFoundException.class)
-    public ResponseEntity<Object> handleCurrencyNotFoundException(CurrencyNotFoundException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ErrorResponse> handleAppException(AppException e) {
+        ResponseStatus responseStatus = AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class);
+        HttpStatus status = responseStatus != null ? responseStatus.value() : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                status.value(),
+                e.getMessage()
+        );
+
+        return new ResponseEntity<>(errorResponse, status);
     }
 
-    @ExceptionHandler(PriceNotAvailableException.class)
-    public ResponseEntity<Object> handlePriceNotAvailableException(PriceNotAvailableException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
+    @ExceptionHandler(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<Object> handleInsufficientFundsException(InsufficientFundsException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "An unexpected error occurred"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    @ExceptionHandler(AssetNotOwnedException.class)
-    public ResponseEntity<Object> handleAssetNotOwnedException(AssetNotOwnedException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InsufficientAssetAmountException.class)
-    public ResponseEntity<Object> handleInsufficientAssetAmountException(InsufficientAssetAmountException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(PortfolioAlreadyExistsException.class)
-    public ResponseEntity<Object> handlePortfolioAlreadyExistsException(PortfolioAlreadyExistsException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<Object> handleInvalidPasswordException(InvalidPasswordException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ConfirmationTextMismatchException.class)
-    public ResponseEntity<Object> handleConfirmationTextMismatchException(ConfirmationTextMismatchException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(AuthenticationFailedException.class)
-    public ResponseEntity<Object> handleAuthenticationFailedException(AuthenticationFailedException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(AccountNotVerifiedException.class)
-    public ResponseEntity<Object> handleAccountNotVerifiedException(AccountNotVerifiedException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(UserNotAuthenticatedException.class)
-    public ResponseEntity<Object> handleUserNotAuthenticatedException(UserNotAuthenticatedException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(EmailSendingException.class)
-    public ResponseEntity<Object> handleEmailSendingException(EmailSendingException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(InvalidVerificationTokenException.class)
-    public ResponseEntity<Object> handleInvalidVerificationTokenException(InvalidVerificationTokenException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EmailNotFoundException.class)
-    public ResponseEntity<Object> handleEmailNotFoundException(EmailNotFoundException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(AccountAlreadyVerifiedException.class)
-    public ResponseEntity<Object> handleAccountAlreadyVerifiedException(AccountAlreadyVerifiedException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(ResendEmailCooldownException.class)
-    public ResponseEntity<Object> handleResendEmailCooldownException(ResendEmailCooldownException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(InvalidAmountException.class)
-    public ResponseEntity<Object> handleInvalidAmountException(InvalidAmountException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<Object> handleInvalidToken(InvalidTokenException ex) {
-        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(AlertNotFoundException.class)
-    public ResponseEntity<Object> handleAlertNotFoundException(AlertNotFoundException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<Object> handleUnauthorizedActionException(UnauthorizedActionException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(InvalidAlertParametersException.class)
-    public ResponseEntity<Object> handleInvalidAlertParametersException(InvalidAlertParametersException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UnsupportedAlertTypeException.class)
-    public ResponseEntity<Object> handleUnsupportedAlertTypeException(UnsupportedAlertTypeException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(AccountBlockedException.class)
-    public ResponseEntity<Object> handleAccountBlocked(AccountBlockedException e) {
-        return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(TransactionNotFoundException.class)
-    public ResponseEntity<Object> handleTransactionNotFoundException(TransactionNotFoundException e) {
-            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-
-    private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status) {
-        Map<String, Object> errorBody = new HashMap<>();
-        errorBody.put("timestamp", LocalDateTime.now());
-        errorBody.put("message", message);
-        errorBody.put("status", status.value());
-
-        return new ResponseEntity<>(errorBody, status);
-    }
-
 }

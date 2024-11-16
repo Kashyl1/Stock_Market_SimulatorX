@@ -13,13 +13,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "User Service", description = "Service containing business logic for user operations")
 public class UserService {
 
     private final AuthenticationService authenticationService;
@@ -27,6 +27,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
+    @Operation(summary = "Add funds to account", description = "Adds a specified amount to the logged-in user's balance")
     public BalanceResponse addFunds(BigDecimal amount) {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
@@ -39,22 +40,25 @@ public class UserService {
         userRepository.save(user);
 
         return BalanceResponse.builder()
-                .message("Funds added successfully.")
+                .message("Funds have been added successfully.")
                 .balance(user.getBalance())
                 .build();
     }
 
+    @Operation(summary = "Get account balance", description = "Returns the current balance of the logged-in user")
     public BalanceResponse getBalance() {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
 
         return BalanceResponse.builder()
                 .balance(user.getBalance())
-                .message("Balance fetched successfully.")
+                .message("Balance retrieved successfully.")
                 .build();
     }
 
     @Transactional(readOnly = true)
+    @Operation(summary = "Get all users", description = "Returns a list of all users (admin only)")
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<UserDTO> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(user -> UserDTO.builder()
                 .id(user.getId())
@@ -72,6 +76,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @Operation(summary = "Get user by ID", description = "Returns user data based on ID (admin only)")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO getUserById(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -91,6 +97,8 @@ public class UserService {
     }
 
     @Transactional
+    @Operation(summary = "Update user", description = "Updates user data (admin only)")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO updateUser(Integer id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -124,6 +132,7 @@ public class UserService {
     }
 
     @Transactional
+    @Operation(summary = "Create admin account", description = "Creates a new user with admin role (admin only)")
     @PreAuthorize("hasRole('ADMIN')")
     public UserDTO createAdminUser(CreateAdminRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -154,10 +163,12 @@ public class UserService {
                 .updatedAt(admin.getUpdatedAt())
                 .balance(admin.getBalance())
                 .reservedBalance(admin.getReservedBalance())
+                .blocked(admin.isBlocked())
                 .build();
     }
 
     @Transactional
+    @Operation(summary = "Change user blocked status", description = "Sets the blocked status for a specified user (admin only)")
     @PreAuthorize("hasRole('ADMIN')")
     public void setUserBlockedStatus(Integer id, boolean blocked) {
         User user = userRepository.findById(id)
@@ -165,6 +176,4 @@ public class UserService {
         user.setBlocked(blocked);
         userRepository.save(user);
     }
-
-
 }

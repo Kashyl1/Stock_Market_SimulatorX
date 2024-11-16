@@ -59,7 +59,7 @@ public class EmailAlertService {
         emailAlertRepository.save(emailAlert);
 
         return EmailAlertResponse.builder()
-                .alertId(emailAlert.getAlertId())
+                .alertId(emailAlert.getAlertid())
                 .currencyId(currency.getCurrencyid())
                 .currencyName(currency.getName())
                 .emailAlertType(emailAlert.getEmailAlertType())
@@ -95,7 +95,7 @@ public class EmailAlertService {
 
     private EmailAlertResponse mapToResponse(EmailAlert emailAlert) {
         return EmailAlertResponse.builder()
-                .alertId(emailAlert.getAlertId())
+                .alertId(emailAlert.getAlertid())
                 .currencyId(emailAlert.getCurrency().getCurrencyid())
                 .currencyName(emailAlert.getCurrency().getName())
                 .emailAlertType(emailAlert.getEmailAlertType())
