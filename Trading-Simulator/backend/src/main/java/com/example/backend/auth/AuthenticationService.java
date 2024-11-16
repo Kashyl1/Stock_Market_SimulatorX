@@ -9,7 +9,6 @@ import com.example.backend.user.Role;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.LockedException;
@@ -20,11 +19,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "Authentication Service", description = "Service layer for authentication and registration")
 public class AuthenticationService {
 
     private final UserRepository userRepository;
@@ -34,6 +38,7 @@ public class AuthenticationService {
     private final VerificationService verificationService;
     private final EventTrackingService eventTrackingService;
 
+    @Operation(summary = "Register a new user", description = "Handles user registration and sends verification email")
     public AuthenticationResponse register(RegisterRequest request) {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
@@ -63,6 +68,7 @@ public class AuthenticationService {
                 .build();
     }
 
+    @Operation(summary = "Authenticate a user", description = "Authenticates user credentials and returns JWT token")
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         try {
             authenticationManager.authenticate(
@@ -91,11 +97,13 @@ public class AuthenticationService {
     }
 
     @Cacheable(value = "currentUser", key = "#email")
+    @Operation(summary = "Get current user", description = "Retrieves the current authenticated user by email")
     public User getCurrentUser(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    @Operation(summary = "Get current user email", description = "Retrieves the email of the current authenticated user")
     public String getCurrentUserEmail() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -106,12 +114,12 @@ public class AuthenticationService {
         }
     }
 
+    @Operation(summary = "Reset password", description = "Resets the user's password using the provided token")
     public void resetPassword(String token, String newPassword) {
         User user = userRepository.findByPasswordResetToken(token)
                 .orElseThrow(() -> new InvalidTokenException("Invalid password reset token"));
 
         user.setPassword(passwordEncoder.encode(newPassword));
-
         user.setPasswordResetToken(null);
 
         userRepository.save(user);

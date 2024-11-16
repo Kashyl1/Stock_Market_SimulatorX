@@ -2,11 +2,9 @@ package com.example.backend.alert;
 
 import com.example.backend.alert.global.GlobalAlert;
 import com.example.backend.alert.global.GlobalAlertRepository;
-import com.example.backend.alert.global.GlobalAlertService;
 import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertRepository;
 import com.example.backend.currency.Currency;
-import com.example.backend.currency.CurrencyRepository;
 import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
@@ -17,17 +15,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.backend.alert.trade.*;
 import com.example.backend.portfolio.Portfolio;
 import com.example.backend.portfolio.PortfolioAsset;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+
 @Component
 @RequiredArgsConstructor
+@Tag(name = "Scheduled Alert Checker", description = "Checks and triggers alerts based on conditions")
 public class ScheduledAlertChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledAlertChecker.class);
@@ -39,15 +41,22 @@ public class ScheduledAlertChecker {
     private final TradeAlertService tradeAlertService;
     private final GlobalAlertRepository globalAlertRepository;
 
-
+    /**
+     * Checks all types of alerts at a fixed rate.
+     */
     @Scheduled(fixedRate = 1000 * 45)
+    @Operation(summary = "Check all alerts", description = "Scheduled method to check and trigger all types of alerts")
     public void checkAllAlerts() {
         checkEmailAlerts();
         checkTradeAlerts();
         checkGlobalAlerts();
     }
 
+    /**
+     * Checks email alerts and triggers them if conditions are met.
+     */
     @Transactional
+    @Operation(summary = "Check email alerts", description = "Checks email alerts and sends notifications if conditions are met")
     public void checkEmailAlerts() {
         List<EmailAlert> activeEmailAlerts = emailAlertRepository.findByActiveTrue();
 
@@ -111,7 +120,11 @@ public class ScheduledAlertChecker {
         }
     }
 
+    /**
+     * Checks trade alerts and executes trades if conditions are met.
+     */
     @Transactional
+    @Operation(summary = "Check trade alerts", description = "Checks trade alerts and executes trades if conditions are met")
     public void checkTradeAlerts() {
         List<TradeAlert> activeTradeAlerts = tradeAlertRepository.findByActiveTrue();
 
@@ -193,7 +206,11 @@ public class ScheduledAlertChecker {
         }
     }
 
+    /**
+     * Checks global alerts and sends notifications if scheduled time is reached.
+     */
     @Transactional
+    @Operation(summary = "Check global alerts", description = "Checks global alerts and sends notifications if scheduled time is reached")
     public void checkGlobalAlerts() {
         List<GlobalAlert> activeGlobalAlerts = globalAlertRepository.findAllByActiveTrue();
 

@@ -1,7 +1,6 @@
 package com.example.backend.usersetting;
 
 import com.example.backend.MailVerification.VerificationService;
-import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertRepository;
 import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
@@ -17,10 +16,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "User Setting Service", description = "Service for managing user settings")
 public class UserSettingService {
 
     private final UserRepository userRepository;
@@ -33,6 +36,7 @@ public class UserSettingService {
     private final TradeAlertRepository tradeAlertRepository;
     private final EmailAlertRepository emailAlertRepository;
 
+    @Operation(summary = "Change password", description = "Changes the user's password")
     public void changePassword(ChangePasswordRequest request) {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
@@ -46,6 +50,7 @@ public class UserSettingService {
     }
 
     @Transactional
+    @Operation(summary = "Delete user account", description = "Deletes the user's account and associated data")
     public String deleteUserAccount(String confirmText) {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
@@ -61,6 +66,7 @@ public class UserSettingService {
     }
 
     @Transactional
+    @Operation(summary = "Delete user by ID", description = "Deletes a user by their ID (admin use)")
     public void deleteUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -68,6 +74,7 @@ public class UserSettingService {
     }
 
     @Transactional
+    @Operation(summary = "Delete user completely", description = "Deletes the user and all associated data")
     public void deleteUserCompletely(User user) {
         transactionRepository.deleteAllByUser(user);
         emailAlertRepository.deleteAllByUser(user);
@@ -76,13 +83,13 @@ public class UserSettingService {
         for (Portfolio portfolio : portfolios) {
             portfolioAssetRepository.deleteAllByPortfolio(portfolio);
             tradeAlertRepository.deleteAllByPortfolio(portfolio);
-
         }
         portfolioRepository.deleteAll(portfolios);
 
         userRepository.delete(user);
     }
 
+    @Operation(summary = "Change email", description = "Changes the user's email address and sends verification email")
     public ChangeEmailResponse changeEmail(ChangeEmailRequest request) {
         String currentEmail = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(currentEmail);
@@ -107,7 +114,7 @@ public class UserSettingService {
         }
 
         return ChangeEmailResponse.builder()
-                .message("Email changed successfully. Please verify your new email. You will be redirected to main page in 5 seconds...")
+                .message("Email changed successfully. Please verify your new email. You will be redirected to the main page in 5 seconds...")
                 .build();
     }
 }

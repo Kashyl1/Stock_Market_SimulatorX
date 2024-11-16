@@ -1,5 +1,6 @@
 package com.example.backend.admin;
 
+import com.example.backend.exceptions.ErrorResponse;
 import com.example.backend.user.UserDTO;
 import com.example.backend.user.UserService;
 import com.example.backend.usersetting.UserSettingService;
@@ -9,9 +10,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
+@Tag(name = "Admin User Controller", description = "Management of user accounts")
 public class AdminUserController {
 
     private final UserService userService;
@@ -19,42 +30,76 @@ public class AdminUserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
+    @Operation(summary = "Get all users", description = "Retrieve a paginated list of all users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
+    })
     public Page<UserDTO> getAllUsers(Pageable pageable) {
         return userService.getAllUsers(pageable);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public UserDTO getUserById(@PathVariable Integer id) {
+    @Operation(summary = "Get user by ID", description = "Retrieve a user by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public UserDTO getUserById(
+            @Parameter(description = "ID of the user to retrieve") @PathVariable Integer id) {
         return userService.getUserById(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable Integer id, @RequestBody UpdateUserRequest request) {
+    @Operation(summary = "Update a user", description = "Update a user's information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public UserDTO updateUser(
+            @Parameter(description = "ID of the user to update") @PathVariable Integer id,
+            @RequestBody UpdateUserRequest request) {
         return userService.updateUser(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
+    @Operation(summary = "Delete a user", description = "Delete a user by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> deleteUser(
+            @Parameter(description = "ID of the user to delete") @PathVariable Integer id) {
         userSettingService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create-admin")
+    @Operation(summary = "Create an admin user", description = "Create a new admin user account")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Admin user created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public UserDTO createAdmin(@RequestBody CreateAdminRequest request) {
         return userService.createAdminUser(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/block")
-    public ResponseEntity<String> blockUser(@PathVariable Integer id, @RequestBody BlockUserRequest request) {
+    @Operation(summary = "Block or unblock a user", description = "Set the blocked status of a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User status updated successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> blockUser(
+            @Parameter(description = "ID of the user to block/unblock") @PathVariable Integer id,
+            @RequestBody BlockUserRequest request) {
         userService.setUserBlockedStatus(id, request.isBlocked());
         String status = request.isBlocked() ? "blocked" : "unblocked";
         return ResponseEntity.ok("User has been " + status + " successfully");
     }
-
-
 }

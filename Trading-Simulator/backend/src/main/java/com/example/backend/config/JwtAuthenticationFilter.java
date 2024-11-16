@@ -16,15 +16,20 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.io.IOException;
+
 @Component
 @RequiredArgsConstructor
 @EnableWebSecurity
+@Tag(name = "JWT Authentication Filter", description = "Filter for JWT authentication")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     @Override
+    @Tag(name = "Do Filter Internal", description = "Filters incoming requests for JWT validation")
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)

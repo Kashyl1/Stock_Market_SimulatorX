@@ -10,6 +10,8 @@ import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.exceptions.UserNotFoundException;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -31,6 +32,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
+@Tag(name = "Verification Service", description = "Service for handling email verification and notifications")
 public class VerificationService {
     private final JavaMailSender mailSender;
 
@@ -41,14 +43,17 @@ public class VerificationService {
 
     private final UserRepository userRepository;
 
+    @Operation(summary = "Generate verification token", description = "Generates a unique verification token for email verification")
     public String verificationToken() {
         return UUID.randomUUID().toString();
     }
 
+    @Operation(summary = "Generate reset token", description = "Generates a unique token for password reset")
     public String generateResetToken() {
         return UUID.randomUUID().toString();
     }
 
+    @Operation(summary = "Send verification email", description = "Sends a verification email to the user")
     public void sendVerificationEmail(User user, String verificationToken) {
         String subject = "Activate Your Account at Royal Coin";
         String verificationUrl = baseUrl + "/verify?token=" + verificationToken;
@@ -101,6 +106,7 @@ public class VerificationService {
         }
     }
 
+    @Operation(summary = "Check resend email cooldown", description = "Checks if the user can resend the verification email")
     public boolean canResendEmail(String email) {
         Instant now = Instant.now();
         Instant lastSent = resendCooldowns.get(email);
@@ -111,6 +117,7 @@ public class VerificationService {
         return false;
     }
 
+    @Operation(summary = "Send password reset email", description = "Sends a password reset email to the user")
     public void sendPasswordResetEmail(User user, String resetToken) {
         String subject = "Password Reset Request";
         String resetUrl = baseUrl + "/reset-password?token=" + resetToken;
@@ -163,6 +170,7 @@ public class VerificationService {
         }
     }
 
+    @Operation(summary = "Send password reset link", description = "Initiates the password reset process by sending a reset link")
     public void sendPasswordResetLink(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User with the given email does not exist"));
@@ -178,6 +186,7 @@ public class VerificationService {
         }
     }
 
+    @Operation(summary = "Send alert email", description = "Sends an email alert to the user based on certain conditions")
     public void sendAlertEmail(User user, Currency currency, BigDecimal currentPrice, EmailAlert emailAlert) {
         String subject = "Price Alert for " + currency.getName();
 
@@ -232,6 +241,7 @@ public class VerificationService {
         }
     }
 
+    @Operation(summary = "Send trade executed email", description = "Sends an email notification when a trade is executed")
     public void sendTradeExecutedEmail(User user, Currency currency, TradeAlert tradeAlert, BigDecimal tradeAmountUSD, TradeAlertType tradeAlertType) {
         String subject = "Trade Executed: " + tradeAlertType + " " + currency.getName();
 
@@ -288,6 +298,7 @@ public class VerificationService {
         }
     }
 
+    @Operation(summary = "Send suspicious transaction email", description = "Sends an email alert if a suspicious transaction is detected")
     public void sendSuspiciousTransactionEmail(User user, Integer transactionId, Currency currency, BigDecimal amount, BigDecimal rate, String transactionType) {
         String subject = "Important: Suspicious Transaction Detected in Your Royal Coin Account";
         String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
@@ -345,6 +356,7 @@ public class VerificationService {
         }
     }
 
+    @Operation(summary = "Send global alert email", description = "Sends a global alert email to all users")
     public void sendGlobalAlertEmail(User user, GlobalAlert globalAlert) {
         String subject = "Important Notification from Royal Coin";
 

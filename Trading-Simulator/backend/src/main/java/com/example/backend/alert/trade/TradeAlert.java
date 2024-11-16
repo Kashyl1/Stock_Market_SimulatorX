@@ -6,6 +6,9 @@ import com.example.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+// Import Swagger annotations
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 
 @Data
@@ -14,38 +17,49 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @Table(name = "trade_alerts")
+@Schema(description = "Represents a trade alert set by a user")
 public class TradeAlert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique identifier of the trade alert", example = "1")
     private Integer tradeAlertid;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userid", nullable = false)
+    @Schema(description = "The user who created the alert")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "portfolioid", nullable = false)
+    @Schema(description = "The portfolio associated with the alert")
     private Portfolio portfolio;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currencyid", nullable = false)
+    @Schema(description = "The currency associated with the alert")
     private Currency currency;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Schema(description = "Type of the trade alert", example = "BUY")
     private TradeAlertType tradeAlertType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Schema(description = "Type of the condition", example = "PRICE")
     private AlertConditionType conditionType;
 
+    @Schema(description = "Value of the condition", example = "50000.0")
     private BigDecimal conditionValue;
 
+    @Schema(description = "Amount to trade", example = "0.1")
     private BigDecimal tradeAmount;
 
     @Column(nullable = false)
+    @Schema(description = "Indicates whether the alert is active", example = "true")
     private boolean active;
 
     @Column(nullable = false, precision = 30, scale = 10)
+    @Schema(description = "The initial price when the alert was created", example = "48000.0")
     private BigDecimal initialPrice;
 }

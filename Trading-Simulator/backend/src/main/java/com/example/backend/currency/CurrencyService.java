@@ -2,6 +2,8 @@ package com.example.backend.currency;
 
 import com.example.backend.transaction.CurrencyUpdate;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "Currency Service", description = "Service for updating and retrieving currency data")
 public class CurrencyService {
 
     private static final String BINANCE_API_URL = "https://api.binance.com/api/v3/ticker/24hr?symbol=";
@@ -39,7 +42,7 @@ public class CurrencyService {
             "ATOM", "RUNE", "BONK", "GRT", "SEI", "JUP", "FLOKI", "PYTH"
     );
 
-
+    @Operation(summary = "Update current prices", description = "Updates the current price of all tracked currencies")
     public void updateCurrentPrice() {
         List<Currency> currenciesToUpdate = new ArrayList<>();
         for (String symbol : CURRENCY_SYMBOLS) {
@@ -67,6 +70,7 @@ public class CurrencyService {
 
 
     @Transactional
+    @Operation(summary = "Update additional data", description = "Updates additional market data for all tracked currencies")
     public void updateAdditionalData() {
         List<Currency> currenciesToUpdate = new ArrayList<>();
         for (String symbol : CURRENCY_SYMBOLS) {
@@ -134,7 +138,7 @@ public class CurrencyService {
                 .volume(response.getVolume())
                 .build();
     }
-
+    @Operation(summary = "Update currency names and images", description = "Fetches and updates currency names and images from CoinGecko")
     public void updateCurrencyNamesAndImages() {
         String coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&symbols=";
         String symbols = String.join(",", CURRENCY_SYMBOLS);
