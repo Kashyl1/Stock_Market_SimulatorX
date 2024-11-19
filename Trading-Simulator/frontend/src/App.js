@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import LoginPage from './pages/Auth/LoginPage';
 import VerificationPage from './pages/Auth/VerificationPage';
 import RegisterPage from './pages/Auth/RegisterPage';
@@ -15,6 +16,7 @@ import PortfolioDetails from './components/Portfolios/PortfolioDetails/Portfolio
 import ResetPasswordForm from './components/Auth/ResetPasswordForm/ResetPasswordForm';
 import AlertsPage from './pages/AlertsPage/AlertsPage';
 import HistoryPage from './pages/HistoryPage/HistoryPage';
+import AdminPageUsers from './pages/AdminPage/AdminPageUsers';
 
 import axios from 'axios';
 
@@ -30,10 +32,19 @@ axios.interceptors.request.use(config => {
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    useEffect(() => {
-        const token = localStorage.getItem('jwtToken');
-        setIsLoggedIn(!!token);
-    }, [isLoggedIn]);
+    const [userRole, setUserRole] = useState(false);
+useEffect(() => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+        const decoded = jwtDecode(token);
+        setUserRole(decoded.role);
+        setIsLoggedIn(true);
+    } else {
+        setIsLoggedIn(false);
+        setUserRole(null);
+    }
+}, [isLoggedIn], [userRole] );
+
 
     const handleLogout = () => {
         localStorage.removeItem('jwtToken');
@@ -63,6 +74,7 @@ function App() {
                     <Route path="/portfolios/:id" element={<PortfolioDetails />} />
                     <Route path="/alerts" element={<PrivateRoute element = {AlertsPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/history" element={<PrivateRoute element = {HistoryPage} isLoggedIn={isLoggedIn} />} />
+                    <Route path="/adminpageusers" element={<PrivateRoute element={AdminPageUsers} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
                 </Routes>
             </div>
         </Router>

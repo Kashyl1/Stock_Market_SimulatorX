@@ -6,7 +6,6 @@
 html, body {
   height: 100%;
   font-family: 'Roboto', sans-serif;
-
 }
 
 body {
@@ -74,7 +73,6 @@ a:hover {
 .navbar, .nav-button {
   font-family: "Cinzel", serif;
   font-optical-sizing: auto;
-  font-weight: <weight>;
   font-style: normal;
 }
 
