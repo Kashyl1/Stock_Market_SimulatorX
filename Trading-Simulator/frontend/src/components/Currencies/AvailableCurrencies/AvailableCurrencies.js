@@ -148,7 +148,9 @@ const AvailableCurrencies = () => {
             <div className="cell">${formatPrice(currency.volume_24h)}</div>
             <div className="cell">${formatPrice(currency.volume_24h)}</div> {/* Tutaj kapitalizacja */}
             <div className="cell">
-              <button onClick={() => handleBuyClick(currency)}>Buy</button>
+              <button className="action-button" onClick={() => handleBuyClick(currency)}>
+                Buy
+              </button>
             </div>
           </div>
         ))}

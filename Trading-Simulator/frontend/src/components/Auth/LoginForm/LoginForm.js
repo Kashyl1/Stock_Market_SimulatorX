@@ -6,6 +6,7 @@ import './LoginForm.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import logo from '../../../assets/stock_logov2.png';
+import { jwtDecode } from 'jwt-decode';
 
 const LoginForm = ({ setIsLoggedIn }) => {
     const [email, setEmail] = useState('');
@@ -30,30 +31,40 @@ const LoginForm = ({ setIsLoggedIn }) => {
 
     const navigate = useNavigate();
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        setErrorMessage('');
-        setResendMessage('');
-        try {
-            const response = await login(email, password);
-            if (response.token) {
-                setIsLoggedIn(true);
-                navigate('/main');
-            }
-        } catch (error) {
-            setIsLoggedIn(false);
-            if (error.status === 403 && error.message === 'User is not verified') {
-                setErrorMessage('Your account is not verified.');
-                setResendMessage('Please verify your account.');
-                setCanResend(true);
-                setResendTimer(60);
-            } else if (error.status === 401 && error.message === 'Invalid email or password') {
-                setErrorMessage('Wrong email or password!');
-            } else {
-                setErrorMessage(error.message || 'An unexpected error occurred.');
-            }
-        }
-    };
+
+   const handleSubmit = async (event) => {
+       event.preventDefault();
+       setErrorMessage('');
+       setResendMessage('');
+       try {
+           const response = await login(email, password);
+           if (response.token) {
+               const decoded = jwtDecode(response.token);
+               localStorage.setItem('jwtToken', response.token);
+
+               if (decoded.role === 'ROLE_ROLE_ADMIN') {
+                   navigate('/adminpageusers');
+               } else {
+                   navigate('/main');
+               }
+
+               setIsLoggedIn(true);
+           }
+       } catch (error) {
+           setIsLoggedIn(false);
+           if (error.status === 403 && error.message === 'User is not verified') {
+               setErrorMessage('Your account is not verified.');
+               setResendMessage('Please verify your account.');
+               setCanResend(true);
+               setResendTimer(60);
+           } else if (error.status === 401 && error.message === 'Invalid email or password') {
+               setErrorMessage('Wrong email or password!');
+           } else {
+               setErrorMessage(error.message || 'An unexpected error occurred.');
+           }
+       }
+   };
+
 
     const handleResendVerification = async () => {
         if (canResend) {
