@@ -1,5 +1,6 @@
 package com.example.backend.mailverification;
 
+import com.example.backend.UserEvent.EventTrackingService;
 import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.user.User;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -27,6 +29,9 @@ class VerificationMailServiceTest {
 
     @InjectMocks
     private VerificationService verificationService;
+
+    @MockBean
+    private EventTrackingService eventTrackingService;
 
     @Test
     void verificationToken_ShouldReturnUniqueToken() {

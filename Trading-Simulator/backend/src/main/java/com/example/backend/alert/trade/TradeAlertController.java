@@ -9,11 +9,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Import Swagger annotations
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.parameters.RequestBody; // Swagger's RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,8 +31,6 @@ public class TradeAlertController {
             @ApiResponse(responseCode = "200", description = "Trade alert created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @RequestBody(description = "Details of the new trade alert", required = true,
-            content = @Content(schema = @Schema(implementation = CreateTradeAlertRequest.class)))
     public ResponseEntity<TradeAlertResponse> createTradeAlert(
             @RequestBody @Valid CreateTradeAlertRequest request) {
         TradeAlert tradeAlert = tradeAlertService.createTradeAlert(request);

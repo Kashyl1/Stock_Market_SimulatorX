@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -29,8 +28,6 @@ public class UserSettingController {
             @ApiResponse(responseCode = "200", description = "Password changed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @RequestBody(description = "Request to change the user's password", required = true,
-            content = @Content(schema = @Schema(implementation = ChangePasswordRequest.class)))
     public ResponseEntity<ChangePasswordResponse> changePassword(
             @RequestBody @Valid ChangePasswordRequest request) {
         userSettingService.changePassword(request);
@@ -45,8 +42,6 @@ public class UserSettingController {
             @ApiResponse(responseCode = "200", description = "Account deleted successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid confirmation text", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @RequestBody(description = "Request to delete the user's account", required = true,
-            content = @Content(schema = @Schema(implementation = DeleteAccountRequest.class)))
     public ResponseEntity<String> deleteAccount(
             @RequestBody DeleteAccountRequest request) {
         userSettingService.deleteUserAccount(request.getConfirmText());
@@ -59,8 +54,6 @@ public class UserSettingController {
             @ApiResponse(responseCode = "200", description = "Email changed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @RequestBody(description = "Request to change the user's email", required = true,
-            content = @Content(schema = @Schema(implementation = ChangeEmailRequest.class)))
     public ResponseEntity<ChangeEmailResponse> changeEmail(
             @RequestBody ChangeEmailRequest request) {
         userSettingService.changeEmail(request);

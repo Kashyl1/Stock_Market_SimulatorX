@@ -97,15 +97,9 @@ public class EmailAlertService {
     }
 
     @Transactional
-    public void deactivateAlert(Integer alertId) { // ehhhhh
+    public void deactivateAlert(Integer alertId) {
         EmailAlert emailAlert = emailAlertRepository.findById(alertId)
                 .orElseThrow(() -> new AlertNotFoundException("Alert not found"));
-
-        String email = authenticationService.getCurrentUserEmail();
-        User user = authenticationService.getCurrentUser(email);
-        if (!emailAlert.getUser().equals(user)) {
-            throw new UnauthorizedActionException("You do not have permission to modify this alert");
-        }
 
         emailAlert.setActive(false);
         emailAlertRepository.save(emailAlert);

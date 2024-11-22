@@ -1,5 +1,7 @@
 package com.example.backend.portfolio;
 
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.PortfolioAlreadyExistsException;
 import com.example.backend.exceptions.PortfolioNotFoundException;
@@ -30,6 +32,9 @@ class PortfolioServiceTest {
     @InjectMocks
     private PortfolioService portfolioService;
 
+    @Mock
+    private EventTrackingService eventTrackingService;
+
     private User user;
 
     @BeforeEach
@@ -57,6 +62,9 @@ class PortfolioServiceTest {
 
         when(portfolioRepository.save(any(Portfolio.class))).thenReturn(savedPortfolio);
 
+        // Mock eventTrackingService.logEvent
+        doNothing().when(eventTrackingService).logEvent(anyString(), any(UserEvent.EventType.class), anyMap());
+
         Portfolio result = portfolioService.createPortfolio(portfolioName);
 
         assertNotNull(result);
@@ -64,6 +72,7 @@ class PortfolioServiceTest {
         assertEquals(user, result.getUser());
 
         verify(portfolioRepository).save(any(Portfolio.class));
+        verify(eventTrackingService).logEvent(eq(user.getEmail()), eq(UserEvent.EventType.CREATE_PORTFOLIO), anyMap());
     }
 
     @Test
@@ -81,6 +90,7 @@ class PortfolioServiceTest {
         assertThrows(PortfolioAlreadyExistsException.class, () -> portfolioService.createPortfolio(portfolioName));
 
         verify(portfolioRepository, never()).save(any(Portfolio.class));
+        // No need to mock eventTrackingService here since save is never called
     }
 
     @Test
@@ -244,7 +254,7 @@ class PortfolioServiceTest {
         BigDecimal totalGainOrLoss = portfolioService.calculateTotalPortfolioGainOrLoss(portfolioId);
 
         assertNotNull(totalGainOrLoss);
-        assertEquals(new BigDecimal("50"), totalGainOrLoss);
+        assertEquals(new BigDecimal("50.00"), totalGainOrLoss);
     }
 
     @Test
