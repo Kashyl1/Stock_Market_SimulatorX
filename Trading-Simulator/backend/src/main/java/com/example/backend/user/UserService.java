@@ -2,6 +2,8 @@ package com.example.backend.user;
 
 import com.example.backend.admin.CreateAdminRequest;
 import com.example.backend.admin.UpdateUserRequest;
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.exceptions.InvalidAmountException;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class UserService {
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EventTrackingService eventTrackingService;
 
     @Transactional
     @Operation(summary = "Add funds to account", description = "Adds a specified amount to the logged-in user's balance")
@@ -38,6 +42,10 @@ public class UserService {
 
         user.setBalance(user.getBalance().add(amount));
         userRepository.save(user);
+
+        Map<String, Object> details = Map.of("amount", amount);
+        eventTrackingService.logEvent(email, UserEvent.EventType.DEPOSIT_FUNDS, details);
+
 
         return BalanceResponse.builder()
                 .message("Funds have been added successfully.")

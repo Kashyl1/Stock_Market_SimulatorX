@@ -1,5 +1,7 @@
 package com.example.backend.alert.mail;
 
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +23,7 @@ public class EmailAlertService {
     private final EmailAlertRepository emailAlertRepository;
     private final CurrencyRepository currencyRepository;
     private final AuthenticationService authenticationService;
+    private final EventTrackingService eventTrackingService;
 
     @Transactional
     public EmailAlertResponse createAlert(CreateEmailAlertRequest request) {
@@ -58,6 +62,20 @@ public class EmailAlertService {
 
         emailAlertRepository.save(emailAlert);
 
+        try {
+            Map<String, Object> details = Map.of(
+                    "alertId", emailAlert.getAlertid(),
+                    "currencyId", currency.getCurrencyid(),
+                    "currencySymbol", currency.getSymbol(),
+                    "emailAlertType", emailAlert.getEmailAlertType().toString(),
+                    "percentageChange", emailAlert.getPercentageChange() != null ? emailAlert.getPercentageChange() : "N/A",
+                    "targetPrice", emailAlert.getTargetPrice() != null ? emailAlert.getTargetPrice() : "N/A"
+            );
+            eventTrackingService.logEvent(email, UserEvent.EventType.CREATE_EMAIL_ALERT, details);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return EmailAlertResponse.builder()
                 .alertId(emailAlert.getAlertid())
                 .currencyId(currency.getCurrencyid())
@@ -79,7 +97,7 @@ public class EmailAlertService {
     }
 
     @Transactional
-    public void deactivateAlert(Integer alertId) {
+    public void deactivateAlert(Integer alertId) { // ehhhhh
         EmailAlert emailAlert = emailAlertRepository.findById(alertId)
                 .orElseThrow(() -> new AlertNotFoundException("Alert not found"));
 
@@ -117,6 +135,14 @@ public class EmailAlertService {
         if (!emailAlert.getUser().equals(user)) {
             throw new UnauthorizedActionException("You do not have permission to delete this alert");
         }
+
+        Map<String, Object> details = Map.of(
+                "alertId", alertId,
+                "currencyId", emailAlert.getCurrency().getCurrencyid(),
+                "currencySymbol", emailAlert.getCurrency().getSymbol(),
+                "emailAlertType", emailAlert.getEmailAlertType().toString()
+        );
+        eventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
 
         emailAlertRepository.delete(emailAlert);
     }

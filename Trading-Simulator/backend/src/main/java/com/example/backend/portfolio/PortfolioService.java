@@ -1,5 +1,7 @@
 package com.example.backend.portfolio;
 
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.admin.UpdatePortfolioRequest;
 import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
@@ -34,7 +36,7 @@ public class PortfolioService {
     private final PortfolioAssetRepository portfolioAssetRepository;
     private final TransactionRepository transactionRepository;
     private final TradeAlertRepository tradeAlertRepository;
-
+    private final EventTrackingService eventTrackingService;
 
     @Transactional
     @Operation(summary = "Create portfolio", description = "Creates a new portfolio for the authenticated user")
@@ -52,7 +54,16 @@ public class PortfolioService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return portfolioRepository.save(portfolio);
+        Portfolio savedPortfolio = portfolioRepository.save(portfolio);
+
+        Map<String, Object> details = Map.of(
+                "portfolioId", savedPortfolio.getPortfolioid(),
+                "name", name
+        );
+        eventTrackingService.logEvent(email, UserEvent.EventType.CREATE_PORTFOLIO, details);
+
+
+        return savedPortfolio;
     }
 
     @Transactional

@@ -1,6 +1,8 @@
 package com.example.backend.transaction;
 
 import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.exceptions.*;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
@@ -43,6 +45,7 @@ public class TransactionService {
     private final AuthenticationService authenticationService;
     private final TransactionMapper transactionMapper;
     private final VerificationService verificationService;
+    private final EventTrackingService eventTrackingService;
 
     @Operation(summary = "Show assets", description = "Processes the asset show")
     public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
@@ -77,6 +80,10 @@ public class TransactionService {
 
         BigDecimal finalAmountInUSD = null;
         BigDecimal finalAmountOfCurrency = null;
+        BigDecimal rate = null;
+
+        BigDecimal purchasedAmountInUSD = null;
+        BigDecimal purchasedAmountOfCurrency = null;
 
         if (amountInUSD != null && amountOfCurrency != null) {
             throw new IllegalArgumentException("Please provide either amountInUSD or amountOfCurrency, not both.");
@@ -100,13 +107,13 @@ public class TransactionService {
         Currency currency = currencyRepository.findBySymbol(currencySymbol.toUpperCase())
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found in database"));
 
-        BigDecimal rate = currency.getCurrentPrice();
+        rate = currency.getCurrentPrice();
         if (rate == null) {
             throw new PriceNotAvailableException("Current price not available for " + currencySymbol);
         }
 
         if (finalAmountInUSD != null) {
-            BigDecimal amountOfCurrencyCalculated = finalAmountInUSD.divide(rate, 8, BigDecimal.ROUND_HALF_UP);
+            BigDecimal amountOfCurrencyCalculated = finalAmountInUSD.divide(rate, 8, RoundingMode.HALF_UP);
 
             if (user.getBalance().compareTo(finalAmountInUSD) < 0) {
                 throw new InsufficientFundsException("Insufficient balance");
@@ -129,9 +136,7 @@ public class TransactionService {
             BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
                     .add(finalAmountInUSD);
 
-            BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
-                    ? amountOfCurrencyCalculated
-                    : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
+            BigDecimal newAveragePrice = totalCost.divide(totalAmount, 8, RoundingMode.HALF_UP);
 
             portfolioAsset.setAmount(totalAmount);
             portfolioAsset.setAveragePurchasePrice(newAveragePrice);
@@ -153,6 +158,9 @@ public class TransactionService {
                     .build();
 
             transactionRepository.save(transaction);
+
+            purchasedAmountInUSD = finalAmountInUSD;
+            purchasedAmountOfCurrency = amountOfCurrencyCalculated;
 
         } else if (finalAmountOfCurrency != null) {
             BigDecimal amountInUSDCalculated = finalAmountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
@@ -178,9 +186,7 @@ public class TransactionService {
             BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
                     .add(amountInUSDCalculated);
 
-            BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
-                    ? finalAmountOfCurrency
-                    : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
+            BigDecimal newAveragePrice = totalCost.divide(totalAmount, 8, RoundingMode.HALF_UP);
 
             portfolioAsset.setAmount(totalAmount);
             portfolioAsset.setAveragePurchasePrice(newAveragePrice);
@@ -202,8 +208,22 @@ public class TransactionService {
                     .build();
 
             transactionRepository.save(transaction);
+
+            purchasedAmountInUSD = amountInUSDCalculated;
+            purchasedAmountOfCurrency = finalAmountOfCurrency;
         }
+
+        Map<String, Object> details = Map.of(
+                "portfolioId", portfolioid,
+                "currencySymbol", currencySymbol,
+                "amountInUSD", purchasedAmountInUSD,
+                "amountOfCurrency", purchasedAmountOfCurrency,
+                "rate", rate
+        );
+
+        eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.BUY_CRYPTO, details);
     }
+
 
     @Transactional
     @Operation(summary = "Sell an asset", description = "Processes the sale of an asset")
@@ -211,6 +231,10 @@ public class TransactionService {
 
         BigDecimal finalAmountOfCurrency = null;
         BigDecimal finalPriceInUSD = null;
+        BigDecimal rate = null;
+
+        BigDecimal soldAmountInUSD = null;
+        BigDecimal soldAmountOfCurrency = null;
 
         if (amountOfCurrency != null && priceInUSD != null) {
             throw new IllegalArgumentException("Please provide either amountOfCurrency or priceInUSD, not both.");
@@ -234,11 +258,10 @@ public class TransactionService {
         Currency currency = currencyRepository.findById(currencyid)
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found in database"));
 
-        BigDecimal rate = currency.getCurrentPrice();
+        rate = currency.getCurrentPrice();
         if (rate == null) {
             throw new PriceNotAvailableException("Current price not available for currency ID: " + currencyid);
         }
-
 
         if (finalAmountOfCurrency != null) {
             BigDecimal amountInUSDCalculated = finalAmountOfCurrency.multiply(rate).setScale(8, RoundingMode.HALF_UP);
@@ -277,6 +300,9 @@ public class TransactionService {
                     .build();
 
             transactionRepository.save(transaction);
+
+            soldAmountInUSD = amountInUSDCalculated;
+            soldAmountOfCurrency = finalAmountOfCurrency;
 
         } else if (finalPriceInUSD != null) {
             BigDecimal amountOfCurrencyCalculated = finalPriceInUSD.divide(rate, 8, RoundingMode.HALF_UP);
@@ -317,8 +343,23 @@ public class TransactionService {
                     .build();
 
             transactionRepository.save(transaction);
+
+            soldAmountInUSD = finalPriceInUSD;
+            soldAmountOfCurrency = amountOfCurrencyCalculated;
         }
+
+        Map<String, Object> details = Map.of(
+                "portfolioId", portfolioid,
+                "currencyId", currencyid,
+                "currencySymbol", currency.getSymbol(),
+                "amountInUSD", soldAmountInUSD,
+                "amountOfCurrency", soldAmountOfCurrency,
+                "rate", rate
+        );
+
+        eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SELL_CRYPTO, details);
     }
+
 
     @Operation(summary = "Show Transaction history for user", description = "Processes the transaction history show by user")
     public Page<TransactionHistoryDTO> getTransactionHistory(Pageable pageable) {

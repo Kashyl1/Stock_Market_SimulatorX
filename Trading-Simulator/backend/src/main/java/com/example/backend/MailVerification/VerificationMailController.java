@@ -1,5 +1,7 @@
 package com.example.backend.MailVerification;
 
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.exceptions.AccountAlreadyVerifiedException;
 import com.example.backend.exceptions.EmailNotFoundException;
 import com.example.backend.exceptions.InvalidVerificationTokenException;
@@ -11,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +32,7 @@ public class VerificationMailController {
 
     private final UserRepository userRepository;
     private final VerificationService verificationService;
+    private final EventTrackingService eventTrackingService;
 
     @GetMapping("/verify")
     @Operation(summary = "Verify user account", description = "Verifies the user account using a token sent via email")
@@ -48,6 +53,14 @@ public class VerificationMailController {
         if (!user.isVerified()) {
             user.setVerified(true);
             userRepository.save(user);
+            try {
+                Map<String, Object> details = Map.of(
+                        "verificationToken", token.substring(0, 10) + "***"
+                );
+                eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.ACCOUNT_VERIFIED, details);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return ResponseEntity.ok("Verification successful. You will be redirected to login in few seconds.");
         } else {
             throw new AccountAlreadyVerifiedException("Account is already verified");
@@ -83,6 +96,15 @@ public class VerificationMailController {
         userRepository.save(user);
 
         verificationService.sendVerificationEmail(user, verificationToken);
+
+        try {
+            Map<String, Object> details = Map.of(
+                    "verificationToken", verificationToken.substring(0, 10) + "***"
+            );
+            eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.RESEND_VERIFICATION_EMAIL, details);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         ResendVerificationResponse response = new ResendVerificationResponse(true);
         return ResponseEntity.ok(response);

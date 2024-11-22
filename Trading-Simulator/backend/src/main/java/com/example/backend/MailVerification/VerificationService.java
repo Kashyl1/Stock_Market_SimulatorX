@@ -1,5 +1,7 @@
 package com.example.backend.MailVerification;
 
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.alert.global.GlobalAlert;
 import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertType;
@@ -35,13 +37,12 @@ import java.util.UUID;
 @Tag(name = "Verification Service", description = "Service for handling email verification and notifications")
 public class VerificationService {
     private final JavaMailSender mailSender;
-
+    private final UserRepository userRepository;
     private final Map<String, Instant> resendCooldowns = new HashMap<>();
+    private final EventTrackingService eventTrackingService;
 
     @Value("${app.base-url}")
     private String baseUrl;
-
-    private final UserRepository userRepository;
 
     @Operation(summary = "Generate verification token", description = "Generates a unique verification token for email verification")
     public String verificationToken() {
@@ -85,6 +86,14 @@ public class VerificationService {
         MimeMessage mimeMessage;
         try {
             mimeMessage = mailSender.createMimeMessage();
+            try {
+                Map<String, Object> details = Map.of(
+                        "verificationToken", verificationToken.substring(0, 10) + "***"
+                );
+                eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SEND_VERIFICATION_EMAIL, details);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (MailException e) {
             throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
         }
@@ -149,6 +158,14 @@ public class VerificationService {
         MimeMessage mimeMessage;
         try {
             mimeMessage = mailSender.createMimeMessage();
+            try {
+                Map<String, Object> details = Map.of(
+                        "resetToken", resetToken.substring(0, 10) + "***"
+                );
+                eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.PASSWORD_RESET_EMAIL_SENT, details);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (MailException e) {
             throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
         }
@@ -181,6 +198,14 @@ public class VerificationService {
 
         try {
             sendPasswordResetEmail(user, resetToken);
+            try {
+                Map<String, Object> details = Map.of(
+                        "resetToken", resetToken.substring(0, 10) + "***"
+                );
+                eventTrackingService.logEvent(email, UserEvent.EventType.PASSWORD_RESET_REQUESTED, details);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             throw new EmailSendingException("Failed to send password reset email");
         }
@@ -405,5 +430,4 @@ public class VerificationService {
             throw new EmailSendingException("Failed to send email to: " + user.getEmail());
         }
     }
-
 }

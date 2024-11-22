@@ -1,6 +1,8 @@
 package com.example.backend.alert.trade;
 
 import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
@@ -20,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +38,7 @@ public class TradeAlertService {
     private final PortfolioAssetRepository portfolioAssetRepository;
     private final TransactionRepository transactionRepository;
     private final VerificationService verificationService;
-
+    private final EventTrackingService eventTrackingService;
 
     @Transactional
     public TradeAlert createTradeAlert(CreateTradeAlertRequest request) {
@@ -83,7 +87,26 @@ public class TradeAlertService {
                 .initialPrice(currentPrice)
                 .build();
 
-        return tradeAlertRepository.save(tradeAlert);
+        TradeAlert savedTradeAlert = tradeAlertRepository.save(tradeAlert);
+
+        try {
+            Map<String, Object> details = Map.of(
+                    "tradeAlertId", savedTradeAlert.getTradeAlertid(),
+                    "portfolioId", portfolio.getPortfolioid(),
+                    "currencyId", currency.getCurrencyid(),
+                    "currencySymbol", currency.getSymbol(),
+                    "tradeAlertType", tradeAlert.getTradeAlertType().toString(),
+                    "conditionType", tradeAlert.getConditionType() != null ? tradeAlert.getConditionType().toString() : "N/A",
+                    "conditionValue", tradeAlert.getConditionValue() != null ? tradeAlert.getConditionValue() : "N/A",
+                    "tradeAmount", tradeAlert.getTradeAmount() != null ? tradeAlert.getTradeAmount() : "N/A"
+            );
+            eventTrackingService.logEvent(email, UserEvent.EventType.CREATE_TRADE_ALERT, details);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return savedTradeAlert;
     }
 
     @Transactional
@@ -121,7 +144,21 @@ public class TradeAlertService {
             userRepository.save(user);
         }
 
+        try {
+            Map<String, Object> details = Map.of(
+                    "tradeAlertId", tradeAlertId,
+                    "portfolioId", tradeAlert.getPortfolio().getPortfolioid(),
+                    "currencyId", tradeAlert.getCurrency().getCurrencyid(),
+                    "currencySymbol", tradeAlert.getCurrency().getSymbol(),
+                    "tradeAlertType", tradeAlert.getTradeAlertType() != null ? tradeAlert.getTradeAlertType().toString() : "N/A"
+            );
+            eventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         tradeAlertRepository.delete(tradeAlert);
+
     }
 
     @Transactional(readOnly = true)

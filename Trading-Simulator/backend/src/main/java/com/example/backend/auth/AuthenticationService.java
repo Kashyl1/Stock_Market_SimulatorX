@@ -1,7 +1,7 @@
 package com.example.backend.auth;
 
-import com.example.backend.analytics.EventTrackingService;
-import com.example.backend.analytics.LoginRegistrationEvent;
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.exceptions.*;
 import com.example.backend.MailVerification.VerificationService;
 import com.example.backend.config.JwtService;
@@ -61,7 +61,7 @@ public class AuthenticationService {
         userRepository.save(user);
         verificationService.sendVerificationEmail(user, verificationToken);
 
-        eventTrackingService.logEvent(request.getEmail(), LoginRegistrationEvent.EventType.REGISTRATION);
+        eventTrackingService.logEvent(request.getEmail(), UserEvent.EventType.REGISTRATION);
 
         return AuthenticationResponse.builder()
                 .message("Registered successfully. Please verify your email.")
@@ -89,7 +89,7 @@ public class AuthenticationService {
         }
         var jwtToken = jwtService.generateToken(user);
 
-        eventTrackingService.logEvent(request.getEmail(), LoginRegistrationEvent.EventType.LOGIN);
+        eventTrackingService.logEvent(request.getEmail(), UserEvent.EventType.LOGIN);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)

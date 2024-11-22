@@ -1,6 +1,6 @@
 package com.example.backend.auth;
 
-import com.example.backend.analytics.EventTrackingService;
+import com.example.backend.UserEvent.EventTrackingService;
 import com.example.backend.exceptions.AccountNotVerifiedException;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.MailVerification.VerificationService;

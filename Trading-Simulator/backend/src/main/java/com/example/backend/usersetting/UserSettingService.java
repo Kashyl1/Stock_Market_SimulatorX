@@ -1,6 +1,8 @@
 package com.example.backend.usersetting;
 
 import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.UserEvent.UserEvent;
 import com.example.backend.alert.mail.EmailAlertRepository;
 import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
@@ -20,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,7 @@ public class UserSettingService {
     private final VerificationService verificationService;
     private final TradeAlertRepository tradeAlertRepository;
     private final EmailAlertRepository emailAlertRepository;
+    private final EventTrackingService eventTrackingService;
 
     @Operation(summary = "Change password", description = "Changes the user's password")
     public void changePassword(ChangePasswordRequest request) {
@@ -47,6 +51,9 @@ public class UserSettingService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        eventTrackingService.logEvent(email, UserEvent.EventType.CHANGE_PASSWORD);
+
     }
 
     @Transactional
@@ -112,6 +119,12 @@ public class UserSettingService {
         } catch (Exception e) {
             throw new EmailSendingException("Failed to send verification email");
         }
+
+        Map<String, Object> details = Map.of(
+                "oldEmail", currentEmail,
+                "newEmail", newEmail
+        );
+        eventTrackingService.logEvent(newEmail, UserEvent.EventType.CHANGE_EMAIL, details);
 
         return ChangeEmailResponse.builder()
                 .message("Email changed successfully. Please verify your new email. You will be redirected to the main page in 5 seconds...")
