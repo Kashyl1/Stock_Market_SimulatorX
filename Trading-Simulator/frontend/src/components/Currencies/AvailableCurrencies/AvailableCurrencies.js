@@ -48,7 +48,7 @@ const AvailableCurrencies = () => {
 
   useEffect(() => {
     fetchAvailableAssets();
-    const interval = setInterval(fetchAvailableAssets, 60000);
+    const interval = setInterval(fetchAvailableAssets, 20000); // Trzeba to zmienić imo, bo co 20 sekund całą tabele refreshuje by zmienić ceny xd
     return () => clearInterval(interval);
   }, [page]);
 
