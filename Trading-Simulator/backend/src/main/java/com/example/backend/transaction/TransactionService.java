@@ -63,6 +63,7 @@ public class TransactionService {
                         assetMap.put("volume_24h", currency.getVolume().multiply(currency.getCurrentPrice()));
                         assetMap.put("image_url", currency.getImageUrl());
                         assetMap.put("currencyid", currency.getCurrencyid());
+                        assetMap.put("market_cap", currency.getMarketCap());
                         return assetMap;
                     })
                     .collect(Collectors.toList());

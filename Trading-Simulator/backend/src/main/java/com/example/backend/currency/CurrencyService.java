@@ -29,6 +29,7 @@ public class CurrencyService {
 
     private static final String BINANCE_API_URL = "https://api.binance.com/api/v3/ticker/24hr?symbol=";
     private static final String BINANCE_PRICE_API_URL = "https://api.binance.com/api/v3/ticker/price?symbol=";
+    private static final String COINGECKO_API_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&symbols=";
     private static final Logger logger = LoggerFactory.getLogger(CurrencyService.class);
     @Autowired
     private RestTemplate restTemplate;
@@ -118,6 +119,28 @@ public class CurrencyService {
                 logger.error("Failed to fetch data for currency symbol {}: {}", symbol, e.getMessage());
             }
         }
+
+        String symbols = String.join(",", CURRENCY_SYMBOLS).toLowerCase();
+        try {
+            JSONArray response = new JSONArray(restTemplate.getForObject(COINGECKO_API_URL + symbols, String.class));
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject currencyData = response.getJSONObject(i);
+                String symbol = currencyData.getString("symbol").toUpperCase();
+                BigDecimal marketCap = currencyData.getBigDecimal("market_cap");
+
+                Optional<Currency> existingCurrencyOpt = currencyRepository.findBySymbol(symbol);
+                if (existingCurrencyOpt.isPresent()) {
+                    Currency existingCurrency = existingCurrencyOpt.get();
+                    if (marketCap != null && !marketCap.equals(existingCurrency.getMarketCap())) {
+                        existingCurrency.setMarketCap(marketCap);
+                        currenciesToUpdate.add(existingCurrency);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to fetch market cap data from CoinGecko: {}", e.getMessage());
+        }
+
         if (!currenciesToUpdate.isEmpty()) {
             currencyRepository.saveAll(currenciesToUpdate);
             logger.info("Updated additional data for {} currencies", currenciesToUpdate.size());
@@ -140,9 +163,8 @@ public class CurrencyService {
     }
     @Operation(summary = "Update currency names and images", description = "Fetches and updates currency names and images from CoinGecko")
     public void updateCurrencyNamesAndImages() {
-        String coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&symbols=";
         String symbols = String.join(",", CURRENCY_SYMBOLS);
-        String url = coingeckoUrl + symbols;
+        String url = COINGECKO_API_URL + symbols;
         List<Currency> currenciesToUpdate = new ArrayList<>();
 
         try {

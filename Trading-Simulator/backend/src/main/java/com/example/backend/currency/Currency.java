@@ -64,4 +64,7 @@ public class Currency {
     @Column(nullable = true, length = 255)
     @Schema(description = "URL to the currency's image", example = "https://example.com/images/btc.png")
     private String imageUrl;
+
+    @Column(name = "market_cap")
+    private BigDecimal marketCap;
 }
