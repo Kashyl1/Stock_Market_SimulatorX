@@ -3,7 +3,6 @@ import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import BuyAssetModal from '../../Transaction/BuyAssetModal/BuyAssetModal';
 import debounce from 'lodash.debounce';
-import { adjustSidebarHeight } from '../../../pages/Currencies/adjustSidebarHeight';
 import './AvailableCurrencies.css';
 
 const AvailableCurrencies = () => {
@@ -82,9 +81,6 @@ const AvailableCurrencies = () => {
     debouncedSetSearchTerm(e.target.value);
   };
 
-  useEffect(() => {
-    adjustSidebarHeight();
-  }, [portfolios, searchTerm, page, data]);
 
   if (isLoading) {
     return <p>Loading...</p>;

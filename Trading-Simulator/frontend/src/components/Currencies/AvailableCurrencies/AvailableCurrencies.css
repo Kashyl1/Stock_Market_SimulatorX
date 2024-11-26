@@ -10,7 +10,7 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr 1fr ;
   background-color: rgba(255, 255, 255, 0.1);
   border-bottom: 2px solid #333;
   font-weight: bold;
@@ -22,7 +22,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr 1fr ;
   padding: 15px 0;
   border-bottom: 1px solid #333;
   align-items: center;
@@ -43,6 +43,7 @@ text-decoration: none;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s;
+  margin: 1px;
 }
 
 .cell button:hover {
@@ -123,6 +124,7 @@ text-decoration: none;
   background-color: rgba(0, 0, 0, 0.7);
   color: #fff;
   transition: border-color 0.3s;
+  margin-top: 5px;
 }
 
 .search-input::placeholder {
@@ -144,6 +146,8 @@ text-decoration: none;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 
@@ -157,3 +161,8 @@ text-decoration: none;
   background-color: rgba(212, 175, 55, 0.5);
   cursor: not-allowed;
 }
+
+.pagination-controls {
+  margin: 10px;
+}
+

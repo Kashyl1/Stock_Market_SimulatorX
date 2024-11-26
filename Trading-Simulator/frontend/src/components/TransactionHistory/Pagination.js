@@ -12,7 +12,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   };
 
   return (
-    <div className="pagination">
+    <div className="pagination-controls">
       <button onClick={handlePrevious} disabled={currentPage === 0}>
         Previous
       </button>

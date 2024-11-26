@@ -16,7 +16,9 @@ import PortfolioDetails from './components/Portfolios/PortfolioDetails/Portfolio
 import ResetPasswordForm from './components/Auth/ResetPasswordForm/ResetPasswordForm';
 import AlertsPage from './pages/AlertsPage/AlertsPage';
 import HistoryPage from './pages/HistoryPage/HistoryPage';
-import AdminPageUsers from './pages/AdminPage/AdminPageUsers';
+import AdminPageUsers from './pages/AdminPageUsers/AdminPageUsers';
+import AdminTransactionsPage from './pages/AdminTransactionsPage/AdminTransactionsPage';
+import AdminPortfoliosPage from './pages/AdminPortfoliosPage/AdminPortfoliosPage'
 
 import axios from 'axios';
 
@@ -75,6 +77,8 @@ useEffect(() => {
                     <Route path="/alerts" element={<PrivateRoute element = {AlertsPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/history" element={<PrivateRoute element = {HistoryPage} isLoggedIn={isLoggedIn} />} />
                     <Route path="/adminpageusers" element={<PrivateRoute element={AdminPageUsers} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
+                    <Route path="/admintransactions" element={<PrivateRoute element={AdminTransactionsPage} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
+                    <Route path="/adminportfolios" element={<PrivateRoute element={AdminPortfoliosPage} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
                 </Routes>
             </div>
         </Router>
