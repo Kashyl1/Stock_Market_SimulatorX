@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import '../../pages/Sidebar/Sidebar.css';
 import logo from '../../assets/stock_logov2.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faUsers, faWallet, faBriefcase, faCog, faBell, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUsers, faWallet, faBriefcase, faCog, faFolderOpen, faMoneyCheckAlt } from '@fortawesome/free-solid-svg-icons';
 
 const AdminSidebar = () => {
     return (
@@ -16,6 +16,12 @@ const AdminSidebar = () => {
               <div className="menu-links">
                 <NavLink to="/adminpageusers" className={({ isActive }) => (isActive ? 'active' : '')}>
                   <FontAwesomeIcon icon={faUsers} /> Users Page
+                </NavLink>
+                <NavLink to="/admintransactions" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faMoneyCheckAlt} /> Users Transactions
+                </NavLink>
+                <NavLink to="/adminportfolios" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <FontAwesomeIcon icon={faFolderOpen} /> Users Portfolios
                 </NavLink>
                 <NavLink to="/main" className={({ isActive }) => (isActive ? 'active' : '')}>
                   <FontAwesomeIcon icon={faHome} /> Main Page
