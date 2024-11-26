@@ -71,7 +71,7 @@ public class TransactionController {
         return ResponseEntity.ok("Asset sold successfully");
     }
 
-    @GetMapping("/available-assets")
+    @GetMapping("/available-assets") // DO ZMIANY
     @Operation(summary = "Get available assets", description = "Retrieves a list of available assets with their current prices")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Assets retrieved successfully")
     })
