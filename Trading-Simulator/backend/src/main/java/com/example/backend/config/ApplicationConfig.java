@@ -50,10 +50,4 @@ public class ApplicationConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    @Tag(name = "Rest Template", description = "Template for RESTful web services")
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 }

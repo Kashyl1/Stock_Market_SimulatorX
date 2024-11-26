@@ -19,14 +19,14 @@ public class ScheduledTasks {
         this.currencyService = currencyService;
     }
 
-    @Scheduled(fixedRate = 1000 * 60)
-    @Operation(summary = "Update current prices", description = "Scheduled task to update current prices every minute")
+    @Scheduled(fixedRate = 1000 * 10)
+    @Operation(summary = "Update current prices", description = "Scheduled task to update current prices every 10 seconds")
     public void updateCurrentPrices() {
         currencyService.updateCurrentPrice();
     }
 
-    @Scheduled(fixedRate = 1000 * 60 * 30)
-    @Operation(summary = "Update additional data", description = "Scheduled task to update additional data every 30 minutes")
+    @Scheduled(fixedRate = 1000 * 60 * 5)
+    @Operation(summary = "Update additional data", description = "Scheduled task to update additional data every 5 minutes")
     public void updateAdditionalData() {
         currencyService.updateAdditionalData();
     }

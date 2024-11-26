@@ -66,5 +66,6 @@ public class Currency {
     private String imageUrl;
 
     @Column(name = "market_cap")
+    @Schema(description = "Current market cap", example = "100000.00")
     private BigDecimal marketCap;
 }
