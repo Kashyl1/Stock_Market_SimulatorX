@@ -1,5 +1,6 @@
 package com.example.backend.currency;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,7 @@ import org.json.JSONArray;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -34,6 +36,8 @@ public class CurrencyService {
     private final CurrencyRepository currencyRepository;
     private final WebClient binanceClient;
     private final WebClient coingeckoClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     private static final List<String> CURRENCY_SYMBOLS = Arrays.asList(
             "BTC", "ETH", "XMR", "BNB", "SOL", "XRP", "DOGE", "TRX", "TON", "ADA",
@@ -113,54 +117,29 @@ public class CurrencyService {
                         .map(symbol -> symbol + "USDT")
                         .collect(Collectors.toList());
 
-                List<List<String>> batches = partitionList(symbolsToRequest, 30);
+                List<Mono<String>> monos = createApiRequests("/api/v3/ticker/price", symbolsToRequest, 30, binanceClient);
 
                 Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
                         .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
 
-                List<Mono<String>> monos = new ArrayList<>();
-
-                for (List<String> batch : batches) {
-                    String symbolsParam = new ObjectMapper().writeValueAsString(batch);
-
-                    Mono<String> responseMono = binanceClient.get()
-                            .uri(uriBuilder -> uriBuilder
-                                    .path("/api/v3/ticker/price")
-                                    .queryParam("symbols", symbolsParam)
-                                    .build())
-                            .retrieve()
-                            .bodyToMono(String.class);
-
-                    monos.add(responseMono);
-                }
-
                 List<Currency> currenciesToUpdate = Flux.merge(monos)
-                        .flatMap(responseStr -> {
-                            JSONArray responseArray = new JSONArray(responseStr);
-                            List<Currency> updatedCurrencies = new ArrayList<>();
+                        .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, currencyMap, jsonObject -> {
+                            String symbolWithUSDT = jsonObject.getString("symbol");
+                            String symbol = symbolWithUSDT.replace("USDT", "");
+                            BigDecimal currentPrice = jsonObject.getBigDecimal("price");
 
-                            for (int i = 0; i < responseArray.length(); i++) {
-                                JSONObject jsonObject = responseArray.getJSONObject(i);
-                                String symbolWithUSDT = jsonObject.getString("symbol");
-                                String symbol = symbolWithUSDT.replace("USDT", "");
-                                BigDecimal currentPrice = jsonObject.getBigDecimal("price");
-
-                                Currency existingCurrency = currencyMap.get(symbol);
-                                if (existingCurrency == null) {
-                                    logger.error("Currency {} not found in database. Skipping.", symbol);
-                                    continue;
-                                }
-
-                                synchronized (existingCurrency) {
-                                    if (currentPrice != null && (existingCurrency.getCurrentPrice() == null || currentPrice.compareTo(existingCurrency.getCurrentPrice()) != 0)) {
-                                        existingCurrency.setCurrentPrice(currentPrice);
-                                        updatedCurrencies.add(existingCurrency);
-                                    }
-                                }
+                            Currency existingCurrency = currencyMap.get(symbol);
+                            if (existingCurrency == null) {
+                                logger.error("Currency {} not found in database. Skipping.", symbol);
+                                return null;
                             }
 
-                            return Flux.fromIterable(updatedCurrencies);
-                        })
+                            if (currentPrice != null && (existingCurrency.getCurrentPrice() == null || currentPrice.compareTo(existingCurrency.getCurrentPrice()) != 0)) {
+                                existingCurrency.setCurrentPrice(currentPrice);
+                                return existingCurrency;
+                            }
+                            return null;
+                        })))
                         .collectList()
                         .block();
 
@@ -169,6 +148,8 @@ public class CurrencyService {
                     logger.info("Updated prices for {} currencies", currenciesToUpdate.size());
                 }
 
+            } catch (JsonProcessingException e) {
+                logger.error("Failed to serialize symbols for API request", e);
             } catch (Exception e) {
                 logger.error("Failed to update prices", e);
             }
@@ -184,94 +165,69 @@ public class CurrencyService {
                         .map(symbol -> symbol + "USDT")
                         .collect(Collectors.toList());
 
-                List<List<String>> batches = partitionList(symbolsToRequest, 50);
+                List<Mono<String>> monos = createApiRequests("/api/v3/ticker/24hr", symbolsToRequest, 50, binanceClient);
 
                 Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
                         .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
 
-                List<Mono<String>> monos = new ArrayList<>();
-
-                for (List<String> batch : batches) {
-                    String symbolsParam = new ObjectMapper().writeValueAsString(batch);
-
-                    Mono<String> responseMono = binanceClient.get()
-                            .uri(uriBuilder -> uriBuilder
-                                    .path("/api/v3/ticker/24hr")
-                                    .queryParam("symbols", symbolsParam)
-                                    .build())
-                            .retrieve()
-                            .bodyToMono(String.class);
-
-                    monos.add(responseMono);
-                }
-
                 List<Currency> currenciesToUpdate = Flux.merge(monos)
-                        .flatMap(responseStr -> {
-                            JSONArray responseArray = new JSONArray(responseStr);
-                            List<Currency> updatedCurrencies = new ArrayList<>();
+                        .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, currencyMap, jsonObject -> {
+                            String symbolWithUSDT = jsonObject.getString("symbol");
+                            String symbol = symbolWithUSDT.replace("USDT", "");
 
-                            for (int i = 0; i < responseArray.length(); i++) {
-                                JSONObject jsonObject = responseArray.getJSONObject(i);
-                                String symbolWithUSDT = jsonObject.getString("symbol");
-                                String symbol = symbolWithUSDT.replace("USDT", "");
-
-                                Currency existingCurrency = currencyMap.get(symbol);
-                                if (existingCurrency == null) {
-                                    logger.error("Currency {} not found in database. Skipping.", symbol);
-                                    continue;
-                                }
-
-                                boolean updated = false;
-
-                                BigDecimal priceChange = new BigDecimal(jsonObject.getString("priceChange"));
-                                if (!priceChange.equals(existingCurrency.getPriceChange())) {
-                                    existingCurrency.setPriceChange(priceChange);
-                                    updated = true;
-                                }
-
-                                BigDecimal priceChangePercent = new BigDecimal(jsonObject.getString("priceChangePercent"));
-                                if (!priceChangePercent.equals(existingCurrency.getPriceChangePercent())) {
-                                    existingCurrency.setPriceChangePercent(priceChangePercent);
-                                    updated = true;
-                                }
-
-                                BigDecimal highPrice = new BigDecimal(jsonObject.getString("highPrice"));
-                                if (!highPrice.equals(existingCurrency.getHighPrice())) {
-                                    existingCurrency.setHighPrice(highPrice);
-                                    updated = true;
-                                }
-
-                                BigDecimal lowPrice = new BigDecimal(jsonObject.getString("lowPrice"));
-                                if (!lowPrice.equals(existingCurrency.getLowPrice())) {
-                                    existingCurrency.setLowPrice(lowPrice);
-                                    updated = true;
-                                }
-
-                                BigDecimal volume = new BigDecimal(jsonObject.getString("volume"));
-                                if (!volume.equals(existingCurrency.getVolume())) {
-                                    existingCurrency.setVolume(volume);
-                                    updated = true;
-                                }
-
-                                if (updated) {
-                                    synchronized (existingCurrency) {
-                                        updatedCurrencies.add(existingCurrency);
-                                    }
-                                }
+                            Currency existingCurrency = currencyMap.get(symbol);
+                            if (existingCurrency == null) {
+                                logger.error("Currency {} not found in database. Skipping.", symbol);
+                                return null;
                             }
 
-                            return Flux.fromIterable(updatedCurrencies);
-                        })
+                            boolean updated = false;
+
+                            BigDecimal priceChange = new BigDecimal(jsonObject.getString("priceChange"));
+                            if (!priceChange.equals(existingCurrency.getPriceChange())) {
+                                existingCurrency.setPriceChange(priceChange);
+                                updated = true;
+                            }
+
+                            BigDecimal priceChangePercent = new BigDecimal(jsonObject.getString("priceChangePercent"));
+                            if (!priceChangePercent.equals(existingCurrency.getPriceChangePercent())) {
+                                existingCurrency.setPriceChangePercent(priceChangePercent);
+                                updated = true;
+                            }
+
+                            BigDecimal highPrice = new BigDecimal(jsonObject.getString("highPrice"));
+                            if (!highPrice.equals(existingCurrency.getHighPrice())) {
+                                existingCurrency.setHighPrice(highPrice);
+                                updated = true;
+                            }
+
+                            BigDecimal lowPrice = new BigDecimal(jsonObject.getString("lowPrice"));
+                            if (!lowPrice.equals(existingCurrency.getLowPrice())) {
+                                existingCurrency.setLowPrice(lowPrice);
+                                updated = true;
+                            }
+
+                            BigDecimal volume = new BigDecimal(jsonObject.getString("volume"));
+                            if (!volume.equals(existingCurrency.getVolume())) {
+                                existingCurrency.setVolume(volume);
+                                updated = true;
+                            }
+
+                            if (updated) {
+                                return existingCurrency;
+                            }
+                            return null;
+                        })))
                         .collectList()
                         .block();
 
-                assert currenciesToUpdate != null;
-                updateMarketCapData(currenciesToUpdate);
-
-                if (!currenciesToUpdate.isEmpty()) {
+                if (currenciesToUpdate != null && !currenciesToUpdate.isEmpty()) {
+                    updateMarketCapData(currenciesToUpdate);
                     currencyRepository.saveAll(currenciesToUpdate);
                     logger.info("Updated additional data for {} currencies", currenciesToUpdate.size());
                 }
+            } catch (JsonProcessingException e) {
+                logger.error("Failed to serialize symbols for API request", e);
             } catch (Exception e) {
                 logger.error("Failed to update additional data", e);
             }
@@ -323,9 +279,6 @@ public class CurrencyService {
             String symbols = String.join(",", symbolsList);
 
             try {
-                Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
-                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
-
                 String responseStr = coingeckoClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .path("/api/v3/coins/markets")
@@ -338,8 +291,10 @@ public class CurrencyService {
 
                 JSONArray response = new JSONArray(responseStr);
 
+                Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
+                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
+
                 List<Currency> currenciesToUpdate = new ArrayList<>();
-                logger.info("API Response: {}", responseStr);
 
                 for (int i = 0; i < response.length(); i++) {
                     JSONObject currencyData = response.getJSONObject(i);
@@ -357,12 +312,6 @@ public class CurrencyService {
                     }
                 }
 
-                logger.info("Currencies to update count: {}", currenciesToUpdate.size());
-                if (!currenciesToUpdate.isEmpty()) {
-                    currencyRepository.saveAll(currenciesToUpdate);
-                    logger.info("Successfully updated {} currencies", currenciesToUpdate.size());
-                }
-
                 if (!currenciesToUpdate.isEmpty()) {
                     currencyRepository.saveAll(currenciesToUpdate);
                     logger.info("Updated names and images for {} currencies", currenciesToUpdate.size());
@@ -372,4 +321,41 @@ public class CurrencyService {
             }
         });
     }
+
+    private List<Mono<String>> createApiRequests(String path, List<String> symbols, int batchSize, WebClient webClient) throws JsonProcessingException, JsonProcessingException {
+        List<List<String>> batches = partitionList(symbols, batchSize);
+        List<Mono<String>> monos = new ArrayList<>();
+
+        for (List<String> batch : batches) {
+            String symbolsParam = objectMapper.writeValueAsString(batch);
+            Mono<String> responseMono = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(path)
+                            .queryParam("symbols", symbolsParam)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(String.class);
+            monos.add(responseMono);
+        }
+
+        return monos;
+    }
+
+    private List<Currency> processApiResponse(String responseStr, Map<String, Currency> currencyMap, Function<JSONObject, Currency> updateFunction) {
+        JSONArray responseArray = new JSONArray(responseStr);
+        List<Currency> updatedCurrencies = new ArrayList<>();
+
+        for (int i = 0; i < responseArray.length(); i++) {
+            JSONObject jsonObject = responseArray.getJSONObject(i);
+            Currency updatedCurrency = updateFunction.apply(jsonObject);
+            if (updatedCurrency != null) {
+                synchronized (updatedCurrency) {
+                    updatedCurrencies.add(updatedCurrency);
+                }
+            }
+        }
+
+        return updatedCurrencies;
+    }
+
 }
