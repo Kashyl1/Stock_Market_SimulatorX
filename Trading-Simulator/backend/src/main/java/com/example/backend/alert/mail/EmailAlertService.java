@@ -1,7 +1,7 @@
 package com.example.backend.alert.mail;
 
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
@@ -23,7 +23,7 @@ public class EmailAlertService {
     private final EmailAlertRepository emailAlertRepository;
     private final CurrencyRepository currencyRepository;
     private final AuthenticationService authenticationService;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
 
     @Transactional
     public EmailAlertResponse createAlert(CreateEmailAlertRequest request) {
@@ -71,7 +71,7 @@ public class EmailAlertService {
                     "percentageChange", emailAlert.getPercentageChange() != null ? emailAlert.getPercentageChange() : "N/A",
                     "targetPrice", emailAlert.getTargetPrice() != null ? emailAlert.getTargetPrice() : "N/A"
             );
-            eventTrackingService.logEvent(email, UserEvent.EventType.CREATE_EMAIL_ALERT, details);
+            userEventTrackingService.logEvent(email, UserEvent.EventType.CREATE_EMAIL_ALERT, details);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,7 +136,7 @@ public class EmailAlertService {
                 "currencySymbol", emailAlert.getCurrency().getSymbol(),
                 "emailAlertType", emailAlert.getEmailAlertType().toString()
         );
-        eventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
+        userEventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
 
         emailAlertRepository.delete(emailAlert);
     }

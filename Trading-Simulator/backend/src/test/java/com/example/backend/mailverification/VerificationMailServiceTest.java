@@ -1,8 +1,8 @@
 package com.example.backend.mailverification;
 
-import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.userEvent.UserEventTrackingService;
 import com.example.backend.exceptions.EmailSendingException;
-import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.user.User;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class VerificationMailServiceTest {
     private VerificationService verificationService;
 
     @MockBean
-    private EventTrackingService eventTrackingService;
+    private UserEventTrackingService userEventTrackingService;
 
     @Test
     void verificationToken_ShouldReturnUniqueToken() {

@@ -1,6 +1,6 @@
 package com.example.backend.usersetting;
 
-import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.ConfirmationTextMismatchException;
 import com.example.backend.exceptions.EmailSendingException;

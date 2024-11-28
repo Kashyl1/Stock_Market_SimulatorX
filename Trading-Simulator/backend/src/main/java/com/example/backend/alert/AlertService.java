@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AlertService {
+public class AlertService { // Przypominajka, przemyśleć / usunać xd
 
     private final EmailAlertRepository emailAlertRepository;
     private final TradeAlertRepository tradeAlertRepository;

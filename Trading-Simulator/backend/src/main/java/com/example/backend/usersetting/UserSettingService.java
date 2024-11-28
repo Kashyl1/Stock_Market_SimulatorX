@@ -1,8 +1,10 @@
 package com.example.backend.usersetting;
 
-import com.example.backend.MailVerification.VerificationService;
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.adminEvent.AdminEvent;
+import com.example.backend.adminEvent.AdminEventTrackingService;
+import com.example.backend.mailVerification.VerificationService;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.alert.mail.EmailAlertRepository;
 import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
@@ -14,6 +16,7 @@ import com.example.backend.transaction.TransactionRepository;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +41,8 @@ public class UserSettingService {
     private final VerificationService verificationService;
     private final TradeAlertRepository tradeAlertRepository;
     private final EmailAlertRepository emailAlertRepository;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
+    private final AdminEventTrackingService adminEventTrackingService;
 
     @Operation(summary = "Change password", description = "Changes the user's password")
     public void changePassword(ChangePasswordRequest request) {
@@ -52,8 +56,7 @@ public class UserSettingService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        eventTrackingService.logEvent(email, UserEvent.EventType.CHANGE_PASSWORD);
-
+        userEventTrackingService.logEvent(email, UserEvent.EventType.CHANGE_PASSWORD);
     }
 
     @Transactional
@@ -73,10 +76,20 @@ public class UserSettingService {
     }
 
     @Transactional
-    @Operation(summary = "Delete user by ID", description = "Deletes a user by their ID (admin use)")
+    @Operation(summary = "Delete user by ID (admin)", description = "Deletes a user by their ID (admin use)")
     public void deleteUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
+        String adminEmail = authenticationService.getCurrentUserEmail();
+        Map<String, Object> details = Map.of(
+                "userId", user.getId(),
+                "userEmail", user.getEmail(),
+                "userName", user.getFirstname(),
+                "userLastName", user.getLastname()
+        );
+
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.DELETE_USER, details);
+
         deleteUserCompletely(user);
     }
 
@@ -124,7 +137,7 @@ public class UserSettingService {
                 "oldEmail", currentEmail,
                 "newEmail", newEmail
         );
-        eventTrackingService.logEvent(newEmail, UserEvent.EventType.CHANGE_EMAIL, details);
+        userEventTrackingService.logEvent(newEmail, UserEvent.EventType.CHANGE_EMAIL, details);
 
         return ChangeEmailResponse.builder()
                 .message("Email changed successfully. Please verify your new email. You will be redirected to the main page in 5 seconds...")

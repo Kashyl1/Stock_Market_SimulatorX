@@ -1,9 +1,9 @@
 package com.example.backend.auth;
 
-import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.userEvent.UserEventTrackingService;
 import com.example.backend.exceptions.AccountNotVerifiedException;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
-import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.config.JwtService;
 import com.example.backend.exceptions.InvalidTokenException;
 import com.example.backend.user.Role;
@@ -48,7 +48,7 @@ class AuthenticationServiceTest {
     private VerificationService verificationService;
 
     @Mock
-    private EventTrackingService eventTrackingService;
+    private UserEventTrackingService userEventTrackingService;
 
     @InjectMocks
     private AuthenticationService authenticationService;

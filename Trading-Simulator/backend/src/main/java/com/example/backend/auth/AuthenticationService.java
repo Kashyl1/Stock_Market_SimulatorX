@@ -1,9 +1,9 @@
 package com.example.backend.auth;
 
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.exceptions.*;
-import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.config.JwtService;
 import com.example.backend.user.Role;
 import com.example.backend.user.User;
@@ -36,7 +36,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final VerificationService verificationService;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
 
     @Operation(summary = "Register a new user", description = "Handles user registration and sends verification email")
     public AuthenticationResponse register(RegisterRequest request) {
@@ -61,7 +61,7 @@ public class AuthenticationService {
         userRepository.save(user);
         verificationService.sendVerificationEmail(user, verificationToken);
 
-        eventTrackingService.logEvent(request.getEmail(), UserEvent.EventType.REGISTRATION);
+        userEventTrackingService.logEvent(request.getEmail(), UserEvent.EventType.REGISTRATION);
 
         return AuthenticationResponse.builder()
                 .message("Registered successfully. Please verify your email.")
@@ -89,7 +89,7 @@ public class AuthenticationService {
         }
         var jwtToken = jwtService.generateToken(user);
 
-        eventTrackingService.logEvent(request.getEmail(), UserEvent.EventType.LOGIN);
+        userEventTrackingService.logEvent(request.getEmail(), UserEvent.EventType.LOGIN);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)

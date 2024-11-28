@@ -1,8 +1,8 @@
 package com.example.backend.mailverification;
 
-import com.example.backend.MailVerification.VerificationMailController;
-import com.example.backend.MailVerification.VerificationService;
-import com.example.backend.UserEvent.EventTrackingService;
+import com.example.backend.mailVerification.VerificationMailController;
+import com.example.backend.mailVerification.VerificationService;
+import com.example.backend.userEvent.UserEventTrackingService;
 import com.example.backend.config.JwtAuthenticationFilter;
 import com.example.backend.exceptions.*;
 import com.example.backend.user.User;
@@ -45,7 +45,7 @@ public class VerificationMailControllerTest {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @MockBean
-    private EventTrackingService eventTrackingService;
+    private UserEventTrackingService userEventTrackingService;
 
     @MockBean
     private JavaMailSender mailSender;

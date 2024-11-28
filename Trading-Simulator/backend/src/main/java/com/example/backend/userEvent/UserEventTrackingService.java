@@ -1,4 +1,4 @@
-package com.example.backend.UserEvent;
+package com.example.backend.userEvent;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class EventTrackingService {
+public class UserEventTrackingService {
 
     private final UserEventRepository eventRepository;
     private final ObjectMapper objectMapper;

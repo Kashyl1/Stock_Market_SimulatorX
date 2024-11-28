@@ -8,7 +8,7 @@ import com.example.backend.currency.Currency;
 import com.example.backend.exceptions.EmailSendingException;
 import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
-import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.example.backend.MailVerification;
+package com.example.backend.mailVerification;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

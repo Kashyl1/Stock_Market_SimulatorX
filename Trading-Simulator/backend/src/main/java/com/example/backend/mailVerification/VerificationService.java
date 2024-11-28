@@ -1,7 +1,7 @@
-package com.example.backend.MailVerification;
+package com.example.backend.mailVerification;
 
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.alert.global.GlobalAlert;
 import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertType;
@@ -39,7 +39,7 @@ public class VerificationService {
     private final JavaMailSender mailSender;
     private final UserRepository userRepository;
     private final Map<String, Instant> resendCooldowns = new HashMap<>();
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -90,7 +90,7 @@ public class VerificationService {
                 Map<String, Object> details = Map.of(
                         "verificationToken", verificationToken.substring(0, 10) + "***"
                 );
-                eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SEND_VERIFICATION_EMAIL, details);
+                userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SEND_VERIFICATION_EMAIL, details);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -162,7 +162,7 @@ public class VerificationService {
                 Map<String, Object> details = Map.of(
                         "resetToken", resetToken.substring(0, 10) + "***"
                 );
-                eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.PASSWORD_RESET_EMAIL_SENT, details);
+                userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.PASSWORD_RESET_EMAIL_SENT, details);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -202,7 +202,7 @@ public class VerificationService {
                 Map<String, Object> details = Map.of(
                         "resetToken", resetToken.substring(0, 10) + "***"
                 );
-                eventTrackingService.logEvent(email, UserEvent.EventType.PASSWORD_RESET_REQUESTED, details);
+                userEventTrackingService.logEvent(email, UserEvent.EventType.PASSWORD_RESET_REQUESTED, details);
             } catch (Exception e) {
                 e.printStackTrace();
             }

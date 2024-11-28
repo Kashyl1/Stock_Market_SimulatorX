@@ -1,7 +1,7 @@
-package com.example.backend.MailVerification;
+package com.example.backend.mailVerification;
 
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.exceptions.AccountAlreadyVerifiedException;
 import com.example.backend.exceptions.EmailNotFoundException;
 import com.example.backend.exceptions.InvalidVerificationTokenException;
@@ -32,7 +32,7 @@ public class VerificationMailController {
 
     private final UserRepository userRepository;
     private final VerificationService verificationService;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
 
     @GetMapping("/verify")
     @Operation(summary = "Verify user account", description = "Verifies the user account using a token sent via email")
@@ -57,7 +57,7 @@ public class VerificationMailController {
                 Map<String, Object> details = Map.of(
                         "verificationToken", token.substring(0, 10) + "***"
                 );
-                eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.ACCOUNT_VERIFIED, details);
+                userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.ACCOUNT_VERIFIED, details);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -101,7 +101,7 @@ public class VerificationMailController {
             Map<String, Object> details = Map.of(
                     "verificationToken", verificationToken.substring(0, 10) + "***"
             );
-            eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.RESEND_VERIFICATION_EMAIL, details);
+            userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.RESEND_VERIFICATION_EMAIL, details);
         } catch (Exception e) {
             e.printStackTrace();
         }
