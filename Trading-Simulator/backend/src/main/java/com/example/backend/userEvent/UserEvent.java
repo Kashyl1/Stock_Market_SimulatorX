@@ -1,4 +1,4 @@
-package com.example.backend.UserEvent;
+package com.example.backend.userEvent;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package com.example.backend.portfolio;
 
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.PortfolioAlreadyExistsException;
 import com.example.backend.exceptions.PortfolioNotFoundException;
@@ -33,7 +33,7 @@ class PortfolioServiceTest {
     private PortfolioService portfolioService;
 
     @Mock
-    private EventTrackingService eventTrackingService;
+    private UserEventTrackingService userEventTrackingService;
 
     private User user;
 
@@ -63,7 +63,7 @@ class PortfolioServiceTest {
         when(portfolioRepository.save(any(Portfolio.class))).thenReturn(savedPortfolio);
 
         // Mock eventTrackingService.logEvent
-        doNothing().when(eventTrackingService).logEvent(anyString(), any(UserEvent.EventType.class), anyMap());
+        doNothing().when(userEventTrackingService).logEvent(anyString(), any(UserEvent.EventType.class), anyMap());
 
         Portfolio result = portfolioService.createPortfolio(portfolioName);
 
@@ -72,7 +72,7 @@ class PortfolioServiceTest {
         assertEquals(user, result.getUser());
 
         verify(portfolioRepository).save(any(Portfolio.class));
-        verify(eventTrackingService).logEvent(eq(user.getEmail()), eq(UserEvent.EventType.CREATE_PORTFOLIO), anyMap());
+        verify(userEventTrackingService).logEvent(eq(user.getEmail()), eq(UserEvent.EventType.CREATE_PORTFOLIO), anyMap());
     }
 
     @Test

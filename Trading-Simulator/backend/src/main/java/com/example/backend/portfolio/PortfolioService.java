@@ -1,7 +1,9 @@
 package com.example.backend.portfolio;
 
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.adminEvent.AdminEvent;
+import com.example.backend.adminEvent.AdminEventTrackingService;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.admin.UpdatePortfolioRequest;
 import com.example.backend.alert.trade.TradeAlertRepository;
 import com.example.backend.auth.AuthenticationService;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
@@ -36,7 +39,8 @@ public class PortfolioService {
     private final PortfolioAssetRepository portfolioAssetRepository;
     private final TransactionRepository transactionRepository;
     private final TradeAlertRepository tradeAlertRepository;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
+    private final AdminEventTrackingService adminEventTrackingService;
 
     @Transactional
     @Operation(summary = "Create portfolio", description = "Creates a new portfolio for the authenticated user")
@@ -60,7 +64,7 @@ public class PortfolioService {
                 "portfolioId", savedPortfolio.getPortfolioid(),
                 "name", name
         );
-        eventTrackingService.logEvent(email, UserEvent.EventType.CREATE_PORTFOLIO, details);
+        userEventTrackingService.logEvent(email, UserEvent.EventType.CREATE_PORTFOLIO, details);
 
 
         return savedPortfolio;
@@ -168,6 +172,8 @@ public class PortfolioService {
     @Transactional
     @Operation(summary = "Get all portfolios (admin)", description = "Retrieves all portfolios (admin use)")
     public Page<PortfolioDTO> getAllPortfolios(Pageable pageable) {
+        String adminEmail = authenticationService.getCurrentUserEmail();
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.GET_ALL_PORTFOLIOS);
         return portfolioRepository.findAll(pageable).map(portfolioMapper::toDTO);
     }
 
@@ -190,9 +196,22 @@ public class PortfolioService {
 
     @Transactional
     @Operation(summary = "Delete portfolio by ID (admin)", description = "Deletes a portfolio by its ID (admin use)")
-    public void deletePortfolioById(Integer portfolioid) {
+    public void deletePortfolioById(Integer portfolioid) { // Przypominajka
         Portfolio portfolio = portfolioRepository.findById(portfolioid)
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+
+        String adminEmail = authenticationService.getCurrentUserEmail();
+
+        Map<String, Object> details = Map.of(
+                "portfolioId", portfolio.getPortfolioid(),
+                "portfolioName", portfolio.getName(),
+                "portfolioAssets", portfolio.getPortfolioAssets(),
+                "userPortfolioId", portfolio.getUser().getId(),
+                "userPortfolioEmail", portfolio.getUser().getEmail()
+        );
+
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.DELETE_PORTFOLIO_BY_ID, details);
+
         transactionRepository.deleteAllByPortfolio(portfolio);
         tradeAlertRepository.deleteAllByPortfolio(portfolio);
 
@@ -205,11 +224,25 @@ public class PortfolioService {
     public PortfolioDTO updatePortfolio(Integer portfolioId, UpdatePortfolioRequest request) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        String oldPortfolioName = portfolio.getName();
         if (request.getName() != null && !request.getName().isEmpty()) {
             portfolio.setName(request.getName());
             portfolio.setUpdatedAt(LocalDateTime.now());
             portfolioRepository.save(portfolio);
         }
+
+        String adminEmail = authenticationService.getCurrentUserEmail();
+
+        Map<String, Object> details = Map.of(
+                "oldPortfolioName", oldPortfolioName,
+                "newPortfolioName", request.getName(),
+                "portfolioId", portfolio.getPortfolioid(),
+                "userPortfolioId", portfolio.getUser().getId(),
+                "userPortfolioEmail", portfolio.getUser().getEmail()
+        );
+
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.UPDATE_PORTFOLIO, details);
+
         return portfolioMapper.toDTO(portfolio);
     }
 }

@@ -1,8 +1,8 @@
 package com.example.backend.alert.trade;
 
-import com.example.backend.MailVerification.VerificationService;
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.mailVerification.VerificationService;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public class TradeAlertService {
     private final PortfolioAssetRepository portfolioAssetRepository;
     private final TransactionRepository transactionRepository;
     private final VerificationService verificationService;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
 
     @Transactional
     public TradeAlert createTradeAlert(CreateTradeAlertRequest request) {
@@ -100,7 +99,7 @@ public class TradeAlertService {
                     "conditionValue", tradeAlert.getConditionValue() != null ? tradeAlert.getConditionValue() : "N/A",
                     "tradeAmount", tradeAlert.getTradeAmount() != null ? tradeAlert.getTradeAmount() : "N/A"
             );
-            eventTrackingService.logEvent(email, UserEvent.EventType.CREATE_TRADE_ALERT, details);
+            userEventTrackingService.logEvent(email, UserEvent.EventType.CREATE_TRADE_ALERT, details);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,7 +151,7 @@ public class TradeAlertService {
                     "currencySymbol", tradeAlert.getCurrency().getSymbol(),
                     "tradeAlertType", tradeAlert.getTradeAlertType() != null ? tradeAlert.getTradeAlertType().toString() : "N/A"
             );
-            eventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
+            userEventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
         } catch (Exception e) {
             e.printStackTrace();
         }

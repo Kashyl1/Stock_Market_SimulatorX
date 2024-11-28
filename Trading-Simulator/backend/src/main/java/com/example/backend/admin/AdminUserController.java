@@ -1,6 +1,8 @@
 package com.example.backend.admin;
 
+import com.example.backend.alert.trade.TradeAlertDTO;
 import com.example.backend.exceptions.ErrorResponse;
+import com.example.backend.user.User;
 import com.example.backend.user.UserDTO;
 import com.example.backend.user.UserService;
 import com.example.backend.usersetting.UserSettingService;
@@ -34,8 +36,9 @@ public class AdminUserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
     })
-    public Page<UserDTO> getAllUsers(Pageable pageable) {
-        return userService.getAllUsers(pageable);
+    public ResponseEntity<Page<UserDTO>> getAllUsers(Pageable pageable) {
+        Page<UserDTO> allUsers = userService.getAllUsers(pageable);
+        return ResponseEntity.ok(allUsers);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -45,9 +48,10 @@ public class AdminUserController {
             @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public UserDTO getUserById(
+    public ResponseEntity<UserDTO> getUserById(
             @Parameter(description = "ID of the user to retrieve") @PathVariable Integer id) {
-        return userService.getUserById(id);
+        UserDTO user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -58,10 +62,11 @@ public class AdminUserController {
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public UserDTO updateUser(
+    public ResponseEntity<UserDTO> updateUser(
             @Parameter(description = "ID of the user to update") @PathVariable Integer id,
             @RequestBody UpdateUserRequest request) {
-        return userService.updateUser(id, request);
+        UserDTO updatedUser = userService.updateUser(id, request);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -84,8 +89,9 @@ public class AdminUserController {
             @ApiResponse(responseCode = "200", description = "Admin user created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public UserDTO createAdmin(@RequestBody CreateAdminRequest request) {
-        return userService.createAdminUser(request);
+    public ResponseEntity<UserDTO> createAdmin(@RequestBody CreateAdminRequest request) {
+        UserDTO admin = userService.createAdminUser(request);
+        return ResponseEntity.ok(admin);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -98,8 +104,7 @@ public class AdminUserController {
     public ResponseEntity<String> blockUser(
             @Parameter(description = "ID of the user to block/unblock") @PathVariable Integer id,
             @RequestBody BlockUserRequest request) {
-        userService.setUserBlockedStatus(id, request.isBlocked());
-        String status = request.isBlocked() ? "blocked" : "unblocked";
-        return ResponseEntity.ok("User has been " + status + " successfully");
+        String answer = userService.setUserBlockedStatus(id, request.isBlocked());
+        return ResponseEntity.ok(answer);
     }
 }

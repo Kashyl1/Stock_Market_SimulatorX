@@ -1,8 +1,10 @@
 package com.example.backend.transaction;
 
-import com.example.backend.MailVerification.VerificationService;
-import com.example.backend.UserEvent.EventTrackingService;
-import com.example.backend.UserEvent.UserEvent;
+import com.example.backend.adminEvent.AdminEvent;
+import com.example.backend.adminEvent.AdminEventTrackingService;
+import com.example.backend.mailVerification.VerificationService;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.userEvent.UserEvent;
 import com.example.backend.exceptions.*;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
@@ -15,12 +17,14 @@ import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jdk.jfr.EventType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -45,7 +49,8 @@ public class TransactionService {
     private final AuthenticationService authenticationService;
     private final TransactionMapper transactionMapper;
     private final VerificationService verificationService;
-    private final EventTrackingService eventTrackingService;
+    private final UserEventTrackingService userEventTrackingService;
+    private final AdminEventTrackingService adminEventTrackingService;
 
     @Operation(summary = "Show assets", description = "Processes the asset show")
     public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
@@ -222,7 +227,7 @@ public class TransactionService {
                 "rate", rate
         );
 
-        eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.BUY_CRYPTO, details);
+        userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.BUY_CRYPTO, details);
     }
 
 
@@ -358,7 +363,7 @@ public class TransactionService {
                 "rate", rate
         );
 
-        eventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SELL_CRYPTO, details);
+        userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SELL_CRYPTO, details);
     }
 
 
@@ -383,7 +388,7 @@ public class TransactionService {
         return transactions.map(transactionMapper::toDTO);
     }
 
-    @Operation(summary = "Get portfolio by user ID (admin)", description = "Show user portfolio (admin use)")
+    @Operation(summary = "Get portfolio by user ID (admin)", description = "Show user portfolio")
     @Transactional
     public Portfolio getPortfolioByidAndUser(Integer portfolioid, User user) {
         if (user == null) {
@@ -393,19 +398,34 @@ public class TransactionService {
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
     }
 
-    @Operation(summary = "Get all transactions", description = "Show all transactions that have been made (admin use)")
-    @Transactional(readOnly = true)
+    @Operation(summary = "Get all transactions (admin)", description = "Show all transactions that have been made (admin use)")
     public Page<TransactionHistoryDTO> getAllTransactions(Pageable pageable) {
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
+
+        String adminEmail = authenticationService.getCurrentUserEmail();
+
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.GET_ALL_TRANSACTIONS);
+
         return mapTransactionsToDTO(transactions);
     }
 
-    @Operation(summary = "Get all user transactions", description = "Show all user transactions (admin use)")
-    @Transactional(readOnly = true)
+    @Operation(summary = "Get all user transactions (admin)", description = "Show all user transactions (admin use)")
     public Page<TransactionHistoryDTO> getTransactionsByUser(Integer userid, Pageable pageable) {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         Page<Transaction> transactions = transactionRepository.findByUser(user, pageable);
+
+        String adminEmail = authenticationService.getCurrentUserEmail();
+
+        Map<String, Object> details = Map.of(
+                "userId", user.getId(),
+                "userEmail", user.getEmail(),
+                "userName", user.getFirstname(),
+                "userLastname", user.getLastname()
+        );
+
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.GET_TRANSACTIONS_BY_USER, details);
+
         return mapTransactionsToDTO(transactions);
     }
 
@@ -431,9 +451,8 @@ public class TransactionService {
     public void markTransactionAsSuspicious(Integer transactionid, boolean suspicious) {
         Transaction transaction = transactionRepository.findById(transactionid)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
-        if (transaction.isSuspicious() == suspicious) {
-            logger.info("Transaction {} already has suspicious status: {}", transactionid, suspicious);
-            return;
+        if (transaction.isSuspicious()) {
+            throw new TransactionAlreadyMarkedAsSuspicious("Transaction already marked as suspicious!");
         }
 
         transaction.setSuspicious(suspicious);
@@ -442,6 +461,15 @@ public class TransactionService {
         if (suspicious) {
             getTransactionDataForEmail(transaction);
         }
+
+        String adminEmail = authenticationService.getCurrentUserEmail();
+
+        Map<String, Object> details = Map.of(
+                "transactionId", transaction.getTransactionid(),
+                "userId", transaction.getUser().getId(),
+                "userEmail", transaction.getUser().getEmail()
+        );
+        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.MARK_TRANSACTION_SUSPICIOUS, details);
     }
 
     @Operation(summary = "Get all suspicious transactions (admin)", description = "Show suspicious transactions (admin use)")

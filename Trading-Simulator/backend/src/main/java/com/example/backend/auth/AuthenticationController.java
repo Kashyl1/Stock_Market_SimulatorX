@@ -1,6 +1,6 @@
 package com.example.backend.auth;
 
-import com.example.backend.MailVerification.VerificationService;
+import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.exceptions.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,7 @@
 package com.example.backend.admin;
 
 import com.example.backend.alert.global.GlobalAlert;
+import com.example.backend.alert.global.GlobalAlertResponse;
 import com.example.backend.alert.global.GlobalAlertService;
 import com.example.backend.exceptions.ErrorResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +31,11 @@ public class AdminGlobalAlertController {
     @Operation(summary = "Create a global alert", description = "Create a new global alert")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Global alert created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<GlobalAlert> createGlobalAlert(@RequestBody GlobalAlert globalAlert) {
-        GlobalAlert createdAlert = globalAlertService.createGlobalAlert(globalAlert);
+    public ResponseEntity<GlobalAlert> createGlobalAlert(@RequestBody GlobalAlertResponse request) {
+        GlobalAlert createdAlert = globalAlertService.createGlobalAlert(request);
         return ResponseEntity.ok(createdAlert);
     }
 
