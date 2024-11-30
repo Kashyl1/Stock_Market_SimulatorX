@@ -203,7 +203,7 @@ public class UserService {
 
     @Transactional
     @Operation(summary = "Change user blocked status (admin)", description = "Sets the blocked status for a specified user (admin only)")
-    public String setUserBlockedStatus(Integer id, boolean blocked) {
+    public String setUserBlockedStatus(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -221,11 +221,10 @@ public class UserService {
             adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.UNBLOCK_USER, details);
             userRepository.save(user);
             return "User has been unblocked successfully";
-        } else {
+        }
             user.setBlocked(true);
             adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.BLOCK_USER, details);
             userRepository.save(user);
             return "User has been blocked successfully";
-        }
     }
 }

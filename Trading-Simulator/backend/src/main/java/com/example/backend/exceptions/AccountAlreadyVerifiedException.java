@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Thrown when an attempt is made to verify an account that is already verified.
  */
 @ResponseStatus(HttpStatus.CONFLICT)
-public class AccountAlreadyVerifiedException extends RuntimeException {
+public class AccountAlreadyVerifiedException extends AppException {
     public AccountAlreadyVerifiedException(String message) {
         super(message);
     }

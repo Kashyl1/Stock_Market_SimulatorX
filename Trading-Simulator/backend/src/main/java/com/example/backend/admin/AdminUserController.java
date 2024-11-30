@@ -1,8 +1,6 @@
 package com.example.backend.admin;
 
-import com.example.backend.alert.trade.TradeAlertDTO;
 import com.example.backend.exceptions.ErrorResponse;
-import com.example.backend.user.User;
 import com.example.backend.user.UserDTO;
 import com.example.backend.user.UserService;
 import com.example.backend.usersetting.UserSettingService;
@@ -102,9 +100,8 @@ public class AdminUserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<String> blockUser(
-            @Parameter(description = "ID of the user to block/unblock") @PathVariable Integer id,
-            @RequestBody BlockUserRequest request) {
-        String answer = userService.setUserBlockedStatus(id, request.isBlocked());
+            @Parameter(description = "ID of the user to block/unblock") @PathVariable Integer id) {
+        String answer = userService.setUserBlockedStatus(id);
         return ResponseEntity.ok(answer);
     }
 }
