@@ -154,7 +154,9 @@ const RegisterForm = () => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-                <img src={logo} alt="Logo" className="logo_login" />
+                <Link to="/">
+                   <img src={logo} alt="Logo" className="logo_login" />
+                </Link>
                 <h2 className="auth-header">Create your account</h2>
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="input-group">

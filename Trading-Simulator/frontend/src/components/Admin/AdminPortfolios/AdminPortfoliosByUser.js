@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getUsers, blockUser, deleteUser, unblockUser } from '../../../services/AdminService';
+import { getUsers } from '../../../services/AdminService';
 import debounce from 'lodash.debounce';
-
+import AdminPortfolios from './AdminPortfolios';
 
 const AdminPortfoliosByUser = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -11,6 +11,7 @@ const AdminPortfoliosByUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(20);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const fetchAllUsers = async () => {
     setLoading(true);
@@ -46,39 +47,13 @@ const AdminPortfoliosByUser = () => {
     }
   }, 300);
 
-  const handleBlockUser = async (userId) => {
-    try {
-      await blockUser(userId);
-      alert(`User with ID: ${userId} has been blocked.`);
-      fetchAllUsers();
-    } catch (error) {
-      alert('Failed to block user.');
-    }
+  const handleSelectUser = (userId) => {
+    setSelectedUserId(userId);
   };
 
-   const handleUnblockUser = async (userId) => {
-       try {
-         await unblockUser(userId);
-         alert(`User with ID: ${userId} has been unblocked.`);
-         fetchAllUsers();
-       } catch (error) {
-         alert('Failed to unblock user.');
-       }
-     };
-
-  const handleDeleteUser = async (userId) => {
-    try {
-      await deleteUser(userId);
-      alert(`User with ID: ${userId} has been deleted.`);
-      fetchAllUsers();
-    } catch (error) {
-      alert('Failed to delete user.');
-    }
+  const handleBackToUserList = () => {
+    setSelectedUserId(null);
   };
-
-  useEffect(() => {
-    fetchAllUsers();
-  }, []);
 
   const startIndex = currentPage * pageSize;
   const endIndex = startIndex + pageSize;
@@ -96,73 +71,80 @@ const AdminPortfoliosByUser = () => {
     }
   };
 
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="error">{error}</p>;
 
   return (
     <div>
-      <h2>List of users</h2>
-      <div className="search-container">
-        <input
-          type="text"
-          placeholder="Search by email"
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="search-input"
-        />
-      </div>
-
-      {usersToDisplay.length > 0 ? (
-        <div className="assets-table">
-          <div className="table-header_admin">
-            <div className="header-cell">ID</div>
-            <div className="header-cell">Name</div>
-            <div className="header-cell">Surname</div>
-            <div className="header-cell">Email</div>
-            <div className="header-cell">Role</div>
-            <div className="header-cell">Blocked</div>
-            <div className="header-cell">Actions</div>
-          </div>
-
-          <div className="table-body">
-            {usersToDisplay.map((user) => (
-              <div className="table-row_admin" key={user.id}>
-                <div className="cell">{user.id}</div>
-                <div className="cell">{user.firstname}</div>
-                <div className="cell">{user.lastname}</div>
-                <div className="cell">{user.email}</div>
-                <div className="cell">{user.role}</div>
-                <div className="cell">{user.blocked ? 'Yes' : 'No'}</div>
-                <div className="cell">
-                  {user.blocked ? (
-                    <button onClick={() => handleUnblockUser(user.id)}>Unblock</button>
-                  ) : (
-                    <button onClick={() => handleBlockUser(user.id)}>Block</button>
-                  )}
-                  <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
-                </div>
-              </div>
-            ))}
-          </div>
-
+      {selectedUserId ? (
+        <div className="cell">
+          <button onClick={handleBackToUserList}>Back to User List</button>
+          <AdminPortfolios userId={selectedUserId} />
         </div>
       ) : (
-        <p>No users match your search.</p>
-      )}
+        <div>
+          <h2>List of users</h2>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search by email"
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="search-input"
+            />
+          </div>
 
-      <div className="pagination-controls">
-        <button onClick={handlePrevPage} disabled={currentPage === 0}>
-          Previous
-        </button>
-        <span>
-          Page {currentPage + 1} of {Math.ceil(filteredUsers.length / pageSize)}
-        </span>
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === Math.ceil(filteredUsers.length / pageSize) - 1}
-        >
-          Next
-        </button>
-      </div>
+          {usersToDisplay.length > 0 ? (
+            <div className="assets-table">
+              <div className="table-header_admin">
+                <div className="header-cell">ID</div>
+                <div className="header-cell">Name</div>
+                <div className="header-cell">Surname</div>
+                <div className="header-cell">Email</div>
+                <div className="header-cell">Role</div>
+                <div className="header-cell">Blocked</div>
+                <div className="header-cell">Actions</div>
+              </div>
+
+              <div className="table-body">
+                {usersToDisplay.map((user) => (
+                  <div className="table-row_admin" key={user.id}>
+                    <div className="cell">{user.id}</div>
+                    <div className="cell">{user.firstname}</div>
+                    <div className="cell">{user.lastname}</div>
+                    <div className="cell">{user.email}</div>
+                    <div className="cell">{user.role}</div>
+                    <div className="cell">{user.blocked ? 'Yes' : 'No'}</div>
+                    <div className="cell">
+                      <button onClick={() => handleSelectUser(user.id)}>View Portfolios</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p>No users match your search.</p>
+          )}
+
+          <div className="pagination-controls">
+            <button onClick={handlePrevPage} disabled={currentPage === 0}>
+              Previous
+            </button>
+            <span>
+              Page {currentPage + 1} of {Math.ceil(filteredUsers.length / pageSize)}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === Math.ceil(filteredUsers.length / pageSize) - 1}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

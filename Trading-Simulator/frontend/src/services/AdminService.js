@@ -99,15 +99,25 @@ export const getSuspiciousTransactions = async (thresholdAmount) => {
 };
 
 export const markTransactionSuspicious = async (transactionId, suspicious) => {
-  const response = await axios.put(
-    `${API_URL}/transactions/${transactionId}/suspicious`,
-    null,
-    {
-      params: { suspicious },
-    }
-  );
-  return response.data;
+  const token = localStorage.getItem('jwtToken'); // Pobranie tokenu JWT z lokalStorage
+  try {
+    const response = await axios.put(
+      `${API_URL}/transactions/${transactionId}/suspicious`,
+      null,
+      {
+        params: { suspicious },
+        headers: {
+          Authorization: `Bearer ${token}`, // Dodanie tokenu JWT do nagłówków
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error marking transaction suspicious:', error);
+    throw error;
+  }
 };
+
 
 export const getPortfolios = async (page, size) => {
   const token = localStorage.getItem('jwtToken');
@@ -156,7 +166,7 @@ export const getPortfolioByid = async (portfolioId) => {
 };
 
 export const getTransactionHistoryByPortfolio = async (portfolioId, page, pageSize) => {
-  const token = localStorage.getItem('jwtToken');  // Fetch JWT token from localStorage for authorization
+  const token = localStorage.getItem('jwtToken');
   try {
     const response = await axios.get(`${API_URL}/transactions/portfolio/${portfolioId}`, {
       headers: {
@@ -168,5 +178,20 @@ export const getTransactionHistoryByPortfolio = async (portfolioId, page, pageSi
   } catch (error) {
     console.error('Error fetching transaction history:', error);
     throw error;
+  }
+};
+
+export const getPortfoliosByUser = async (userId) => {
+  const token = localStorage.getItem('jwtToken'); // Pobranie tokena z localStorage
+  try {
+    const response = await axios.get(`${API_URL}/portfolios/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Dodanie nagłówka z autoryzacją
+      },
+    });
+    return response.data; // Zwrócenie danych odpowiedzi
+  } catch (error) {
+    console.error('Error fetching portfolios by user:', error);
+    throw error; // Rzucenie wyjątku w razie błędu
   }
 };

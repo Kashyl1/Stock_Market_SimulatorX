@@ -165,6 +165,7 @@ useEffect(() => {
         <div className="transactions-table">
           <div className="table-header_admin_userTransactions">
             <div className="header-cell">Transaction ID</div>
+            <div className="header-cell">Portfolio ID</div>
             <div className="header-cell">Type</div>
             <div className="header-cell">Currency</div>
             <div className="header-cell">Amount</div>
@@ -178,6 +179,7 @@ useEffect(() => {
             {filteredTransactions.map((transaction) => (
               <div className="table-row_admin_userTransactions" key={transaction.transactionid}>
                 <div className="cell">{transaction.transactionid}</div>
+                <div className="cell">{transaction.portfolioid}</div>
                 <div className="cell">{transaction.transactionType}</div>
                 <div className="cell">{transaction.currencyName}</div>
                 <div className="cell">{transaction.amount}</div>
