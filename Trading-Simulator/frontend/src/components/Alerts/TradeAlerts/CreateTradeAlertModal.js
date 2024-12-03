@@ -6,9 +6,9 @@ import './CreateTradeAlertModal.css';
 
 const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
   const [tradeAlertType, setTradeAlertType] = useState('BUY');
-  const [conditionType, setConditionType] = useState('PERCENTAGE');
-  const [conditionValue, setConditionValue] = useState('');
+  const [conditionPrice, setConditionPrice] = useState('');
   const [tradeAmount, setTradeAmount] = useState('');
+  const [orderType, setOrderType] = useState('LIMIT');
   const [portfolioId, setPortfolioId] = useState('');
   const [currencyId, setCurrencyId] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +20,6 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
     const fetchData = async () => {
       try {
         const availableCurrencies = await getAvailableAssets(0, 100);
-        console.log('Available Currencies:', availableCurrencies);
         setCurrencies(availableCurrencies.content || availableCurrencies);
 
         if (availableCurrencies.content && availableCurrencies.content.length > 0) {
@@ -28,8 +27,9 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
         }
 
         const userPortfoliosResponse = await getUserPortfolios();
-        console.log('User Portfolios Response:', userPortfoliosResponse);
-        const userPortfolios = Array.isArray(userPortfoliosResponse) ? userPortfoliosResponse : userPortfoliosResponse.content;
+        const userPortfolios = Array.isArray(userPortfoliosResponse)
+          ? userPortfoliosResponse
+          : userPortfoliosResponse.content;
         setPortfolios(userPortfolios);
         if (userPortfolios.length > 0) {
           setPortfolioId(userPortfolios[0].portfolioid);
@@ -55,8 +55,8 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
       return;
     }
 
-    if (!conditionValue || isNaN(conditionValue) || parseFloat(conditionValue) <= 0) {
-      setError('Condition value must be a positive number.');
+    if (!conditionPrice || isNaN(conditionPrice) || parseFloat(conditionPrice) <= 0) {
+      setError('Condition price must be a positive number.');
       return;
     }
 
@@ -69,9 +69,9 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
       portfolioId,
       currencyId,
       tradeAlertType,
-      conditionType,
-      conditionValue: parseFloat(conditionValue),
+      conditionPrice: parseFloat(conditionPrice),
       tradeAmount: parseFloat(tradeAmount),
+      orderType,
     };
 
     setLoading(true);
@@ -134,35 +134,34 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
         </label>
 
         <label>
-          Condition Type:
+          Order Type:
           <select
-            value={conditionType}
-            onChange={(e) => setConditionType(e.target.value)}
+            value={orderType}
+            onChange={(e) => setOrderType(e.target.value)}
           >
-            <option value="PERCENTAGE">Percentage</option>
-            <option value="PRICE">Price</option>
+            <option value="LIMIT">Limit</option>
+            <option value="STOP">Stop</option>
           </select>
         </label>
 
         <label>
-          Condition Value ({conditionType === 'PERCENTAGE' ? '%' : '$'}):
+          Condition Price ($):
           <input
             type="number"
-            value={conditionValue}
-            onChange={(e) => setConditionValue(e.target.value)}
+            value={conditionPrice}
+            onChange={(e) => setConditionPrice(e.target.value)}
             step="0.01"
           />
-
         </label>
 
         <label>
-          Trade Amount (USD):
+          Trade Amount ({tradeAlertType === 'BUY' ? 'USD' : 'Currency Units'}):
           <input
             type="number"
             value={tradeAmount}
             onChange={(e) => setTradeAmount(e.target.value)}
             min="0"
-            step="0.01"
+            step="0.00000001"
           />
         </label>
 
@@ -176,7 +175,6 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
             Cancel
           </button>
         </div>
-
       </div>
     </div>
   );

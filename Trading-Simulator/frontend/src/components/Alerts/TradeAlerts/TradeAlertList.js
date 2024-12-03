@@ -11,7 +11,7 @@ const TradeAlertList = ({ tradeAlerts, loading, error, onTradeAlertDeactivated, 
     return <p className="error-message">{error}</p>;
   }
 
-  if (tradeAlerts.length === 0) {
+  if (!tradeAlerts || tradeAlerts.length === 0) {
     return <p>You have no set trade alerts.</p>;
   }
 
@@ -22,9 +22,10 @@ const TradeAlertList = ({ tradeAlerts, loading, error, onTradeAlertDeactivated, 
           <div className="header-cell">Currency</div>
           <div className="header-cell">Initial Price</div>
           <div className="header-cell">Alert Type</div>
-          <div className="header-cell">Target Price / Change</div>
+          <div className="header-cell">Condition Price</div>
           <div className="header-cell">Trade Amount</div>
           <div className="header-cell">Actions</div>
+          <div className="header-cell">Status</div>
         </div>
 
         <div className="table-body">

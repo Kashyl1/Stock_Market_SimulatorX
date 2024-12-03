@@ -6,7 +6,6 @@ import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertRepository;
 import com.example.backend.currency.Currency;
 import com.example.backend.exceptions.EmailSendingException;
-import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
 import com.example.backend.mailVerification.VerificationService;
 import com.example.backend.user.UserRepository;
@@ -17,10 +16,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.backend.alert.trade.*;
-import com.example.backend.portfolio.Portfolio;
-import com.example.backend.portfolio.PortfolioAsset;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,7 +34,6 @@ public class ScheduledAlertChecker {
     private final EmailAlertRepository emailAlertRepository;
     private final VerificationService verificationService;
     private final TradeAlertRepository tradeAlertRepository;
-    private final TransactionService transactionService;
     private final UserRepository userRepository;
     private final TradeAlertService tradeAlertService;
     private final GlobalAlertRepository globalAlertRepository;
@@ -75,7 +72,7 @@ public class ScheduledAlertChecker {
                     BigDecimal initialPrice = emailAlert.getInitialPrice();
                     BigDecimal percentageChange = emailAlert.getPercentageChange();
 
-                    BigDecimal expectedPriceChange = initialPrice.multiply(percentageChange.abs()).divide(BigDecimal.valueOf(100));
+                    BigDecimal expectedPriceChange = initialPrice.multiply(percentageChange.abs()).divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
                     BigDecimal targetPriceIncrease = initialPrice.add(expectedPriceChange);
                     BigDecimal targetPriceDecrease = initialPrice.subtract(expectedPriceChange);
 
@@ -124,7 +121,6 @@ public class ScheduledAlertChecker {
      * Checks trade alerts and executes trades if conditions are met.
      */
     @Transactional
-    @Operation(summary = "Check trade alerts", description = "Checks trade alerts and executes trades if conditions are met")
     public void checkTradeAlerts() {
         List<TradeAlert> activeTradeAlerts = tradeAlertRepository.findByActiveTrue();
 
@@ -136,65 +132,14 @@ public class ScheduledAlertChecker {
                 continue;
             }
 
-            boolean shouldTrigger = false;
-
-            switch (tradeAlert.getConditionType()) {
-                case PERCENTAGE:
-
-                    Portfolio portfolio = tradeAlert.getPortfolio();
-                    User user = tradeAlert.getUser();
-
-                    PortfolioAsset portfolioAsset = portfolio.getPortfolioAssets().stream()
-                            .filter(asset -> asset.getCurrency().equals(currency))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (portfolioAsset == null) {
-                        continue;
-                    }
-
-                    BigDecimal averagePurchasePrice = portfolioAsset.getAveragePurchasePrice();
-                    BigDecimal percentageChange = tradeAlert.getConditionValue();
-
-                    BigDecimal targetPriceValue = averagePurchasePrice.multiply(
-                            BigDecimal.ONE.add(percentageChange.divide(BigDecimal.valueOf(100)))
-                    );
-
-                    if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
-                        if (currentPrice.compareTo(targetPriceValue) >= 0) {
-                            shouldTrigger = true;
-                        }
-                    } else if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
-                        BigDecimal targetBuyPrice = averagePurchasePrice.multiply(
-                                BigDecimal.ONE.subtract(percentageChange.divide(BigDecimal.valueOf(100)))
-                        );
-                        if (currentPrice.compareTo(targetBuyPrice) <= 0) {
-                            shouldTrigger = true;
-                        }
-                    }
-                    break;
-
-                case PRICE:
-                    BigDecimal conditionPrice = tradeAlert.getConditionValue();
-
-                    if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
-                        if (currentPrice.compareTo(conditionPrice) <= 0) {
-                            shouldTrigger = true;
-                        }
-                    } else if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
-                        if (currentPrice.compareTo(conditionPrice) >= 0) {
-                            shouldTrigger = true;
-                        }
-                    }
-                    break;
-            }
+            boolean shouldTrigger = isShouldTrigger(tradeAlert, currentPrice);
 
             if (shouldTrigger) {
                 try {
                     if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
-                        tradeAlertService.executeBuyFromReserved(tradeAlert, currentPrice);
+                        tradeAlertService.executeBuyFromReserved(tradeAlert);
                     } else {
-                        tradeAlertService.executeSellFromReserved(tradeAlert, currentPrice);
+                        tradeAlertService.executeSell(tradeAlert);
                     }
                     tradeAlert.setActive(false);
                     tradeAlertRepository.save(tradeAlert);
@@ -204,6 +149,35 @@ public class ScheduledAlertChecker {
                 }
             }
         }
+    }
+
+    private static boolean isShouldTrigger(TradeAlert tradeAlert, BigDecimal currentPrice) {
+        boolean shouldTrigger = false;
+        BigDecimal conditionPrice = tradeAlert.getConditionPrice();
+        OrderType orderType = tradeAlert.getOrderType();
+
+        if (orderType == OrderType.LIMIT) {
+            if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
+                if (currentPrice.compareTo(conditionPrice) <= 0) {
+                    shouldTrigger = true;
+                }
+            } else if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
+                if (currentPrice.compareTo(conditionPrice) >= 0) {
+                    shouldTrigger = true;
+                }
+            }
+        } else if (orderType == OrderType.STOP) {
+            if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY) {
+                if (currentPrice.compareTo(conditionPrice) >= 0) {
+                    shouldTrigger = true;
+                }
+            } else if (tradeAlert.getTradeAlertType() == TradeAlertType.SELL) {
+                if (currentPrice.compareTo(conditionPrice) <= 0) {
+                    shouldTrigger = true;
+                }
+            }
+        }
+        return shouldTrigger;
     }
 
     /**

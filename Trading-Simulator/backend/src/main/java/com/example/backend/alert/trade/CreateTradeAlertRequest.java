@@ -3,7 +3,6 @@ package com.example.backend.alert.trade;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-// Import Swagger annotations
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -24,17 +23,16 @@ public class CreateTradeAlertRequest {
     @Schema(description = "Type of the trade alert", example = "BUY")
     private TradeAlertType tradeAlertType;
 
-    @NotNull(message = "Condition type is required")
-    @Schema(description = "Type of the condition", example = "PRICE")
-    private AlertConditionType conditionType;
-
-    @NotNull(message = "Condition value is required")
-    @Positive(message = "Condition value must be positive")
-    @Schema(description = "Value of the condition", example = "50000.0")
-    private BigDecimal conditionValue;
+    @NotNull(message = "Condition price is required")
+    @Schema(description = "Price at which the alert should trigger", example = "50000.0")
+    private BigDecimal conditionPrice;
 
     @NotNull(message = "Trade amount is required")
     @Positive(message = "Trade amount must be positive")
     @Schema(description = "Amount to trade", example = "0.1")
     private BigDecimal tradeAmount;
+
+    @NotNull(message = "Order type is required")
+    @Schema(description = "Type of the order", example = "LIMIT")
+    private OrderType orderType;
 }

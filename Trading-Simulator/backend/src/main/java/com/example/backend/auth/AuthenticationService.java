@@ -96,7 +96,6 @@ public class AuthenticationService {
                 .build();
     }
 
-    @Cacheable(value = "currentUser", key = "#email")
     @Operation(summary = "Get current user", description = "Retrieves the current authenticated user by email")
     public User getCurrentUser(String email) {
         return userRepository.findByEmail(email)

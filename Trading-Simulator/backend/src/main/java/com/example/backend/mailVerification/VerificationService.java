@@ -5,7 +5,6 @@ import com.example.backend.userEvent.UserEvent;
 import com.example.backend.alert.global.GlobalAlert;
 import com.example.backend.alert.mail.EmailAlert;
 import com.example.backend.alert.mail.EmailAlertType;
-import com.example.backend.alert.trade.TradeAlert;
 import com.example.backend.alert.trade.TradeAlertType;
 import com.example.backend.currency.Currency;
 import com.example.backend.exceptions.EmailSendingException;
@@ -17,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -40,6 +41,7 @@ public class VerificationService {
     private final UserRepository userRepository;
     private final Map<String, Instant> resendCooldowns = new HashMap<>();
     private final UserEventTrackingService userEventTrackingService;
+    private static final Logger logger = LoggerFactory.getLogger(VerificationService.class);
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -92,7 +94,7 @@ public class VerificationService {
                 );
                 userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.SEND_VERIFICATION_EMAIL, details);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error while logging user event: {}", e.getMessage(), e);
             }
         } catch (MailException e) {
             throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
@@ -164,7 +166,7 @@ public class VerificationService {
                 );
                 userEventTrackingService.logEvent(user.getEmail(), UserEvent.EventType.PASSWORD_RESET_EMAIL_SENT, details);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error while logging user event: {}", e.getMessage(), e);
             }
         } catch (MailException e) {
             throw new EmailSendingException("Failed to create email message for: " + user.getEmail());
@@ -204,7 +206,7 @@ public class VerificationService {
                 );
                 userEventTrackingService.logEvent(email, UserEvent.EventType.PASSWORD_RESET_REQUESTED, details);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error while logging user event: {}", e.getMessage(), e);
             }
         } catch (Exception e) {
             throw new EmailSendingException("Failed to send password reset email");
@@ -215,17 +217,7 @@ public class VerificationService {
     public void sendAlertEmail(User user, Currency currency, BigDecimal currentPrice, EmailAlert emailAlert) {
         String subject = "Price Alert for " + currency.getName();
 
-        String alertMessage;
-        if (emailAlert.getEmailAlertType() == EmailAlertType.PERCENTAGE) {
-            String direction = emailAlert.getPercentageChange().compareTo(BigDecimal.ZERO) > 0 ? "increased" : "decreased";
-            alertMessage = String.format("The price of %s has %s by %.2f%%.\nCurrent price: $%.2f.",
-                    currency.getName(), direction, emailAlert.getPercentageChange().abs(), currentPrice);
-        } else if (emailAlert.getEmailAlertType() == EmailAlertType.PRICE) {
-            alertMessage = String.format("The price of %s has reached your set threshold: $%.2f.\nCurrent price: $%.2f.",
-                    currency.getName(), emailAlert.getTargetPrice(), currentPrice);
-        } else {
-            alertMessage = "Your alert has been triggered.";
-        }
+        String alertMessage = getString(currency, currentPrice, emailAlert);
 
         String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
                 alertMessage + "\n\n" +
@@ -266,19 +258,34 @@ public class VerificationService {
         }
     }
 
+    private static String getString(Currency currency, BigDecimal currentPrice, EmailAlert emailAlert) {
+        String alertMessage;
+        if (emailAlert.getEmailAlertType() == EmailAlertType.PERCENTAGE) {
+            String direction = emailAlert.getPercentageChange().compareTo(BigDecimal.ZERO) > 0 ? "increased" : "decreased";
+            alertMessage = String.format("The price of %s has %s by %.2f%%.\nCurrent price: $%.2f.",
+                    currency.getName(), direction, emailAlert.getPercentageChange().abs(), currentPrice);
+        } else if (emailAlert.getEmailAlertType() == EmailAlertType.PRICE) {
+            alertMessage = String.format("The price of %s has reached your set threshold: $%.2f.\nCurrent price: $%.2f.",
+                    currency.getName(), emailAlert.getTargetPrice(), currentPrice);
+        } else {
+            alertMessage = "Your alert has been triggered.";
+        }
+        return alertMessage;
+    }
+
     @Operation(summary = "Send trade executed email", description = "Sends an email notification when a trade is executed")
-    public void sendTradeExecutedEmail(User user, Currency currency, TradeAlert tradeAlert, BigDecimal tradeAmountUSD, TradeAlertType tradeAlertType) {
+    public void sendTradeExecutedEmail(User user, Currency currency, BigDecimal tradeAmountUSD, TradeAlertType tradeAlertType) {
         String subject = "Trade Executed: " + tradeAlertType + " " + currency.getName();
 
         String tradeType = tradeAlertType == TradeAlertType.BUY ? "Buy" : "Sell";
-        String tradeAmountDescription = "$" + tradeAmountUSD.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString();
+        String tradeAmountDescription = "$" + tradeAmountUSD.setScale(2, RoundingMode.HALF_UP).toPlainString();
 
         String textMessage = "Hello " + user.getFirstname() + ",\n\n" +
                 "Your automatic trade has been executed successfully.\n" +
                 "Trade Type: " + tradeType + "\n" +
                 "Currency: " + currency.getName() + " (" + currency.getSymbol() + ")\n" +
                 "Trade Amount: " + tradeAmountDescription + "\n" +
-                "Current Price: $" + currency.getCurrentPrice().setScale(2, BigDecimal.ROUND_HALF_UP) + "\n" +
+                "Current Price: $" + currency.getCurrentPrice().setScale(2, RoundingMode.HALF_UP) + "\n" +
                 "Timestamp: " + LocalDateTime.now() + "\n\n" +
                 "Best regards,\nRoyal Coin Team";
 
@@ -290,7 +297,7 @@ public class VerificationService {
                 "<li><strong>Trade Type:</strong> " + tradeType + "</li>" +
                 "<li><strong>Currency:</strong> " + currency.getName() + " (" + currency.getSymbol() + ")</li>" +
                 "<li><strong>Trade Amount:</strong> " + tradeAmountDescription + "</li>" +
-                "<li><strong>Current Price:</strong> $" + currency.getCurrentPrice().setScale(2, BigDecimal.ROUND_HALF_UP) + "</li>" +
+                "<li><strong>Current Price:</strong> $" + currency.getCurrentPrice().setScale(2, RoundingMode.HALF_UP) + "</li>" +
                 "<li><strong>Timestamp:</strong> " + LocalDateTime.now() + "</li>" +
                 "</ul>" +
                 "<p>Best regards,<br>Royal Coin Team</p>" +

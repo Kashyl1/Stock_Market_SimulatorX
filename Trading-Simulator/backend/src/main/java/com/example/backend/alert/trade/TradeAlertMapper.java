@@ -14,7 +14,7 @@ public class TradeAlertMapper {
                 .currencySymbol(tradeAlert.getCurrency().getSymbol())
                 .tradeAlertType(tradeAlert.getTradeAlertType())
                 .initialPrice(tradeAlert.getInitialPrice())
-                .conditionValue(tradeAlert.getConditionValue())
+                .conditionPrice(tradeAlert.getConditionPrice())
                 .tradeAmount(tradeAlert.getTradeAmount())
                 .active(tradeAlert.isActive())
                 .build();

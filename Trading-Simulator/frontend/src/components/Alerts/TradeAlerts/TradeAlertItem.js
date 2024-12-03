@@ -31,63 +31,33 @@ const TradeAlertItem = ({ tradeAlertData, onTradeAlertDeactivated, onTradeAlertD
     }
   };
 
-  const calculateTargetPrice = (initialPrice, conditionType, conditionValue, tradeAlertType) => {
-    if (
-      initialPrice === null ||
-      initialPrice === undefined ||
-      conditionValue === null ||
-      conditionValue === undefined
-    ) {
-      return 'N/A';
-    }
-
-    if (conditionType === 'PRICE') {
-      return `$${conditionValue.toFixed(2)}`;
-    }
-
-    if (conditionType === 'PERCENTAGE') {
-      let targetPrice;
-      if (tradeAlertType === 'BUY') {
-        targetPrice = initialPrice * (1 - conditionValue / 100);
-      } else if (tradeAlertType === 'SELL') {
-        targetPrice = initialPrice * (1 + conditionValue / 100);
-      } else {
-        return 'N/A';
-      }
-      return `$${targetPrice.toFixed(2)}`;
-    }
-
-    return 'N/A';
-  };
-
-  const targetPrice = calculateTargetPrice(
-    tradeAlertData.initialPrice,
-    tradeAlertData.conditionType,
-    tradeAlertData.conditionValue,
-    tradeAlertData.tradeAlertType
-  );
-
   return (
     <div className="table-row">
       <div className="cell">{tradeAlertData.currencyName}</div>
-      <div className="cell">${tradeAlertData.initialPrice.toFixed(2)}</div>
+      <div className="cell">
+        {tradeAlertData.initialPrice ? `$${tradeAlertData.initialPrice.toFixed(2)}` : 'N/A'}
+      </div>
       <div className="cell">{tradeAlertData.tradeAlertType}</div>
       <div className="cell">
-        {tradeAlertData.conditionType === 'PERCENTAGE'
-          ? `${tradeAlertData.conditionValue}%`
-          : `$${tradeAlertData.conditionValue.toFixed(2)}`}
+        {tradeAlertData.conditionPrice ? `$${tradeAlertData.conditionPrice.toFixed(2)}` : 'N/A'}
       </div>
       <div className="cell">
-       ${tradeAlertData.tradeAmount.toFixed(2)}
+        {tradeAlertData.tradeAlertType === 'BUY'
+          ? `$${tradeAlertData.tradeAmount.toFixed(2)}`
+          : `${tradeAlertData.tradeAmount.toFixed(8)} units`}
       </div>
       <div className="cell">
         {tradeAlertData.active ? (
-          <button onClick={handleDeactivate} className="deactivate-button">Deactivate</button>
+          <button onClick={handleDeactivate} className="deactivate-button">
+            Deactivate
+          </button>
         ) : (
-          <button onClick={handleDelete} className="delete-button">Delete</button>
+          <button onClick={handleDelete} className="delete-button">
+            Delete
+          </button>
         )}
-        <div className="cell">{tradeAlertData.active ? 'Active' : 'Triggered'}</div>
       </div>
+      <div className="cell">{tradeAlertData.active ? 'Active' : 'Triggered'}</div>
     </div>
   );
 };

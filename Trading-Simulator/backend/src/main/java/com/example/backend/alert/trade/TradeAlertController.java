@@ -38,7 +38,7 @@ public class TradeAlertController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/deactivate/{tradeAlertId}")
+    @PutMapping("/deactivate/{tradeAlertId}")
     @Operation(summary = "Deactivate a trade alert", description = "Deactivates a specific trade alert")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Trade alert deactivated successfully"),

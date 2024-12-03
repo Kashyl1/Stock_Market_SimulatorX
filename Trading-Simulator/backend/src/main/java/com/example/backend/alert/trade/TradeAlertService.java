@@ -16,6 +16,8 @@ import com.example.backend.transaction.TransactionRepository;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,8 @@ public class TradeAlertService {
     private final TransactionRepository transactionRepository;
     private final VerificationService verificationService;
     private final UserEventTrackingService userEventTrackingService;
+    private static final Logger logger = LoggerFactory.getLogger(TradeAlertService.class);
+
 
     @Transactional
     public TradeAlert createTradeAlert(CreateTradeAlertRequest request) {
@@ -51,10 +55,11 @@ public class TradeAlertService {
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found"));
 
         if (request.getTradeAlertType() == TradeAlertType.SELL) {
-            boolean ownsCurrency = portfolio.getPortfolioAssets().stream()
-                    .anyMatch(asset -> asset.getCurrency().equals(currency) && asset.getAmount().compareTo(BigDecimal.ZERO) > 0);
-            if (!ownsCurrency) {
-                throw new AssetNotOwnedException("You do not own this currency in the selected portfolio");
+            PortfolioAsset asset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
+                    .orElseThrow(() -> new AssetNotOwnedException("You do not own this currency in the selected portfolio"));
+
+            if (asset.getAmount().compareTo(request.getTradeAmount()) < 0) {
+                throw new InsufficientAssetAmountException("You do not have enough of this currency to set this trade alert");
             }
         }
 
@@ -79,9 +84,9 @@ public class TradeAlertService {
                 .portfolio(portfolio)
                 .currency(currency)
                 .tradeAlertType(request.getTradeAlertType())
-                .conditionType(request.getConditionType())
-                .conditionValue(request.getConditionValue())
+                .conditionPrice(request.getConditionPrice())
                 .tradeAmount(request.getTradeAmount())
+                .orderType(request.getOrderType())
                 .active(true)
                 .initialPrice(currentPrice)
                 .build();
@@ -95,13 +100,12 @@ public class TradeAlertService {
                     "currencyId", currency.getCurrencyid(),
                     "currencySymbol", currency.getSymbol(),
                     "tradeAlertType", tradeAlert.getTradeAlertType().toString(),
-                    "conditionType", tradeAlert.getConditionType() != null ? tradeAlert.getConditionType().toString() : "N/A",
-                    "conditionValue", tradeAlert.getConditionValue() != null ? tradeAlert.getConditionValue() : "N/A",
+                    "conditionPrice", tradeAlert.getConditionPrice(),
                     "tradeAmount", tradeAlert.getTradeAmount() != null ? tradeAlert.getTradeAmount() : "N/A"
             );
             userEventTrackingService.logEvent(email, UserEvent.EventType.CREATE_TRADE_ALERT, details);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while logging user event: {}", e.getMessage(), e);
         }
 
 
@@ -115,7 +119,6 @@ public class TradeAlertService {
 
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
-
 
         if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY && tradeAlert.isActive()) {
             BigDecimal tradeAmount = tradeAlert.getTradeAmount();
@@ -135,7 +138,6 @@ public class TradeAlertService {
         String email = authenticationService.getCurrentUserEmail();
         User user = authenticationService.getCurrentUser(email);
 
-
         if (tradeAlert.getTradeAlertType() == TradeAlertType.BUY && tradeAlert.isActive()) {
             BigDecimal tradeAmount = tradeAlert.getTradeAmount();
             user.setReservedBalance(user.getReservedBalance().subtract(tradeAmount));
@@ -153,11 +155,10 @@ public class TradeAlertService {
             );
             userEventTrackingService.logEvent(email, UserEvent.EventType.DELETE_NOTIFICATION, details);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while logging user event: {}", e.getMessage(), e);
         }
 
         tradeAlertRepository.delete(tradeAlert);
-
     }
 
     @Transactional(readOnly = true)
@@ -168,7 +169,7 @@ public class TradeAlertService {
     }
 
     @Transactional
-    public void executeBuyFromReserved(TradeAlert tradeAlert, BigDecimal currentPrice) {
+    public void executeBuyFromReserved(TradeAlert tradeAlert) {
         TradeAlertType alertType = tradeAlert.getTradeAlertType();
         BigDecimal tradeAmount = tradeAlert.getTradeAmount();
         User user = tradeAlert.getUser();
@@ -183,33 +184,40 @@ public class TradeAlertService {
         buyAssetForAlert(tradeAlert.getPortfolio().getPortfolioid(),
                 tradeAlert.getCurrency().getSymbol(),
                 tradeAmount,
-                null,
                 user);
 
-        verificationService.sendTradeExecutedEmail(user, tradeAlert.getCurrency(), tradeAlert, tradeAmount, alertType);
+        verificationService.sendTradeExecutedEmail(user, tradeAlert.getCurrency(), tradeAmount, alertType);
     }
 
-
     @Transactional
-    public void executeSellFromReserved(TradeAlert tradeAlert, BigDecimal currentPrice) {
+    public void executeSell(TradeAlert tradeAlert) {
         TradeAlertType alertType = tradeAlert.getTradeAlertType();
         BigDecimal tradeAmount = tradeAlert.getTradeAmount();
         User user = tradeAlert.getUser();
+        Portfolio portfolio = tradeAlert.getPortfolio();
+        Currency currency = tradeAlert.getCurrency();
 
         if (alertType != TradeAlertType.SELL) {
             throw new IllegalArgumentException("This method only handles SELL alerts.");
         }
 
-        sellAssetForAlert(tradeAlert.getPortfolio().getPortfolioid(),
-                tradeAlert.getCurrency().getCurrencyid(),
-                null,
-                tradeAmount,
-                user);
-        verificationService.sendTradeExecutedEmail(user, tradeAlert.getCurrency(), tradeAlert, tradeAmount, alertType);
+        PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
+                .orElse(null);
+
+        if (portfolioAsset == null || portfolioAsset.getAmount().compareTo(tradeAmount) < 0) {
+            tradeAlert.setActive(false);
+            tradeAlertRepository.save(tradeAlert);
+            return;
+        }
+
+        sellAssetForAlert(portfolio.getPortfolioid(), currency.getCurrencyid(), tradeAmount, user);
+
+        verificationService.sendTradeExecutedEmail(user, currency, tradeAmount, alertType);
+
+
     }
 
-    @Transactional
-    private void buyAssetForAlert(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD, BigDecimal amountOfCurrency, User user) {
+    private void buyAssetForAlert(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD, User user) {
 
         if (amountInUSD != null) {
             Currency currency = currencyRepository.findBySymbol(currencySymbol.toUpperCase())
@@ -223,7 +231,7 @@ public class TradeAlertService {
                 throw new PriceNotAvailableException("Current price not available for " + currencySymbol);
             }
 
-            BigDecimal amountOfCurrencyCalculated = amountInUSD.divide(rate, 8, BigDecimal.ROUND_HALF_UP);
+            BigDecimal amountOfCurrencyCalculated = amountInUSD.divide(rate, 8, RoundingMode.HALF_UP);
 
             PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
                     .orElse(PortfolioAsset.builder()
@@ -239,9 +247,7 @@ public class TradeAlertService {
             BigDecimal totalCost = portfolioAsset.getAmount().multiply(portfolioAsset.getAveragePurchasePrice())
                     .add(amountInUSD);
 
-            BigDecimal newAveragePrice = totalAmount.compareTo(BigDecimal.ZERO) == 0
-                    ? amountOfCurrencyCalculated
-                    : totalCost.divide(totalAmount, 8, BigDecimal.ROUND_HALF_UP);
+            BigDecimal newAveragePrice = totalCost.divide(totalAmount, 8, RoundingMode.HALF_UP);
 
             portfolioAsset.setAmount(totalAmount);
             portfolioAsset.setAveragePurchasePrice(newAveragePrice);
@@ -266,9 +272,7 @@ public class TradeAlertService {
         }
     }
 
-    @Transactional
-    private void sellAssetForAlert(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency, BigDecimal priceInUSD, User user) {
-
+    private void sellAssetForAlert(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency, User user) {
         if (amountOfCurrency != null) {
             Currency currency = currencyRepository.findById(currencyid)
                     .orElseThrow(() -> new CurrencyNotFoundException("Currency not found in database"));
@@ -286,10 +290,6 @@ public class TradeAlertService {
             PortfolioAsset portfolioAsset = portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)
                     .orElseThrow(() -> new AssetNotOwnedException("You do not own this currency"));
 
-            if (portfolioAsset.getAmount().compareTo(amountOfCurrency) < 0) {
-                throw new InsufficientAssetAmountException("Insufficient amount of currency to sell");
-            }
-
             BigDecimal newAmount = portfolioAsset.getAmount().subtract(amountOfCurrency).setScale(8, RoundingMode.HALF_UP);
             portfolioAsset.setAmount(newAmount);
             portfolioAsset.setUpdatedAt(LocalDateTime.now());
@@ -301,7 +301,6 @@ public class TradeAlertService {
             } else {
                 portfolioAssetRepository.save(portfolioAsset);
             }
-
             BigDecimal newBalance = user.getBalance().add(amountInUSDCalculated).setScale(8, RoundingMode.HALF_UP);
             user.setBalance(newBalance);
             userRepository.save(user);
@@ -319,6 +318,4 @@ public class TradeAlertService {
             transactionRepository.save(transaction);
         }
     }
-
-
 }

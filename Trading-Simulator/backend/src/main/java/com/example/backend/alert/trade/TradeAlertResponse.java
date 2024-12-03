@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-// Import Swagger annotations
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -34,9 +33,6 @@ public class TradeAlertResponse {
     @Schema(description = "Type of the trade alert", example = "BUY")
     private TradeAlertType tradeAlertType;
 
-    @Schema(description = "Type of the condition", example = "PRICE")
-    private AlertConditionType conditionType;
-
     @Schema(description = "Value of the condition", example = "50000.0")
     private BigDecimal conditionValue;
 
@@ -49,6 +45,12 @@ public class TradeAlertResponse {
     @Schema(description = "Initial price when the alert was created", example = "48000.0")
     private BigDecimal initialPrice;
 
+    @Schema(description = "Type of the order", example = "LIMIT")
+    private OrderType orderType;
+
+    @Schema(description = "Price at which the alert should trigger", example = "50000.0")
+    private BigDecimal conditionPrice;
+
     public static TradeAlertResponse fromTradeAlert(TradeAlert tradeAlert) {
         return TradeAlertResponse.builder()
                 .tradeAlertId(tradeAlert.getTradeAlertid())
@@ -57,11 +59,11 @@ public class TradeAlertResponse {
                 .currencyId(tradeAlert.getCurrency().getCurrencyid())
                 .currencyName(tradeAlert.getCurrency().getName())
                 .tradeAlertType(tradeAlert.getTradeAlertType())
-                .conditionType(tradeAlert.getConditionType())
-                .conditionValue(tradeAlert.getConditionValue())
                 .tradeAmount(tradeAlert.getTradeAmount())
                 .active(tradeAlert.isActive())
                 .initialPrice(tradeAlert.getInitialPrice())
+                .orderType(tradeAlert.getOrderType())
+                .conditionPrice(tradeAlert.getConditionPrice())
                 .build();
     }
 }

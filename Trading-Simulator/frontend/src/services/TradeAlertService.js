@@ -22,7 +22,7 @@ export const getUserTradeAlerts = async () => {
 };
 
 export const deactivateTradeAlert = async (tradeAlertId) => {
-  const response = await axios.post(
+  const response = await axios.put(
     `${API_URL}/deactivate/${tradeAlertId}`,
     {},
     getAuthHeaders()

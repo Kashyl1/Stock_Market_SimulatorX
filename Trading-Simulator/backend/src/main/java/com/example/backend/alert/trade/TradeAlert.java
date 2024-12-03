@@ -6,7 +6,6 @@ import com.example.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-// Import Swagger annotations
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -44,13 +43,8 @@ public class TradeAlert {
     @Schema(description = "Type of the trade alert", example = "BUY")
     private TradeAlertType tradeAlertType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Schema(description = "Type of the condition", example = "PRICE")
-    private AlertConditionType conditionType;
-
-    @Schema(description = "Value of the condition", example = "50000.0")
-    private BigDecimal conditionValue;
+    @Schema(description = "Price at which the alert should trigger", example = "50000.0")
+    private BigDecimal conditionPrice;
 
     @Schema(description = "Amount to trade", example = "0.1")
     private BigDecimal tradeAmount;
@@ -62,4 +56,9 @@ public class TradeAlert {
     @Column(nullable = false, precision = 30, scale = 10)
     @Schema(description = "The initial price when the alert was created", example = "48000.0")
     private BigDecimal initialPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Schema(description = "Type of the order", example = "LIMIT")
+    private OrderType orderType;
 }

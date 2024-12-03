@@ -17,14 +17,12 @@ import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jdk.jfr.EventType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -237,7 +235,7 @@ public class TransactionService {
 
         BigDecimal finalAmountOfCurrency = null;
         BigDecimal finalPriceInUSD = null;
-        BigDecimal rate = null;
+        BigDecimal rate;
 
         BigDecimal soldAmountInUSD = null;
         BigDecimal soldAmountOfCurrency = null;

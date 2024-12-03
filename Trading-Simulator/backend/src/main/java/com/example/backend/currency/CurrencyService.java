@@ -39,8 +39,9 @@ public class CurrencyService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
+    // BTC
     private static final List<String> CURRENCY_SYMBOLS = Arrays.asList(
-            "BTC", "ETH", "XMR", "BNB", "SOL", "XRP", "DOGE", "TRX", "TON", "ADA",
+            "ETH", "XMR", "BNB", "SOL", "XRP", "DOGE", "TRX", "TON", "ADA",
             "AVAX", "SHIB", "LINK", "DOT", "DAI", "NEAR", "LTC", "SUI", "APT", "UNI",
             "PEPE", "TAO", "ICP", "FET", "XLM", "STX", "RENDER", "WIF", "IMX", "AAVE",
             "FIL", "ARB", "OP", "INJ", "HBAR", "FTM", "VET", "ATOM", "RUNE", "BONK",
