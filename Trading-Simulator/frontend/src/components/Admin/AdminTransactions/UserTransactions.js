@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getTransactionsByUser, markTransactionSuspicious } from '../../../services/AdminService';
+import { getTransactionsByUser, markTransactionSuspicious, getTransactionHistoryByPortfolio } from '../../../services/AdminService';
 import '../../../components/Admin/AdminUsers/AdminUsers.css';
 
-const UserTransactions = ({ userId }) => {
+const UserTransactions = ({ userId, portfolioId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -11,45 +11,68 @@ const UserTransactions = ({ userId }) => {
   const [transactionPage, setTransactionPage] = useState(0);
   const [transactionPageSize] = useState(20);
   const [totalTransactionPages, setTotalTransactionPages] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
   const [allTransactions, setAllTransactions] = useState([]);
 
-  useEffect(() => {
-    if (userId !== null) {
-      setLoading(true);
-      setError(null);
-      const fetchTransactions = async () => {
-        try {
-          const allData = [];
-          let currentPage = 0;
-          let totalPages = 1;
+useEffect(() => {
+  setLoading(true);
+  setError(null);
+  const fetchTransactions = async () => {
+    try {
+      const allData = [];
+      let currentPage = 0;
+      let totalPages = 1;
 
+      console.log('Starting to fetch transactions...');
 
-          while (currentPage < totalPages) {
-            const response = await getTransactionsByUser(userId, currentPage, transactionPageSize);
-            allData.push(...(response.content || []));
-            totalPages = response.totalPages || 1;
-            currentPage += 1;
-          }
-
-          setAllTransactions(allData);
-          setTransactions(allData.slice(0, transactionPageSize));
-          setFilteredTransactions(allData.slice(0, transactionPageSize));
-          setTotalTransactionPages(Math.ceil(allData.length / transactionPageSize));
-        } catch (err) {
-          setError('Error while fetching transactions.');
-          console.error(err);
-          setTransactions([]);
-          setFilteredTransactions([]);
-          setAllTransactions([]);
-          setTotalTransactionPages(0);
-        } finally {
-          setLoading(false);
+      if (userId) {
+        console.log(`Fetching transactions for userId: ${userId}`);
+        while (currentPage < totalPages) {
+          console.log(`Fetching page ${currentPage + 1} for userId: ${userId}`);
+          const response = await getTransactionsByUser(userId, currentPage, transactionPageSize);
+          console.log(`Received response for userId: ${userId}, page ${currentPage + 1}`, response);
+          allData.push(...(response.content || []));
+          totalPages = response.totalPages || 1;
+          console.log(`Total pages for userId ${userId}: ${totalPages}`);
+          currentPage += 1;
         }
-      };
-      fetchTransactions();
+      } else if (portfolioId) {
+        console.log(`Fetching transactions for portfolioId: ${portfolioId}`);
+        while (currentPage < totalPages) {
+          console.log(`Fetching page ${currentPage + 1} for portfolioId: ${portfolioId}`);
+          const response = await getTransactionHistoryByPortfolio(portfolioId, currentPage, transactionPageSize);
+          console.log(`Received response for portfolioId: ${portfolioId}, page ${currentPage + 1}`, response);
+          allData.push(...(response.content || []));
+          totalPages = response.totalPages || 1;
+          console.log(`Total pages for portfolioId ${portfolioId}: ${totalPages}`);
+          currentPage += 1;
+        }
+      }
+
+      console.log('All fetched transactions:', allData);
+
+      setAllTransactions(allData);
+      setTransactions(allData.slice(0, transactionPageSize));
+      setFilteredTransactions(allData.slice(0, transactionPageSize));
+      setTotalTransactionPages(Math.ceil(allData.length / transactionPageSize));
+
+      console.log('Filtered transactions set:', allData.slice(0, transactionPageSize));
+    } catch (err) {
+      console.error('Error while fetching transactions:', err);
+      setError('Error while fetching transactions.');
+      setTransactions([]);
+      setFilteredTransactions([]);
+      setAllTransactions([]);
+      setTotalTransactionPages(0);
+    } finally {
+      setLoading(false);
+      console.log('Loading state set to false');
     }
-  }, [userId, transactionPageSize]);
+  };
+
+  console.log('useEffect triggered, fetching transactions...');
+  fetchTransactions();
+}, [userId, portfolioId, transactionPageSize]);
+
 
 
   const formatTimestamp = (timestamp) => {
@@ -78,9 +101,6 @@ const UserTransactions = ({ userId }) => {
     }
   };
 
-
-
-
   const handleNextTransactionPage = () => {
     if (searchQuery.trim() === '') {
       if (transactionPage < totalTransactionPages - 1) {
@@ -102,7 +122,6 @@ const UserTransactions = ({ userId }) => {
       }
     }
   };
-
 
   const handleMarkSuspicious = async (transactionId, currentStatus) => {
     try {
@@ -132,7 +151,7 @@ const UserTransactions = ({ userId }) => {
 
   return (
     <div>
-      <h3>User Transactions</h3>
+      <h3>{userId ? 'User Transactions' : 'Portfolio Transactions'}</h3>
       <div className="search-container">
         <input
           type="text"
@@ -141,12 +160,12 @@ const UserTransactions = ({ userId }) => {
           onChange={(e) => handleSearch(e.target.value)}
           className="search-input"
         />
-
       </div>
       {filteredTransactions.length > 0 ? (
         <div className="transactions-table">
           <div className="table-header_admin_userTransactions">
             <div className="header-cell">Transaction ID</div>
+            <div className="header-cell">Portfolio ID</div>
             <div className="header-cell">Type</div>
             <div className="header-cell">Currency</div>
             <div className="header-cell">Amount</div>
@@ -160,6 +179,7 @@ const UserTransactions = ({ userId }) => {
             {filteredTransactions.map((transaction) => (
               <div className="table-row_admin_userTransactions" key={transaction.transactionid}>
                 <div className="cell">{transaction.transactionid}</div>
+                <div className="cell">{transaction.portfolioid}</div>
                 <div className="cell">{transaction.transactionType}</div>
                 <div className="cell">{transaction.currencyName}</div>
                 <div className="cell">{transaction.amount}</div>

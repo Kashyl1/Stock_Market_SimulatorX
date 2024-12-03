@@ -110,8 +110,10 @@ const LoginForm = ({ setIsLoggedIn }) => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-                <img src={logo} alt="Logo" className="logo_login" />
-                <h2 className="auth-header">User login</h2>
+                 <Link to="/">
+                    <img src={logo} alt="Logo" className="logo_login" />
+                 </Link>
+                 <h2 className="auth-header">User login</h2>
                 {!showResetForm ? (
                     <form onSubmit={handleSubmit} className="auth-form">
                         <div className="input-group">

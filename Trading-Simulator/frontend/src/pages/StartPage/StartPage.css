@@ -196,19 +196,6 @@
     color: #f5f5f5;
 }
 
-
-.about-us__section h2:hover {
-    color: #fff;
-    transition: color 0.3s;
-}
-
-.about-us__section li:hover {
-    color: #d4af37;
-    transition: color 0.3s;
-}
-
-
-
 .about-us__offer-section {
     display: flex;
     align-items: center;

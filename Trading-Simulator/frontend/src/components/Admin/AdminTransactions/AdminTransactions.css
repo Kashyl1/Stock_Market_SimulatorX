@@ -104,3 +104,80 @@
   background-color: rgba(212, 175, 55, 0.5);
   cursor: not-allowed;
 }
+
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+
+}
+
+
+.portfolio-card-custom {
+
+  border: 2px solid #b99300;
+  border-radius: 12px;
+  color: #f8c32d;
+  text-align: center;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.portfolio-card-custom:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8);
+}
+
+
+.portfolio-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.portfolio-id {
+  font-size: 1rem;
+  color: #d4af37;
+  margin-bottom: 20px;
+}
+
+
+.portfolio-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.view-button {
+  background-color: #b99300;
+  color: #101010;
+}
+
+.view-button:hover {
+  background-color: #d4af37;
+  color: #fff;
+}
+
+.delete-button {
+  background-color: #d40000;
+  color: #fff;
+}
+
+.delete-button:hover {
+  background-color: #ff4c4c;
+  color: #101010;
+}

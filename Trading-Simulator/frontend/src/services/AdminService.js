@@ -99,12 +99,99 @@ export const getSuspiciousTransactions = async (thresholdAmount) => {
 };
 
 export const markTransactionSuspicious = async (transactionId, suspicious) => {
-  const response = await axios.put(
-    `${API_URL}/transactions/${transactionId}/suspicious?suspicious=${suspicious}`,
-    null,
-    {
-      params: { suspicious },
-    }
-  );
-  return response.data;
+  const token = localStorage.getItem('jwtToken'); // Pobranie tokenu JWT z lokalStorage
+  try {
+    const response = await axios.put(
+      `${API_URL}/transactions/${transactionId}/suspicious`,
+      null,
+      {
+        params: { suspicious },
+        headers: {
+          Authorization: `Bearer ${token}`, // Dodanie tokenu JWT do nagłówków
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error marking transaction suspicious:', error);
+    throw error;
+  }
+};
+
+
+export const getPortfolios = async (page, size) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/portfolios`, {
+      params: { page, size },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching portfolios:', error);
+    throw error;
+  }
+};
+
+export const deletePortfolio = async (portfolioId) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.delete(`${API_URL}/portfolios/${portfolioId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting portfolio:', error);
+    throw error;
+  }
+};
+
+export const getPortfolioByid = async (portfolioId) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/portfolios/${portfolioId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching portfolio:', error);
+    throw error;
+  }
+};
+
+export const getTransactionHistoryByPortfolio = async (portfolioId, page, pageSize) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/transactions/portfolio/${portfolioId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transaction history:', error);
+    throw error;
+  }
+};
+
+export const getPortfoliosByUser = async (userId) => {
+  const token = localStorage.getItem('jwtToken'); // Pobranie tokena z localStorage
+  try {
+    const response = await axios.get(`${API_URL}/portfolios/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Dodanie nagłówka z autoryzacją
+      },
+    });
+    return response.data; // Zwrócenie danych odpowiedzi
+  } catch (error) {
+    console.error('Error fetching portfolios by user:', error);
+    throw error; // Rzucenie wyjątku w razie błędu
+  }
 };

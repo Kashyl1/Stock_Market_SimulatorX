@@ -41,7 +41,7 @@
 
 .table-header_admin_userTransactions {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.5fr 1.5fr 1fr 1.5fr 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr 1.5fr 1fr 1.5fr;
   background-color: rgba(255, 255, 255, 0.1);
   border-bottom: 2px solid #333;
   font-weight: bold;
@@ -53,10 +53,8 @@
 
 .table-row_admin_userTransactions {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.5fr 1.5fr 1fr 1.5fr 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr 1.5fr 1fr 1.5fr;
   padding: 15px 0;
   border-bottom: 1px solid #333;
   align-items: center;
 }
-
-

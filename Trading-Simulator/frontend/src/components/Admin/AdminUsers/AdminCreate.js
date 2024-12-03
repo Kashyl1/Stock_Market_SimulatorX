@@ -95,28 +95,6 @@ const AdminCreate = () => {
           required
         />
       </div>
-      <div className="input-group-settings">
-        <label htmlFor="balance">Balance</label>
-        <input
-          type="number"
-          step="0.001"
-          id="balance"
-          name="balance"
-          value={formData.balance}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="input-group-settings">
-        <label htmlFor="reservedBalance">Reserved Balance</label>
-        <input
-          type="number"
-          step="0.001"
-          id="reservedBalance"
-          name="reservedBalance"
-          value={formData.reservedBalance}
-          onChange={handleChange}
-        />
-      </div>
       {responseMessage && (
         <p className={responseMessage.includes('successfully') ? 'success-message' : 'error-message'}>
           {responseMessage}
