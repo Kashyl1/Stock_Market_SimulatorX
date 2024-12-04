@@ -14,6 +14,7 @@ import org.json.JSONArray;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -25,23 +26,17 @@ import reactor.core.publisher.Mono;
 @Service
 @Tag(name = "Currency Service", description = "Service for updating and retrieving currency data")
 public class CurrencyService {
-    // Całkowita zmiana logiki w przyszłości dodawania kryptowalut (LISTA NIE BĘDZIE GIT)
-    // PRZYPOMINAJKA CZEMU: BINANCE BIFI, COINGEECKO: beefy-finance
-    // PIERWSZY PLAN DODAĆ NOWĄ KOLUMNE COINGEECKO_ID DO ROZWAZENIA
-    // DRUGI PLAN MAPOWANIE RĘCZNE
-    // TRZECI PLAN BRAK
 
     private static final Logger logger = LoggerFactory.getLogger(CurrencyService.class);
 
     private final CurrencyRepository currencyRepository;
     private final WebClient binanceClient;
     private final WebClient coingeckoClient;
+    private final HistoricalKlineRepository historicalKlineRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-
-    // BTC
     private static final List<String> CURRENCY_SYMBOLS = Arrays.asList(
-            "ETH", "XMR", "BNB", "SOL", "XRP", "DOGE", "TRX", "TON", "ADA",
+            "BTC", "ETH", "XMR", "BNB", "SOL", "XRP", "DOGE", "TRX", "TON", "ADA",
             "AVAX", "SHIB", "LINK", "DOT", "DAI", "NEAR", "LTC", "SUI", "APT", "UNI",
             "PEPE", "TAO", "ICP", "FET", "XLM", "STX", "RENDER", "WIF", "IMX", "AAVE",
             "FIL", "ARB", "OP", "INJ", "HBAR", "FTM", "VET", "ATOM", "RUNE", "BONK",
@@ -53,10 +48,12 @@ public class CurrencyService {
     public CurrencyService(
             CurrencyRepository currencyRepository,
             @Qualifier("binanceClient") WebClient binanceClient,
-            @Qualifier("coingeckoClient") WebClient coingeckoClient) {
+            @Qualifier("coingeckoClient") WebClient coingeckoClient,
+            HistoricalKlineRepository historicalKlineRepository) {
         this.currencyRepository = currencyRepository;
         this.binanceClient = binanceClient;
         this.coingeckoClient = coingeckoClient;
+        this.historicalKlineRepository = historicalKlineRepository;
     }
 
     private List<List<String>> partitionList(List<String> list, int size) {
@@ -110,6 +107,7 @@ public class CurrencyService {
         }
     }
 
+    @Transactional
     @Operation(summary = "Update current prices", description = "Updates the current price of all tracked currencies")
     public void updateCurrentPrice() {
         measureExecutionTime("updateCurrentPrice", () -> {
@@ -120,11 +118,11 @@ public class CurrencyService {
 
                 List<Mono<String>> monos = createApiRequests("/api/v3/ticker/price", symbolsToRequest, 30, binanceClient);
 
-                Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
-                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
+                Map<String, Currency> currencyMap = new ConcurrentHashMap<>(currencyRepository.findAll().stream()
+                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency)));
 
                 List<Currency> currenciesToUpdate = Flux.merge(monos)
-                        .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, currencyMap, jsonObject -> {
+                        .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, jsonObject -> {
                             String symbolWithUSDT = jsonObject.getString("symbol");
                             String symbol = symbolWithUSDT.replace("USDT", "");
                             BigDecimal currentPrice = jsonObject.getBigDecimal("price");
@@ -146,7 +144,6 @@ public class CurrencyService {
 
                 if (currenciesToUpdate != null && !currenciesToUpdate.isEmpty()) {
                     currencyRepository.saveAll(currenciesToUpdate);
-                    logger.info("Updated prices for {} currencies", currenciesToUpdate.size());
                 }
 
             } catch (JsonProcessingException e) {
@@ -168,11 +165,11 @@ public class CurrencyService {
 
                 List<Mono<String>> monos = createApiRequests("/api/v3/ticker/24hr", symbolsToRequest, 50, binanceClient);
 
-                Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
-                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
+                Map<String, Currency> currencyMap = new ConcurrentHashMap<>(currencyRepository.findAll().stream()
+                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency)));
 
                 List<Currency> currenciesToUpdate = Flux.merge(monos)
-                        .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, currencyMap, jsonObject -> {
+                        .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, jsonObject -> {
                             String symbolWithUSDT = jsonObject.getString("symbol");
                             String symbol = symbolWithUSDT.replace("USDT", "");
 
@@ -225,7 +222,6 @@ public class CurrencyService {
                 if (currenciesToUpdate != null && !currenciesToUpdate.isEmpty()) {
                     updateMarketCapData(currenciesToUpdate);
                     currencyRepository.saveAll(currenciesToUpdate);
-                    logger.info("Updated additional data for {} currencies", currenciesToUpdate.size());
                 }
             } catch (JsonProcessingException e) {
                 logger.error("Failed to serialize symbols for API request", e);
@@ -235,6 +231,7 @@ public class CurrencyService {
         });
     }
 
+    @Transactional
     private void updateMarketCapData(List<Currency> currenciesToUpdate) {
         String symbols = CURRENCY_SYMBOLS.stream()
                 .map(String::toLowerCase)
@@ -270,6 +267,7 @@ public class CurrencyService {
         }
     }
 
+    @Transactional
     @Operation(summary = "Update currency names and images", description = "Fetches and updates currency names and images from CoinGecko")
     public void updateCurrencyNamesAndImages() {
         measureExecutionTime("updateCurrencyNamesAndImages", () -> {
@@ -308,8 +306,6 @@ public class CurrencyService {
                         existingCurrency.setImageUrl(imageUrl);
                         existingCurrency.setName(name);
                         currenciesToUpdate.add(existingCurrency);
-                    } else {
-                        logger.warn("Currency with symbol {} not found in the database", symbol);
                     }
                 }
 
@@ -342,7 +338,7 @@ public class CurrencyService {
         return monos;
     }
 
-    private List<Currency> processApiResponse(String responseStr, Map<String, Currency> currencyMap, Function<JSONObject, Currency> updateFunction) {
+    private List<Currency> processApiResponse(String responseStr, Function<JSONObject, Currency> updateFunction) {
         JSONArray responseArray = new JSONArray(responseStr);
         List<Currency> updatedCurrencies = new ArrayList<>();
 
@@ -359,4 +355,100 @@ public class CurrencyService {
         return updatedCurrencies;
     }
 
+    public void updateHistoricalData(String interval, int limit) {
+        measureExecutionTime("updateHistoricalKlines", () -> {
+            try {
+                Map<String, Currency> currencyMap = currencyRepository.findAll().stream()
+                        .collect(Collectors.toMap(Currency::getSymbol, currency -> currency));
+
+                int maxConcurrency = 5;
+
+                Flux.fromIterable(CURRENCY_SYMBOLS)
+                        .flatMap(symbol -> {
+                            String symbolWithUSDT = symbol + "USDT";
+                            Currency currency = currencyMap.get(symbol);
+                            if (currency == null) {
+                                logger.error("Currency {} not found in database. Skipping.", symbol);
+                                return Mono.empty();
+                            }
+
+                            return binanceClient.get()
+                                    .uri(uriBuilder -> uriBuilder
+                                            .path("/api/v3/klines")
+                                            .queryParam("symbol", symbolWithUSDT)
+                                            .queryParam("interval", interval)
+                                            .queryParam("limit", limit)
+                                            .build())
+                                    .retrieve()
+                                    .bodyToMono(String.class)
+                                    .flatMap(responseStr -> processKlinesResponse(responseStr, currency, interval))
+                                    .onErrorResume(e -> {
+                                        logger.error("Error fetching klines for symbol {}", symbolWithUSDT, e);
+                                        return Mono.empty();
+                                    });
+                        }, maxConcurrency)
+                        .collectList()
+                        .block();
+
+            } catch (Exception e) {
+                logger.error("Failed to update historical data", e);
+            }
+        });
+    }
+
+    private Mono<Void> processKlinesResponse(String responseStr, Currency currency, String interval) {
+        return Mono.fromRunnable(() -> {
+            if (responseStr == null) {
+                logger.error("No response for symbol {}", currency.getSymbol());
+                return;
+            }
+
+            JSONArray klines = new JSONArray(responseStr);
+            List<HistoricalKline> historicalKlines = new ArrayList<>();
+
+            for (int i = 0; i < klines.length(); i++) {
+                JSONArray kline = klines.getJSONArray(i);
+                Long openTime = kline.getLong(0);
+                BigDecimal openPrice = new BigDecimal(kline.getString(1));
+                BigDecimal highPrice = new BigDecimal(kline.getString(2));
+                BigDecimal lowPrice = new BigDecimal(kline.getString(3));
+                BigDecimal closePrice = new BigDecimal(kline.getString(4));
+                BigDecimal volume = new BigDecimal(kline.getString(5));
+                Long closeTime = kline.getLong(6);
+
+                Optional<HistoricalKline> existingKlineOpt = historicalKlineRepository.findByCurrencyAndIntervalAndOpenTime(
+                        currency, interval, openTime);
+                HistoricalKline historicalKline;
+                if (existingKlineOpt.isPresent()) {
+                    historicalKline = existingKlineOpt.get();
+                    historicalKline.setOpenPrice(openPrice);
+                    historicalKline.setHighPrice(highPrice);
+                    historicalKline.setLowPrice(lowPrice);
+                    historicalKline.setClosePrice(closePrice);
+                    historicalKline.setVolume(volume);
+                    historicalKline.setCloseTime(closeTime);
+                } else {
+                    historicalKline = HistoricalKline.builder()
+                            .currency(currency)
+                            .openTime(openTime)
+                            .openPrice(openPrice)
+                            .highPrice(highPrice)
+                            .lowPrice(lowPrice)
+                            .closePrice(closePrice)
+                            .volume(volume)
+                            .closeTime(closeTime)
+                            .interval(interval)
+                            .build();
+                }
+
+                historicalKlines.add(historicalKline);
+            }
+
+            if (!historicalKlines.isEmpty()) {
+                historicalKlineRepository.saveAll(historicalKlines);
+            } else {
+                logger.info("No new klines found for symbol {}", currency.getSymbol());
+            }
+        });
+    }
 }

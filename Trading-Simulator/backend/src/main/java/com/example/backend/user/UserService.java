@@ -50,7 +50,6 @@ public class UserService {
 
 
         return BalanceResponse.builder()
-                .message("Funds have been added successfully.")
                 .balance(user.getBalance())
                 .build();
     }
@@ -62,7 +61,6 @@ public class UserService {
 
         return BalanceResponse.builder()
                 .balance(user.getBalance())
-                .message("Balance retrieved successfully.")
                 .build();
     }
 
