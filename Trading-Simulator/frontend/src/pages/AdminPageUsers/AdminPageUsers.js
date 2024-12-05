@@ -27,13 +27,13 @@ const AdminPageUsers = () => {
         <h1>Users Panel</h1>
         <div className="admin_button-container">
           <button
-            className={`action-button ${activeButton === 'users' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'users' ? 'active' : ''}`}
             onClick={() => handleButtonClick('users')}
           >
             Show Users
           </button>
           <button
-            className={`action-button ${activeButton === 'create' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'create' ? 'active' : ''}`}
             onClick={() => handleButtonClick('create')}
           >
             Create Admin

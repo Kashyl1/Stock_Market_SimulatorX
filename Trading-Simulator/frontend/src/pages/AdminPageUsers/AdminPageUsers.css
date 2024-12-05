@@ -11,7 +11,7 @@ h1 {
   margin-bottom: 20px;
 }
 
-.action-button  {
+.admin_action-button  {
   display: block;
   padding: 10px 15px;
   color: #aaa;
@@ -24,17 +24,17 @@ h1 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.action-button:hover {
+.admin_action-button:hover {
    background-color: #555;
   transform: translateY(-3px);
 }
 
-.action-button.active {
+.admin_action-button.active {
 background-color: #d4af37;
   color: #000;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
-.action-button:focus {
+.admin_action-button:focus {
   outline: none;
 }

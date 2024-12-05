@@ -58,3 +58,107 @@
   border-bottom: 1px solid #333;
   align-items: center;
 }
+
+
+.table-header_admin,
+.table-row_admin,
+.table-header_suspicious,
+.table-row_admin_suspicious,
+.table-header_admin_userTransactions,
+.table-row_admin_userTransactions {
+  display: grid;
+  align-items: center;
+  border-bottom: 1px solid #333;
+}
+
+
+.table-header_admin,
+.table-header_suspicious,
+.table-header_admin_userTransactions {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid #333;
+  font-weight: bold;
+  text-align: left;
+  color: #d4af37;
+}
+
+
+@media (max-width: 1200px) {
+  .table-header_admin,
+  .table-row_admin,
+  .table-header_suspicious,
+  .table-row_admin_suspicious,
+  .table-header_admin_userTransactions,
+  .table-row_admin_userTransactions {
+    padding: 10px 0;
+    font-size: 14px;
+  }
+}
+
+
+@media (max-width: 992px) {
+  .table-header_admin,
+  .table-row_admin,
+  .table-header_suspicious,
+  .table-row_admin_suspicious,
+  .table-header_admin_userTransactions,
+  .table-row_admin_userTransactions {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .table-header_admin,
+  .table-row_admin,
+  .table-header_suspicious,
+  .table-row_admin_suspicious,
+  .table-header_admin_userTransactions,
+  .table-row_admin_userTransactions {
+    padding: 6px 0;
+    font-size: 12px;
+  }
+
+
+}
+
+
+@media (max-width: 576px) {
+  .table-header_admin,
+  .table-row_admin,
+  .table-header_suspicious,
+  .table-row_admin_suspicious,
+  .table-header_admin_userTransactions,
+  .table-row_admin_userTransactions {
+    padding: 4px 0;
+    font-size: 11px;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .table-header_admin,
+  .table-row_admin,
+  .table-header_suspicious,
+  .table-row_admin_suspicious,
+  .table-header_admin_userTransactions,
+  .table-row_admin_userTransactions {
+    padding: 2px 0;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-header_admin_userTransactions,
+  .table-row_admin_userTransactions {
+    grid-template-columns: 1fr 1fr 1fr 1fr; /* Dalsze redukcje kolumn */
+  }
+
+  .table-header_admin_userTransactions > :nth-child(4),
+  .table-header_admin_userTransactions > :nth-child(7),
+  .table-row_admin_userTransactions > :nth-child(4),
+  .table-row_admin_userTransactions > :nth-child(7) {
+    display: none; /* Ukrywanie kolejnych kolumn */
+  }
+}

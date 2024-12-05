@@ -91,3 +91,106 @@
 .error-input {
   border-color: #ff4d4f;
 }
+
+@media (max-width: 992px) {
+  .user-settings {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .user-settings h2 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .user-settings-form {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  .input-group-settings label {
+    font-size: 1em;
+  }
+
+  .input-group-settings input {
+    width: 100%;
+    font-size: 0.85em;
+    padding: 8px;
+  }
+
+  .user-settings-form button {
+    width: 100%;
+    font-size: 1em;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-settings {
+    padding: 15px;
+  }
+
+  .user-settings h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+
+  .input-group-settings input {
+    font-size: 0.8em;
+    padding: 7px;
+  }
+
+  .user-settings-form button {
+    font-size: 0.9em;
+    padding: 10px;
+  }
+
+
+}
+
+@media (max-width: 576px) {
+  .user-settings {
+    padding: 10px;
+  }
+
+  .user-settings h2 {
+    font-size: 1.3em;
+  }
+
+  .input-group-settings label {
+    font-size: 0.9em;
+  }
+
+  .input-group-settings input {
+    font-size: 0.75em;
+    padding: 6px;
+  }
+
+  .user-settings-form button {
+    font-size: 0.85em;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-settings h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  .input-group-settings label {
+    font-size: 0.85em;
+  }
+
+  .input-group-settings input {
+    font-size: 0.7em;
+    padding: 5px;
+  }
+
+  .user-settings-form button {
+    font-size: 0.8em;
+    padding: 7px;
+  }
+}

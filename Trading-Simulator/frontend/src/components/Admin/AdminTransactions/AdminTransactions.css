@@ -72,17 +72,6 @@
 }
 
 
-@media (max-width: 768px) {
-  .txn-portal-header,
-  .txn-universe-row {
-    grid-template-columns: repeat(3, minmax(100px, 1fr));
-  }
-
-  .txn-header-cell-unique:nth-child(n+4),
-  .txn-cell-dimension:nth-child(n+4) {
-    display: none;
-  }
-}
 
 
 .txn-button {
@@ -169,11 +158,6 @@
 
 .view-button:hover {
   background-color: #d4af37;
-  color: #fff;
-}
-
-.delete-button {
-  background-color: #d40000;
   color: #fff;
 }
 

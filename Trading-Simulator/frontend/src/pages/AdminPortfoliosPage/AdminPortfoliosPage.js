@@ -25,13 +25,13 @@ const handleButtonClick = (buttonName) => {
         <h1>Portfolios Panel</h1>
         <div className="admin_button-container">
           <button
-            className={`action-button ${activeButton === 'portfolios' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'portfolios' ? 'active' : ''}`}
             onClick={() => handleButtonClick('portfolios')}
           >
             Show Portfolios
           </button>
           <button
-            className={`action-button ${activeButton === 'portfoliosByUser' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'portfoliosByUser' ? 'active' : ''}`}
             onClick={() => handleButtonClick('portfoliosByUser')}
           >
             Portfolios By Users
