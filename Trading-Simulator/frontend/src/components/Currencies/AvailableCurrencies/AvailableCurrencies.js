@@ -36,13 +36,13 @@ const AvailableCurrencies = () => {
       setData(availableAssets.content);
       setIsLoading(false);
     } catch (err) {
-        let errorMessage = 'Failed to fetch available assets.';
-        if (err.response?.data?.message) {
-          errorMessage = err.response.data.message;
-        }
-        setError(errorMessage);
-        setIsLoading(false);
+      let errorMessage = 'Failed to fetch available assets.';
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
       }
+      setError(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -81,6 +81,15 @@ const AvailableCurrencies = () => {
     debouncedSetSearchTerm(e.target.value);
   };
 
+  const formatLargeNumber = (num) => {
+    if (num === undefined || num === null || isNaN(num)) return 'N/A';
+
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T'; // Biliony
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';  // Miliardy
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';  // Miliony
+    if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';  // Tysiące
+    return num.toFixed(0); // Jeśli liczba jest mniejsza niż 1000
+  };
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -113,43 +122,46 @@ const AvailableCurrencies = () => {
           onChange={handleSearchChange}
           className="search-input"
         />
-        <div className="table-header">
-          <div className="header-cell">Name</div>
-          <div className="header-cell">Price</div>
-          <div className="header-cell">Change (24h)</div>
-          <div className="header-cell">Volume (24h)</div>
-          <div className="header-cell">Market cap</div>
-          <div className="header-cell">Action</div>
-        </div>
-        {filteredCurrencies.map((currency, index) => (
-          <div className="table-row" key={index}>
-            <div className="cell currency-info">
-              <img src={currency.image_url} alt={currency.name} className="currency-icon" />
-              <div>
-                <span className="currency-name">{currency.name}</span>
-                <span className="currency-symbol">{currency.id.toUpperCase()}</span>
+        <div className="scroll-container">
+          <div className="table-header">
+            <div className="header-cell">Name</div>
+            <div className="header-cell">Price</div>
+            <div className="header-cell">Change (24h)</div>
+            <div className="header-cell">Volume (24h)</div>
+            <div className="header-cell">Market cap</div>
+            <div className="header-cell">Action</div>
+          </div>
+          {filteredCurrencies.map((currency, index) => (
+            <div className="table-row" key={index}>
+              <div className="cell currency-info">
+                <img src={currency.image_url} alt={currency.name} className="currency-icon" />
+                <div>
+                  <span className="currency-name">{currency.name}</span>
+                  <span className="currency-symbol">{currency.id.toUpperCase()}</span>
+                </div>
+              </div>
+              <div className="cell">${formatPrice(currency.price_in_usd)}</div>
+              <div className="cell">
+                <span
+                  className={`currency-change ${
+                    currency.price_change_percent_24h > 0 ? 'positive' : 'negative'
+                  }`}
+                >
+                  {currency.price_change_percent_24h > 0 ? '+' : ''}
+                  {currency.price_change_percent_24h.toFixed(2)}%
+                </span>
+              </div>
+              <div className="cell">${formatLargeNumber(currency.volume_24h)}</div>
+              <div className="cell">${formatLargeNumber(currency.market_cap)}</div>
+              <div className="cell">
+                <button className="action-button" onClick={() => handleBuyClick(currency)}>
+                  Buy
+                </button>
               </div>
             </div>
-            <div className="cell">${formatPrice(currency.price_in_usd)}</div>
-            <div className="cell">
-              <span
-                className={`currency-change ${
-                  currency.price_change_percent_24h > 0 ? 'positive' : 'negative'
-                }`}
-              >
-                {currency.price_change_percent_24h > 0 ? '+' : ''}
-                {currency.price_change_percent_24h.toFixed(2)}%
-              </span>
-            </div>
-            <div className="cell">${formatPrice(currency.volume_24h)}</div>
-            <div className="cell">${formatPrice(currency.market_cap)}</div> {/* Chyba git? */}
-            <div className="cell">
-              <button className="action-button" onClick={() => handleBuyClick(currency)}>
-                Buy
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
         <div className="pagination-controls">
           <button onClick={handlePrevPage} disabled={page === 0}>
             Previous

@@ -101,7 +101,7 @@ const AdminTransactionsUnique = () => {
       </div>
 
       {transactions.length > 0 ? (
-        <>
+        <div className="scroll-container">
           <div className="txn-dimension-table">
             <div className="txn-portal-header">
               <div className="txn-header-cell-unique">ID</div>
@@ -141,29 +141,24 @@ const AdminTransactionsUnique = () => {
               ))}
             </div>
           </div>
-
-          <div className="pagination-controls">
-            <button
-              onClick={handlePrevPage}
-              disabled={page === 0}
-            >
-              Previous
-            </button>
-            <span>
-              Page {page + 1} of {totalPages}
-            </span>
-            <button
-              onClick={handleNextPage}
-              disabled={page === totalPages - 1}
-            >
-              Next
-            </button>
-          </div>
-        </>
+        </div>
       ) : (
         <p>No transactions available.</p>
       )}
+
+      <div className="pagination-controls">
+        <button onClick={handlePrevPage} disabled={page === 0}>
+          Previous
+        </button>
+        <span>
+          Page {page + 1} of {totalPages}
+        </span>
+        <button onClick={handleNextPage} disabled={page === totalPages - 1}>
+          Next
+        </button>
+      </div>
     </div>
+
   );
 };
 

@@ -24,19 +24,19 @@ const handleButtonClick = (buttonName) => {
         <h1>Transactions Panel</h1>
         <div className="admin_button-container">
           <button
-            className={`action-button ${activeButton === 'Transactions' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'Transactions' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Transactions')}
           >
             Show Transactions
           </button>
           <button
-            className={`action-button ${activeButton === 'TransactionsByUser' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'TransactionsByUser' ? 'active' : ''}`}
             onClick={() => handleButtonClick('TransactionsByUser')}
           >
             Transactions By User
           </button>
           <button
-            className={`action-button ${activeButton === 'SuspiciousTransactions' ? 'active' : ''}`}
+            className={`admin_action-button ${activeButton === 'SuspiciousTransactions' ? 'active' : ''}`}
             onClick={() => handleButtonClick('SuspiciousTransactions')}
           >
             Get Suspicious Transactions

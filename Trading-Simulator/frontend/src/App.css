@@ -4,18 +4,17 @@
 }
 
 html, body {
-  height: 100%;
   font-family: 'Roboto', sans-serif;
 }
 
 body {
-  margin: 0;
-  padding: 0;
   background-image: url('assets/3601908.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
 }
+
+
 
 a {
   color: #007bff;
@@ -26,11 +25,7 @@ a:hover {
   text-decoration: none;
 }
 
-.App {
-  min-height: 100vh;
-  background-size: cover;
-  background-position: center;
-}
+
 
 .navbar {
   position: fixed;
@@ -76,5 +71,261 @@ a:hover {
   font-style: normal;
 }
 
+button {
+  border: none;
+}
+button:hover {
+  cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+  .navbar {
+    display: none;
+  }
+}
+
+@media (max-width: 1500px) {
+    body {
+      background-attachment: scroll;
+      background-size: cover;
+      background-position: center;
+    }
+
+
+}
+
+@media (max-width: 1200px) {
+  .portfolio-details h3,
+  .settings-sidebar h2,
+  .alerts-page h1,
+  .table-title,
+  .portfolio-details h1,
+  .portfolio-details h2,
+  .portfolios-page h1,
+  .portfolios-page h2 {
+    font-size: 1.4em;
+  }
+
+  .portfolio-button {
+    font-size: 1em;
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+
+  .search-input {
+    font-size: 16px;
+    padding: 6px;
+  }
+
+  .admin_action-button.active {
+    font-size: 1.2em;
+    padding: 6px 12px;
+  }
+
+  .admin_action-button {
+    font-size: 1.2em;
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 992px) {
+  .settings-sidebar h2,
+  .alerts-page h1,
+  .table-title,
+  .portfolio-details h1,
+  .portfolio-details h2,
+  .portfolios-page h1,
+  .portfolios-page h2 {
+    font-size: 1.3em;
+  }
+  .cell button,
+  .portfolio-button {
+    font-size: 1em;
+    border-radius: 7px;
+    padding: 7px 12px;
+  }
+
+  .pagination-controls button,
+  .pagination-controls {
+  font-size: 0.85em;
+
+  }
+
+  .search-input {
+    font-size: 15px;
+    padding: 5px;
+  }
+
+  .admin_action-button.active {
+    font-size: 1.1em;
+    padding: 5px 10px;
+  }
+
+  .admin_action-button {
+    font-size: 1.1em;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-details h3,
+  .settings-sidebar h2,
+  .alerts-page h1,
+  .table-title,
+  .portfolio-details h1,
+  .portfolio-details h2,
+  .portfolios-page h1,
+  .portfolios-page h2 {
+    font-size: 1.2em;
+  }
+
+  .portfolio-button {
+    font-size: 0.95em;
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+
+  .search-input {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .admin_action-button.active {
+    font-size: 1em;
+    padding: 5px 10px;
+  }
+
+  .admin_action-button {
+    font-size: 1em;
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+
+    .nav-link, .nav-button {
+      font-size: 0.9rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .nav-link:hover, .nav-button:hover {
+      transform: scale(1.03);
+    }
+    .create-alert-button,
+    .tabs button,
+    .settings-links a {
+      font-size: 0.9em;
+    }
+}
+
+@media (max-width: 576px) {
+  .portfolio-details h3,
+  .settings-sidebar h2,
+  .alerts-page h1,
+  .table-title,
+  .portfolio-details h1,
+  .portfolio-details h2,
+  .portfolios-page h1,
+  .portfolios-page h2 {
+    font-size: 1.1em;
+  }
+
+  .portfolio-button {
+    font-size: 0.9em;
+    border-radius: 5px;
+    padding: 5px 8px;
+  }
+
+  .search-input {
+    font-size: 13px;
+    padding: 4px;
+  }
+
+  .admin_action-button.active {
+    font-size: 0.95em;
+    padding: 4px 8px;
+  }
+
+  .admin_action-button {
+    font-size: 0.95em;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+    .nav-link, .nav-button {
+      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .nav-link:hover, .nav-button:hover {
+      transform: scale(1.02);
+    }
+
+}
+
+@media (max-width: 480px) {
+  .portfolio-details h3,
+  .settings-sidebar h2,
+  .alerts-page h1,
+  .table-title,
+  .portfolio-details h1,
+  .portfolio-details h2 {
+    font-size: 1.2em;
+  }
+
+  .portfolios-page h1 {
+    font-size: 1.2em;
+  }
+
+  .portfolios-page h2 {
+    font-size: 1em;
+    text-align: center;
+  }
+
+  .portfolio-button {
+    font-size: 0.9em;
+    border-radius: 6px;
+    padding: 7px 12px;
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+
+  .search-input {
+    padding: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #d4af37;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 2.5px;
+  }
+
+  .admin_action-button.active {
+    background-color: #d4af37;
+    color: #000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    font-size: 1em;
+    padding: 5px 10px;
+  }
+
+  .admin_action-button {
+    padding: 5px 10px;
+    font-size: 1em;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  }
+
+    .nav-link, .nav-button {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+    }
+
+    .nav-link:hover, .nav-button:hover {
+      transform: scale(1.01);
+    }
+}
 
 

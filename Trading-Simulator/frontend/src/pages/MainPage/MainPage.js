@@ -7,8 +7,8 @@ const MainPage = () => {
   return (
     <div className="main-page">
         <Sidebar />
-        <div className="content">
-            <BalanceDisplay />
+        <div className="portfolio-details">
+        <h1>Main Page </h1>
         </div>
     </div>
 
