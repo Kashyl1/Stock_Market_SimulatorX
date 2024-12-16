@@ -25,10 +25,10 @@ const Verification = () => {
         try {
             await verifyAccount(token);
             setMessage('Verification successful! Redirecting to login...');
-           // setTimeout(() => navigate('/login'), 5000);
+            setTimeout(() => navigate('/login'), 5000);
         } catch (error) {
             setMessage(error.message || 'Unable to verify. Please try again.');
-           // setTimeout(() => navigate('/login'), 5000);
+            setTimeout(() => navigate('/login'), 5000);
         }
     };
 

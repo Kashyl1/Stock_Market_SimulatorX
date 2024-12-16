@@ -18,7 +18,7 @@ const AdminPortfolios = ({ userId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [editStatus, setEditStatus] = useState(null); // Nowy stan
+  const [editStatus, setEditStatus] = useState(null); 
   const pageSize = 20;
 
   const fetchPortfolios = async () => {
@@ -52,7 +52,7 @@ const AdminPortfolios = ({ userId }) => {
   const handleEditPortfolio = async (portfolioId) => {
     if (!editingName.trim()) {
       setEditStatus({ success: false, message: 'Name cannot be empty.' });
-      setTimeout(() => setEditStatus(null), 3000); // Ukrycie komunikatu po 3 sekundach
+      setTimeout(() => setEditStatus(null), 3000);
       return;
     }
     try {
@@ -64,7 +64,7 @@ const AdminPortfolios = ({ userId }) => {
       console.error('Error updating portfolio:', error);
       setEditStatus({ success: false, message: 'Failed to update portfolio name.' });
     } finally {
-      setTimeout(() => setEditStatus(null), 3000); // Ukrycie komunikatu po 3 sekundach
+      setTimeout(() => setEditStatus(null), 3000);
     }
   };
 
@@ -151,7 +151,6 @@ const handleSearchChange = (term) => {
              >
             Update Name
            </button>
-            {/* Dodanie miejsca na komunikat */}
                        {editStatus && (
                          <span
                            className={`edit-status ${editStatus.success ? 'success' : 'error'}`}
