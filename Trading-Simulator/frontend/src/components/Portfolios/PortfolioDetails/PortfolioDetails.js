@@ -17,7 +17,6 @@ const PortfolioDetails = () => {
   const [showSellModal, setShowSellModal] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
-
   const fetchPortfolio = async () => {
     try {
       const portfolioData = await getPortfolioByid(id);
@@ -97,17 +96,18 @@ const PortfolioDetails = () => {
         <h3>Assets:</h3>
         {assetsWithGains && assetsWithGains.length > 0 ? (
           <div className="assets-table">
-            <div className="table-header">
+            <div className="table-header_portfolio">
               <div className="header-cell">Name</div>
               <div className="header-cell">Amount</div>
               <div className="header-cell">Average Purchase Price</div>
               <div className="header-cell">Current Price</div>
+              <div className="header-cell">Current Value</div>
               <div className="header-cell">Gain/Loss</div>
               <div className="header-cell">Action</div>
             </div>
 
-            {assetsWithGains.map((asset) => (
-              <div className="table-row" key={asset.currencyName}>
+            {assetsWithGains.filter(asset => asset.amount > 0).map((asset) => (
+              <div className="table-row_portfolio" key={asset.currencyName}>
                 <div className="cell currency-info">
                   <img src={asset.imageUrl} alt={asset.currencyName} className="currency-icon" />
                   <span className="currency-name">{asset.currencyName}</span>
@@ -115,6 +115,7 @@ const PortfolioDetails = () => {
                 <div className="cell">{asset.amount}</div>
                 <div className="cell">${asset.averagePurchasePrice.toFixed(2)}</div>
                 <div className="cell">${asset.currentPrice.toFixed(2)}</div>
+                <div className="cell">${(asset.currentPrice * asset.amount).toFixed(2)}</div>
                 <div className="cell">
                   <span className={`currency-change ${asset.gainOrLoss >= 0 ? 'positive' : 'negative'}`}>
                     {asset.gainOrLoss >= 0 ? '+' : ''}${asset.gainOrLoss.toFixed(2)}

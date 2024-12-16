@@ -9,7 +9,7 @@ import logo from '../../assets/stock_logov2.png';
 // import video from '../../assets/Jano.mp4';
 import exampleImageOne from '../../assets/gold_chart.png';
 import exampleImageTwo from '../../assets/vision.png';
-
+import Footer from '../../components/Footer/Footer'
 
 function scrollToSection(event, offset) {
     event.preventDefault();
@@ -165,7 +165,6 @@ const HomePage = () => {
                 </div>
             </div>
         </div>
-
 
     </div>
 
