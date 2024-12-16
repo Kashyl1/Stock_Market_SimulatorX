@@ -1,4 +1,4 @@
-/* Podstawowe style dla sidebar */
+
 .sidebar_main {
     width: 12.5%;
     background-color: rgba(0, 0, 0, 0.8);
@@ -7,8 +7,8 @@
     display: flex;
     flex-direction: column;
     align-items: start;
-    position: relative; /* Potrzebne do menu wysuwanego */
-    transition: width 0.3s ease; /* Płynne przejście przy zmianie rozmiaru */
+    position: relative;
+    transition: width 0.3s ease;
 }
 
 .logo-container {
@@ -20,7 +20,6 @@
     height: auto;
 }
 
-/* Styl dla linków menu */
 .menu-links {
     display: flex;
     flex-direction: column;
@@ -28,7 +27,7 @@
     width: 100%;
 }
 
-/* Styl linków */
+
 .menu-links a {
     text-decoration: none;
     color: #fff;
@@ -43,21 +42,21 @@
     gap: 10px;
 }
 
-/* Zmiana koloru po najechaniu */
+
 .menu-links a:hover {
     background-color: #d4af37;
     transform: scale(1.02);
     transition: background-color 0.4s ease-in-out, transform 0.2s ease-in-out;
 }
 
-/* Styl dla aktywnych linków */
+
 .menu-links a.active {
     background-color: #d4af37;
 }
 
-/* Hamburger menu */
+
 .hamburger {
-    display: none; /* Ukryj menu hamburgerowe na dużych ekranach */
+    display: none;
     position: absolute;
     top: 20px;
     left: 20px;
@@ -66,10 +65,10 @@
 }
 
 .hamburger svg {
-  color: #d4af37; /* Zmień #333 na dowolny inny kolor */
+  color: #d4af37;
 }
 
-/* Pozycja wysuwanego menu */
+
 .menu-links.show {
     display: block;
     position: fixed;
@@ -82,13 +81,13 @@
     z-index: 9999;
 }
 
-/* Dla dużych ekranów */
+
 @media (min-width: 768px) {
     .sidebar_main {
         width: 12.5%;
     }
     .hamburger {
-        display: none; /* Hamburger ukryty na większych ekranach */
+        display: none;
     }
     .menu-links {
         display: flex;
@@ -96,27 +95,27 @@
     }
 }
 
-/* Dla małych ekranów */
+
 @media (max-width: 767px) {
     .sidebar_main {
-        width: 0; /* Ukryj menu boczne na małych ekranach */
+        width: 0;
         padding: 0;
         border-right: none;
     }
 
     .hamburger {
-        display: block; /* Pokaż hamburger na małych ekranach */
+        display: block;
     }
 
     .logo {
         display: none;
     }
     .menu-links {
-        display: none; /* Ukryj linki, gdy menu jest zamknięte */
+        display: none;
     }
 
     .menu-links.show {
-        display: block; /* Pokaż linki po otwarciu */
+        display: block;
     }
 
     .portfolio-details h2 {
