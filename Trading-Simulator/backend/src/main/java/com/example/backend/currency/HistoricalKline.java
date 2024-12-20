@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 @Table(
         name = "HistoricalKlines",
         indexes = {
-                @Index(name = "idx_currency_interval_openTime", columnList = "currencyid, interval, openTime"),
+                @Index(name = "idx_currency_timeInterval_openTime", columnList = "currencyid, interval, openTime"),
                 @Index(name = "idx_currency", columnList = "currencyid"),
-                @Index(name = "idx_interval", columnList = "interval"),
+                @Index(name = "idx_timeInterval", columnList = "interval"),
                 @Index(name = "idx_openTime", columnList = "openTime")
         }
 )
@@ -63,7 +63,11 @@ public class HistoricalKline {
     @Schema(description = "Close time of the kline in milliseconds", example = "1625101200000")
     private Long closeTime;
 
-    @Column(nullable = false, length = 5)
+    @Column(name = "`interval`", nullable = false, length = 5)
     @Schema(description = "Interval of the kline", example = "1h")
-    private String interval;
+    private String timeInterval;
+
+    @Version
+    @Column(nullable = false)
+    private Long version = 0L;
 }

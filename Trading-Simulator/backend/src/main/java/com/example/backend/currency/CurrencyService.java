@@ -125,7 +125,7 @@ public class CurrencyService {
                         .flatMap(responseStr -> Flux.fromIterable(processApiResponse(responseStr, jsonObject -> {
                             String symbolWithUSDT = jsonObject.getString("symbol");
                             String symbol = symbolWithUSDT.replace("USDT", "");
-                            BigDecimal currentPrice = jsonObject.getBigDecimal("price");
+                            BigDecimal currentPrice = new BigDecimal(jsonObject.getString("price"));
 
                             Currency existingCurrency = currencyMap.get(symbol);
                             if (existingCurrency == null) {
@@ -255,7 +255,8 @@ public class CurrencyService {
             for (int i = 0; i < response.length(); i++) {
                 JSONObject currencyData = response.getJSONObject(i);
                 String symbol = currencyData.getString("symbol").toUpperCase();
-                BigDecimal marketCap = currencyData.optBigDecimal("market_cap", null);
+                String marketCapStr = currencyData.optString("market_cap", null);
+                BigDecimal marketCap = (marketCapStr != null) ? new BigDecimal(marketCapStr) : null;
 
                 Currency currency = currencyMap.get(symbol);
                 if (currency != null && marketCap != null && !marketCap.equals(currency.getMarketCap())) {
@@ -396,7 +397,7 @@ public class CurrencyService {
         });
     }
 
-    private Mono<Void> processKlinesResponse(String responseStr, Currency currency, String interval) {
+    private Mono<Void> processKlinesResponse(String responseStr, Currency currency, String timeInterval) {
         return Mono.fromRunnable(() -> {
             if (responseStr == null) {
                 logger.error("No response for symbol {}", currency.getSymbol());
@@ -416,8 +417,8 @@ public class CurrencyService {
                 BigDecimal volume = new BigDecimal(kline.getString(5));
                 Long closeTime = kline.getLong(6);
 
-                Optional<HistoricalKline> existingKlineOpt = historicalKlineRepository.findByCurrencyAndIntervalAndOpenTime(
-                        currency, interval, openTime);
+                Optional<HistoricalKline> existingKlineOpt = historicalKlineRepository.findByCurrencyAndTimeIntervalAndOpenTime(
+                        currency, timeInterval, openTime);
                 HistoricalKline historicalKline;
                 if (existingKlineOpt.isPresent()) {
                     historicalKline = existingKlineOpt.get();
@@ -437,7 +438,7 @@ public class CurrencyService {
                             .closePrice(closePrice)
                             .volume(volume)
                             .closeTime(closeTime)
-                            .interval(interval)
+                            .timeInterval(timeInterval)
                             .build();
                 }
 

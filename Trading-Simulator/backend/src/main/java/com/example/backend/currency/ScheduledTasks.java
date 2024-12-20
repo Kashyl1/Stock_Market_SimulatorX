@@ -2,11 +2,13 @@ package com.example.backend.currency;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
+@Profile("!test")
 @Component
 @Tag(name = "Scheduled Tasks", description = "Tasks scheduled to update currency data periodically")
 public class ScheduledTasks {

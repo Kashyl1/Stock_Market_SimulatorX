@@ -1,5 +1,6 @@
 package com.example.backend.currency;
 
+import com.example.backend.alert.trade.TradeAlert;
 import com.example.backend.portfolio.PortfolioAsset;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +35,13 @@ public class Currency {
     @JsonIgnore
     @Schema(description = "List of portfolio assets associated with this currency")
     private List<PortfolioAsset> portfolioAssets;
+
+    @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Schema(description = "List of trade alerts associated with this currency")
+    private List<TradeAlert> tradeAlerts;
+
+    @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistoricalKline> historicalKlines;
 
     @Column(nullable = true, precision = 30, scale = 10)
     @Schema(description = "Price change over the last 24 hours", example = "500.00")

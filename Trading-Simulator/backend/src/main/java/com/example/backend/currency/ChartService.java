@@ -16,14 +16,14 @@ public class ChartService {
     private final HistoricalKlineRepository historicalKlineRepository;
     private final CurrencyRepository currencyRepository;
 
-    public List<HistoricalKlineDTO> getChartData(String symbol, String interval) {
+    public List<HistoricalKlineDTO> getChartData(String symbol, String timeInterval) {
         Optional<Currency> currencyOpt = currencyRepository.findBySymbol(symbol.toUpperCase());
         if (currencyOpt.isEmpty()) {
             throw new CurrencyNotFoundException("Currency not found: " + symbol);
         }
 
-        List<HistoricalKline> klines = historicalKlineRepository.findByCurrencyAndIntervalOrderByOpenTimeAsc(
-                currencyOpt.get(), interval);
+        List<HistoricalKline> klines = historicalKlineRepository.findByCurrencyAndTimeIntervalOrderByOpenTimeAsc(
+                currencyOpt.get(), timeInterval);
 
         return klines.stream()
                 .map(HistoricalKlineDTO::new)
