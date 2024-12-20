@@ -32,19 +32,21 @@ const Verification = () => {
         }
     };
 
-    return (
-        <div className="verification-page">
-            <div className="static-background"></div>
-            <div className="verification-container">
-                <FontAwesomeIcon icon={faEnvelope} />
-                <h2>Verification Status</h2>
-                <p>{message}</p>
-                <Link to="/login" className="resend-button">
-                    If you didn't get redirected click on the link
-                </Link>
-            </div>
-        </div>
-    );
+ return (
+     <div className="verification-page">
+         <div className="static-background"></div>
+         <div className="verification-container">
+             <FontAwesomeIcon icon={faEnvelope} />
+             <h2>Verification Status</h2>
+             <div className="message-link-container">
+                 <p>{message}</p>
+                 <Link to="/login" className="resend-button">
+                     If you didn't get redirected click on the link
+                 </Link>
+             </div>
+         </div>
+     </div>
+ );
 };
 
 export default Verification;
