@@ -113,11 +113,10 @@ public class TransactionControllerIntegrationTest {
         user.setBalance(new BigDecimal("1000.00"));
         userRepository.save(user);
 
-        testCurrency = Currency.builder()
-                .symbol("BTC_TEST")
-                .name("Bitcoin Test")
-                .currentPrice(new BigDecimal("50000.00"))
-                .build();
+        testCurrency = new Currency();
+        testCurrency.setSymbol("BTC_TEST");
+        testCurrency.setName("Bitcoin Test");
+        testCurrency.setCurrentPrice(new BigDecimal("50000.00"));
         currencyRepository.save(testCurrency);
 
         assertNotNull(testCurrency, "testCurrency should not be null after initialization");

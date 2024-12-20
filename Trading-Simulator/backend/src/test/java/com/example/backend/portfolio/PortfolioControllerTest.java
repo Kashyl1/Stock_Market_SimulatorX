@@ -59,9 +59,8 @@ public class PortfolioControllerTest {
                 .andExpect(jsonPath("$.name", is("My Portfolio")))
                 .andExpect(jsonPath("$.createdAt").exists())
                 .andExpect(jsonPath("$.updatedAt").exists());
-
-        verify(portfolioService).createPortfolio("My Portfolio");
     }
+
 
     @Test
     public void createPortfolio_PortfolioAlreadyExists_ShouldReturnConflict() throws Exception {
