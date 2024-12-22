@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import AdminSidebar from '../../components/Admin/AdminSidebar';
 import AdminUsers from '../../components/Admin/AdminUsers/AdminUsers';
-import AdminCreate from '../../components/Admin/AdminUsers/AdminCreate'; // Importujemy nowy komponent
+import AdminCreate from '../../components/Admin/AdminUsers/AdminCreate';
 import './AdminPageUsers.css';
 
 const AdminPageUsers = () => {

@@ -18,7 +18,9 @@ import AlertsPage from './pages/AlertsPage/AlertsPage';
 import HistoryPage from './pages/HistoryPage/HistoryPage';
 import AdminPageUsers from './pages/AdminPageUsers/AdminPageUsers';
 import AdminTransactionsPage from './pages/AdminTransactionsPage/AdminTransactionsPage';
-import AdminPortfoliosPage from './pages/AdminPortfoliosPage/AdminPortfoliosPage'
+import AdminPortfoliosPage from './pages/AdminPortfoliosPage/AdminPortfoliosPage';
+import AdminEventsPage from './pages/AdminEventsPage/AdminEventsPage';
+import AdminAlertsPage from './pages/AdminAlertsPage/AdminAlertsPage';
 import Footer from './components/Footer/Footer'
 
 import axios from 'axios';
@@ -80,7 +82,8 @@ useEffect(() => {
                     <Route path="/adminpageusers" element={<PrivateRoute element={AdminPageUsers} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
                     <Route path="/admintransactions" element={<PrivateRoute element={AdminTransactionsPage} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
                     <Route path="/adminportfolios" element={<PrivateRoute element={AdminPortfoliosPage} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
-
+                    <Route path="/adminevents" element={<PrivateRoute element={AdminEventsPage} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
+                    <Route path="/adminalerts" element={<PrivateRoute element={AdminAlertsPage} isLoggedIn={isLoggedIn} requiredRole="ROLE_ROLE_ADMIN"  />}  />
                 </Routes>
                 <Footer/>
             </div>

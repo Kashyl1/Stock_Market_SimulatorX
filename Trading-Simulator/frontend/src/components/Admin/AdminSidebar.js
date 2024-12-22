@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { NavLink } from 'react-router-dom';
 import '../../pages/Sidebar/Sidebar.css';
 import logo from '../../assets/stock_logov2.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faUsers, faWallet, faBriefcase, faCog, faFolderOpen, faMoneyCheckAlt, faBars, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUsers, faMoneyCheckAlt, faFolderOpen, faListAlt, faExclamationTriangle, faBars, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 const AdminSidebar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,6 +58,12 @@ const AdminSidebar = () => {
         </NavLink>
         <NavLink to="/adminportfolios" className={({ isActive }) => (isActive ? 'active' : '')}>
           <FontAwesomeIcon icon={faFolderOpen} /> Users Portfolios
+        </NavLink>
+        <NavLink to="/adminevents" className={({ isActive }) => (isActive ? 'active' : '')}>
+          <FontAwesomeIcon icon={faListAlt} /> Admin Events
+        </NavLink>
+        <NavLink to="/adminalerts" className={({ isActive }) => (isActive ? 'active' : '')}>
+          <FontAwesomeIcon icon={faExclamationTriangle} /> Admin Alerts
         </NavLink>
         <NavLink to="/main" className={({ isActive }) => (isActive ? 'active' : '')}>
           <FontAwesomeIcon icon={faHome} /> Main Page

@@ -1,0 +1,40 @@
+.stats-section {
+  margin-bottom: 30px;
+  color: #fff;
+}
+
+.stats-section h3 {
+  color: #f9d85c;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+
+}
+
+.stats-table th,
+.stats-table td {
+  border: 1px solid #333;
+  padding: 12px 15px;
+  text-align: left;
+  color: #fff;
+}
+
+.stats-table th {
+  background-color: #292929;
+  font-weight: bold;
+  color: #f9d85c;
+}
+
+.stats-table tr:hover {
+  background-color: #333;
+}
+
+.error {
+  color: #ff4d4d;
+  font-weight: bold;
+}
