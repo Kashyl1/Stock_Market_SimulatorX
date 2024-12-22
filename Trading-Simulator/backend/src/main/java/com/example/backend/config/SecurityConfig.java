@@ -55,7 +55,10 @@ public class SecurityConfig {
                                 "/api/user/balance",
                                 "/api/user-settings/**",
                                 "/api/user/add-funds",
-                                "/api/alerts/**").hasAnyRole("USER", "ADMIN")
+                                "/api/alerts/**",
+                                "/api/analytics/**",
+                                "/api/charts/**")
+                        .hasAnyRole("USER", "ADMIN")
                         .requestMatchers(EndpointRequest.to("health", "info", "caches", "metrics")).hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

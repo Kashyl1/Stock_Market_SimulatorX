@@ -1,6 +1,5 @@
-package com.example.backend;
+package com.example.backend.analytics;
 
-import com.example.backend.analytics.IndicatorCacheService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +21,14 @@ public class AnalyticsCacheIntegrationTest {
 
     @Test
     void testSmaEndpointWithRedisCache() {
-        // Załóżmy, że scheduler już uruchomił się i wrzucił dane do Redis,
-        // albo możesz sam wywołać indicatorCacheService.saveSma(...) żeby zasymulować.
         indicatorCacheService.saveSma("BTC", "1h", 3, new BigDecimal("40.00"));
 
-        // Teraz wykonaj żądanie do endpointu:
         webTestClient.get()
                 .uri("/api/analytics/sma/BTC/1h/3")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(BigDecimal.class)
                 .value(value -> {
-                    // Sprawdź czy zwróciło poprawną wartość z Redis
                     Assertions.assertEquals(new BigDecimal("40.00"), value);
                 });
     }

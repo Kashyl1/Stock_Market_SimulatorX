@@ -17,7 +17,7 @@ public class ExecutionTimeAspect {
     public Object measureMethodExecutionTime(ProceedingJoinPoint pjp, LogExecutionTime logExecTime) throws Throwable {
         long start = System.currentTimeMillis();
         try {
-            return pjp.proceed(); // wywołanie metody docelowej
+            return pjp.proceed();
         } finally {
             long end = System.currentTimeMillis();
             double seconds = (end - start) / 1000.0;
