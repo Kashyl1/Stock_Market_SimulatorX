@@ -211,3 +211,144 @@ export const updatePortfolioName = async (portfolioId, payload) => {
     throw error;
   }
 };
+
+export const getAdminActions = async (page, pageSize) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/event/admin`, {
+       params: { page, pageSize },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin actions:', error);
+    throw error;
+  }
+};
+
+export const deleteAdminEvent = async (eventId) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.delete(`${API_URL}/event/admin/${eventId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting admin event:', error);
+    throw error;
+  }
+};
+
+export const getAdminStats = async () => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/event/admin/stats`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    throw error;
+  }
+};
+
+export const getUserStats = async () => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/event/user/stats`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    throw error;
+  }
+};
+
+export const getUserEvents = async (page, pageSize) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/event/user`, {
+       params: { page, pageSize },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin actions:', error);
+    throw error;
+  }
+};
+
+export const deleteUserEvent = async (eventId) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.delete(`${API_URL}/event/user/${eventId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting admin event:', error);
+    throw error;
+  }
+};
+
+export const postGlobalAlert = async (alertData) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.post(
+      `${API_URL}/global-alerts`,
+      alertData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error posting global alert:', error);
+    throw error;
+  }
+};
+
+export const getGlobalAlerts = async () => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.get(`${API_URL}/global-alerts`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching global alerts:', error);
+    throw error;
+  }
+};
+
+export const deleteGlobalAlert = async (alertId) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.delete(`${API_URL}/global-alerts/${alertId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting global alert:', error);
+    throw error;
+  }
+};
