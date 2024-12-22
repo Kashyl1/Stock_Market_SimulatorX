@@ -1,9 +1,6 @@
 package com.example.backend.analytics;
 
-import com.example.backend.currency.Currency;
-import com.example.backend.currency.CurrencyRepository;
-import com.example.backend.currency.HistoricalKline;
-import com.example.backend.currency.HistoricalKlineRepository;
+import com.example.backend.currency.*;
 import com.example.backend.exceptions.CurrencyNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
