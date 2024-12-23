@@ -4,41 +4,78 @@ import com.example.backend.currency.HistoricalKline;
 import com.example.backend.exceptions.NotEnoughDataForCalculationException;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
-public class EmaCalculator implements IndicatorCalculator {
+public class EmaCalculator implements IndicatorCalculator<List<BigDecimal>> {
     private final int periods;
+    private final MathContext mathContext = new MathContext(20, RoundingMode.HALF_UP);
 
     public EmaCalculator(int periods) {
         this.periods = periods;
     }
 
     @Override
-    public BigDecimal calculate(List<HistoricalKline> klines) {
+    public List<BigDecimal> calculate(List<HistoricalKline> klines) {
         if (klines.size() < periods) {
             throw new NotEnoughDataForCalculationException("Not enough data for EMA calculation");
         }
 
-        if (periods == 1 && klines.size() == 1) {
-            return klines.get(0).getClosePrice().setScale(2, RoundingMode.HALF_UP);
-        }
+        List<BigDecimal> emaSeries = new ArrayList<>();
 
-        List<HistoricalKline> initial = klines.subList(0, periods);
-        BigDecimal sma = initial.stream()
+        BigDecimal sma = klines.stream()
+                .limit(periods)
                 .map(HistoricalKline::getClosePrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(periods), RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(periods), mathContext);
+        emaSeries.add(sma);
 
         double k = 2.0 / (periods + 1.0);
+        BigDecimal multiplier = BigDecimal.valueOf(k);
+        BigDecimal oneMinusK = BigDecimal.valueOf(1 - k);
 
-        BigDecimal ema = sma;
+        BigDecimal previousEma = sma;
 
         for (int i = periods; i < klines.size(); i++) {
-            BigDecimal close = klines.get(i).getClosePrice().setScale(2, RoundingMode.HALF_UP);
-            ema = close.multiply(BigDecimal.valueOf(k)).add(ema.multiply(BigDecimal.valueOf(1 - k)));
+            BigDecimal close = klines.get(i).getClosePrice();
+            BigDecimal ema = close.multiply(multiplier)
+                    .add(previousEma.multiply(oneMinusK));
+            emaSeries.add(ema);
+            previousEma = ema;
         }
 
-        return ema.setScale(2, RoundingMode.HALF_UP);
+        return emaSeries;
+    }
+
+    public List<BigDecimal> calculateEmaFromValues(List<BigDecimal> values) {
+        if (values.size() < periods) {
+            throw new NotEnoughDataForCalculationException("Not enough data for EMA calculation");
+        }
+
+        List<BigDecimal> emaSeries = new ArrayList<>();
+
+        BigDecimal sma = values.stream()
+                .limit(periods)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(periods), mathContext);
+        emaSeries.add(sma);
+
+        double k = 2.0 / (periods + 1.0);
+        BigDecimal multiplier = BigDecimal.valueOf(k);
+        BigDecimal oneMinusK = BigDecimal.valueOf(1 - k);
+
+        BigDecimal previousEma = sma;
+
+        for (int i = periods; i < values.size(); i++) {
+            BigDecimal close = values.get(i);
+            BigDecimal ema = close.multiply(multiplier)
+                    .add(previousEma.multiply(oneMinusK));
+            emaSeries.add(ema);
+            previousEma = ema;
+        }
+
+        return emaSeries;
     }
 }

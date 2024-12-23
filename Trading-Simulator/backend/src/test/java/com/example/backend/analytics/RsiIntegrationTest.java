@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -39,7 +38,6 @@ public class RsiIntegrationTest extends BaseIntegrationTest {
     void testCalculateRsiWithNoData() { // periods > klines
         Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
 
-
         int periods = 3;
         try {
             BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new RsiCalculator(periods));
@@ -55,7 +53,6 @@ public class RsiIntegrationTest extends BaseIntegrationTest {
     void testCalculateRsiWithFewerCandlesThanPeriod() {
         // n klines < m periods no nie, tak sie nie bawimy
         Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
-
 
         createAndSaveHistoricalKline(currency, "1h", 1L, 10, 15, 9, 10, 1000L);
         createAndSaveHistoricalKline(currency, "1h", 2L, 20, 25, 19, 20, 2000L);

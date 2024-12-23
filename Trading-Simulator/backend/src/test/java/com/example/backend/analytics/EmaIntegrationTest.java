@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 public class EmaIntegrationTest extends BaseIntegrationTest {
 
@@ -21,7 +22,8 @@ public class EmaIntegrationTest extends BaseIntegrationTest {
 
         int periods = 3;
         try {
-            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            List<BigDecimal> emaSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            BigDecimal result = emaSeries.get(emaSeries.size() - 1);
             BigDecimal expected = BigDecimal.valueOf(40.00);
             Assertions.assertEquals(0, result.setScale(2, RoundingMode.HALF_UP).compareTo(expected));
         } catch (CurrencyNotFoundException e) {
@@ -35,7 +37,8 @@ public class EmaIntegrationTest extends BaseIntegrationTest {
 
         int periods = 3;
         try {
-            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            List<BigDecimal> emaSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            BigDecimal result = emaSeries.get(emaSeries.size() - 1);
             Assertions.fail("Should have thrown an exception due to no data available");
         } catch (CurrencyNotFoundException e) {
             Assertions.fail("Currency should be found.");
@@ -70,7 +73,8 @@ public class EmaIntegrationTest extends BaseIntegrationTest {
         // EMA dla 1 świecy z okresem 1 = po prostu cena zamknięcia tej świecy = 50
         int periods = 1;
         try {
-            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            List<BigDecimal> emaSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            BigDecimal result = emaSeries.get(emaSeries.size() - 1);
             Assertions.assertEquals(0, result.compareTo(BigDecimal.valueOf(50.0)),
                     "EMA should match the single candle close price");
         } catch (NotEnoughDataForCalculationException e) {
@@ -92,7 +96,8 @@ public class EmaIntegrationTest extends BaseIntegrationTest {
 
         int periods = 3;
         try {
-            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            List<BigDecimal> emaSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new EmaCalculator(periods));
+            BigDecimal result = emaSeries.get(emaSeries.size() - 1);
             Assertions.assertEquals(0, result.compareTo(BigDecimal.valueOf(100.0)),
                     "EMA should match the same price of all candles");
         } catch (NotEnoughDataForCalculationException e) {
@@ -113,16 +118,12 @@ public class EmaIntegrationTest extends BaseIntegrationTest {
 
         int periods = 3;
         try {
-            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "5m", new EmaCalculator(periods));
+            List<BigDecimal> emaSeries = analyticsService.calculateIndicator("ROYAL_COIN", "5m", new EmaCalculator(periods));
+            BigDecimal result = emaSeries.get(emaSeries.size() - 1);
             Assertions.assertEquals(0, result.setScale(3, RoundingMode.HALF_UP).compareTo(BigDecimal.valueOf(30.0)),
                     "EMA should be 30.0 for the last three candles");
         } catch (CurrencyNotFoundException e) {
             Assertions.fail("Currency should be found but got CurrencyNotFoundException");
         }
-    }
-
-    void createAndSaveCurrency() {
-        Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
-        createAndSaveHistoricalKline(currency, "1h", 50L, 250, 500, 250, 430, 20000L);
     }
 }
