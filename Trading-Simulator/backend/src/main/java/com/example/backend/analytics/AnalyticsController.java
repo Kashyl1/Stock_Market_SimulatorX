@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -51,9 +52,11 @@ public class AnalyticsController {
                 return ResponseEntity.ok(cached);
             }
 
-            BigDecimal ema = analyticsService.calculateIndicator(symbol, interval, new EmaCalculator(periods));
-            indicatorCacheService.saveEma(symbol.toUpperCase(), interval, periods, ema);
-            return ResponseEntity.ok(ema);
+            List<BigDecimal> emaSeries = analyticsService.calculateIndicator(symbol, interval, new EmaCalculator(periods));
+            BigDecimal latestEma = emaSeries.get(emaSeries.size() - 1);
+
+            indicatorCacheService.saveEma(symbol.toUpperCase(), interval, periods, latestEma);
+            return ResponseEntity.ok(latestEma);
         } catch (Exception e) {
             logger.error("Error retrieving EMA for {}: {}", symbol, e.getMessage());
             return ResponseEntity.status(500).build();
@@ -97,6 +100,26 @@ public class AnalyticsController {
             return ResponseEntity.ok(volatility);
         } catch (Exception e) {
             logger.error("Error retrieving volatility for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/macd/{symbol}/{interval}")
+    public ResponseEntity<MacdResult> getMacd(
+            @PathVariable String symbol,
+            @PathVariable String interval
+    ) {
+        try {
+            MacdResult cached = indicatorCacheService.getMacd(symbol.toUpperCase(), interval);
+            if (cached != null) {
+                return ResponseEntity.ok(cached.format(8));
+            }
+
+            MacdResult result = analyticsService.calculateIndicator(symbol, interval, new MacdCalculator());
+            indicatorCacheService.saveMacd(symbol.toUpperCase(), interval, result);
+            return ResponseEntity.ok(result.format(8));
+        } catch (Exception e) {
+            logger.error("Error retrieving MACD for {}: {}", symbol, e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }

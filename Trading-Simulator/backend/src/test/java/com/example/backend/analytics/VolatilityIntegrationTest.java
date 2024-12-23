@@ -75,7 +75,6 @@ public class VolatilityIntegrationTest extends BaseIntegrationTest{
     void testCalculateVolatilityWithOneCandleShouldReturnZero() {
         // jo je git
         Currency currency = createAndSaveCurrency("ROYAL_COIN", "ToMarka!");
-
         createAndSaveHistoricalKline(currency, "1h", 1L, 50, 55, 45, 50, 1000L);
 
         int periods = 1;

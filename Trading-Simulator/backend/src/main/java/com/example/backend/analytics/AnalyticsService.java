@@ -5,7 +5,6 @@ import com.example.backend.exceptions.CurrencyNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -15,7 +14,7 @@ public class AnalyticsService {
     private final HistoricalKlineRepository historicalKlineRepository;
     private final CurrencyRepository currencyRepository;
 
-    public BigDecimal calculateIndicator(String symbol, String timeInterval, IndicatorCalculator calculator) {
+    public <T> T calculateIndicator(String symbol, String timeInterval, IndicatorCalculator<T> calculator) {
         Currency currency = currencyRepository.findBySymbol(symbol.toUpperCase())
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found: " + symbol));
 

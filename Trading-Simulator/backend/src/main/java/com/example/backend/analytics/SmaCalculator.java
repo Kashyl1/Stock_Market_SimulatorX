@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-public class SmaCalculator implements IndicatorCalculator {
+public class SmaCalculator implements IndicatorCalculator<BigDecimal> {
 
     private final int periods;
 

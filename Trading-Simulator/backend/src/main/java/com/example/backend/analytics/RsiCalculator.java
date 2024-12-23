@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-public class RsiCalculator implements IndicatorCalculator {
+public class RsiCalculator implements IndicatorCalculator<BigDecimal> {
     private final int periods;
 
     public RsiCalculator(int periods) {

@@ -21,8 +21,9 @@ class EmaCalculatorTest {
 
         int periods = 3;
         EmaCalculator emaCalculator = new EmaCalculator(periods);
+        List<BigDecimal> emaSeries = emaCalculator.calculate(klines);
 
-        BigDecimal result = emaCalculator.calculate(klines);
+        BigDecimal result = emaSeries.get(emaSeries.size() - 1);
 
         BigDecimal expected = new BigDecimal("40.00");
 

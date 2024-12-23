@@ -37,12 +37,12 @@ public class IndicatorSchedulerTest {
 
         Currency currency = new Currency();
         currency.setSymbol("BTC");
-        currency.setName("Litecoin");
+        currency.setName("Litecoin?");
         currencyRepository.save(currency);
 
-        createHistoricalKline(currency, "5m", 1L, 100, 105, 95, 100, 1000L);
-        createHistoricalKline(currency, "5m", 2L, 105, 110, 100, 105, 2000L);
-        createHistoricalKline(currency, "5m", 3L, 110, 115, 105, 110, 3000L);
+        for (long i = 1; i <= 30; i++) {
+            createHistoricalKline(currency, "5m", i, 100 + i, 105 + i, 95 + i, 100 + i, 1000L * i);
+        }
     }
 
     private void createHistoricalKline(Currency currency, String timeInterval, Long openTime,

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-public class VolatilityCalculator implements IndicatorCalculator {
+public class VolatilityCalculator implements IndicatorCalculator<BigDecimal> {
     private final int periods;
 
     public VolatilityCalculator(int periods) {

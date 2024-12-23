@@ -1,16 +1,9 @@
 package com.example.backend.analytics;
 
 import com.example.backend.currency.Currency;
-import com.example.backend.currency.CurrencyRepository;
-import com.example.backend.currency.HistoricalKline;
-import com.example.backend.currency.HistoricalKlineRepository;
 import com.example.backend.exceptions.CurrencyNotFoundException;
-import com.example.backend.portfolio.PortfolioAssetRepository;
-import com.example.backend.transaction.TransactionRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -47,7 +40,6 @@ public class SmaIntegrationTest extends BaseIntegrationTest {
     void testCalculateSmaWithNoData() { // periods > klines
         Currency currency = createAndSaveCurrency("ROYAL_COIN", "ToMarka!");
 
-
         int periods = 3;
         try {
             BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new SmaCalculator(periods));
@@ -80,7 +72,6 @@ public class SmaIntegrationTest extends BaseIntegrationTest {
     void testCalculateSmaWithOneCandle() {
         // jo je git
         Currency currency = createAndSaveCurrency("ROYAL_COIN", "ToMarka!");
-
         createAndSaveHistoricalKline(currency, "1h", 1L, 50, 55, 45, 50, 1000L);
 
         // SMA dla 1 świecy z okresem 1 = po prostu cena zamknięcia tej świecy = 50
