@@ -19,18 +19,16 @@ public class IndicatorScheduler {
     private final AnalyticsService analyticsService;
     private final IndicatorCacheService indicatorCacheService;
     private final List<String> intervals = List.of("1m", "3m", "5m", "30m", "1h", "1d");
-    private static final Logger logger = LoggerFactory.getLogger(MacdCalculator.class);
+    private final AdxCalculator adxCalculator;
 
     @LogExecutionTime
-    @Scheduled(fixedRate = 1000 * 71)
+    @Scheduled(fixedRate = 1000 * 71, initialDelay = 1000 * 60)
     public void updateIndicators() {
         for (String symbol : CURRENCY_SYMBOLS) {
             for (String interval : intervals) {
                 try {
                     BigDecimal sma = analyticsService.calculateIndicator(symbol, interval, new SmaCalculator(30));
                     indicatorCacheService.saveSma(symbol, interval, 30, sma);
-                    logger.debug("Saved SMA for {} {}: {}", symbol, interval, sma);
-
 
                     List<BigDecimal> emaSeries = analyticsService.calculateIndicator(symbol, interval, new EmaCalculator(12));
                     BigDecimal latestEma = emaSeries.get(emaSeries.size() - 1);
@@ -44,6 +42,9 @@ public class IndicatorScheduler {
 
                     MacdResult macdResult = analyticsService.calculateIndicator(symbol, interval, new MacdCalculator());
                     indicatorCacheService.saveMacd(symbol, interval, macdResult);
+
+                    BigDecimal adx = analyticsService.calculateIndicator(symbol, interval, adxCalculator);
+                    indicatorCacheService.saveAdx(symbol, interval, adx);
                 } catch (Exception e) {
                     System.err.println("Failed to update analytics for " + symbol + " " + interval + ": " + e.getMessage());
                 }

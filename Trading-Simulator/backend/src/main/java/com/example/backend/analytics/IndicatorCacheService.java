@@ -109,4 +109,20 @@ public class IndicatorCacheService {
         }
     }
 
+    public void saveAdx(String symbol, String interval, BigDecimal value) {
+        String key = "ADX:" + symbol + ":" + interval;
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(5)); // Ustaw czas przechowywania np. 5 minut
+    }
+
+    public BigDecimal getAdx(String symbol, String interval) {
+        String key = "ADX:" + symbol + ":" + interval;
+        try {
+            String val = redisTemplate.opsForValue().get(key);
+            return val != null ? new BigDecimal(val) : null;
+        } catch (Exception e) {
+            logger.error("Redis error loading ADX: {}", e.getMessage());
+            return null;
+        }
+    }
+
 }
