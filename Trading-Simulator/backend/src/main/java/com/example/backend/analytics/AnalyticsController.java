@@ -21,6 +21,7 @@ public class AnalyticsController {
     private final AnalyticsService analyticsService;
     private final IndicatorCacheService indicatorCacheService;
     private static final Logger logger = LoggerFactory.getLogger(AnalyticsController.class);
+    private final AdxCalculator adxCalculator;
 
     @GetMapping("/sma/{symbol}/{interval}/{periods}") // Pomyśleć nad logiką
     public ResponseEntity<BigDecimal> getSimpleMovingAverage(
@@ -120,6 +121,26 @@ public class AnalyticsController {
             return ResponseEntity.ok(result.format(8));
         } catch (Exception e) {
             logger.error("Error retrieving MACD for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/adx/{symbol}/{interval}")
+    public ResponseEntity<BigDecimal> getAdx(
+            @PathVariable String symbol,
+            @PathVariable String interval) {
+        try {
+            BigDecimal cached = indicatorCacheService.getAdx(symbol.toUpperCase(), interval);
+            if (cached != null) {
+                return ResponseEntity.ok(cached);
+            }
+
+            BigDecimal adx = analyticsService.calculateIndicator(symbol, interval, adxCalculator);
+            indicatorCacheService.saveAdx(symbol.toUpperCase(), interval, adx);
+
+            return ResponseEntity.ok(adx);
+        } catch (Exception e) {
+            logger.error("Error retrieving ADX for {}: {}", symbol, e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
