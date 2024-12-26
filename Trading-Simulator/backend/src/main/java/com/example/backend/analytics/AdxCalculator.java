@@ -14,8 +14,6 @@ public class AdxCalculator implements IndicatorCalculator<BigDecimal> {
 
     private static final int PERIODS = 14; // Stały okres
 
-    private final MathContext mathContext = new MathContext(20, RoundingMode.HALF_UP);
-
     private final TrueRangeCalculator trueRangeCalculator;
     private final PositiveDMCalculator positiveDMCalculator;
     private final NegativeDMCalculator negativeDMCalculator;

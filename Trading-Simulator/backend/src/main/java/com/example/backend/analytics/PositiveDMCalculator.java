@@ -22,7 +22,7 @@ public class PositiveDMCalculator implements IndicatorCalculator<List<BigDecimal
             BigDecimal diffHigh = high.subtract(highPrev).setScale(5, RoundingMode.HALF_UP);
             BigDecimal diffLow = lowPrev.subtract(low).setScale(5, RoundingMode.HALF_UP);
 
-            BigDecimal positiveDM = (diffHigh.abs().compareTo(diffLow.abs()) > 0 && diffHigh.compareTo(BigDecimal.ZERO) > 0)
+            BigDecimal positiveDM = (diffHigh.compareTo(diffLow) > 0 && diffHigh.compareTo(BigDecimal.ZERO) > 0)
                     ? diffHigh
                     : BigDecimal.ZERO;
             positiveDMs.add(positiveDM.setScale(5, RoundingMode.HALF_UP));

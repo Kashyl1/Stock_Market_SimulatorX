@@ -22,7 +22,7 @@ public class NegativeDMCalculator implements IndicatorCalculator<List<BigDecimal
             BigDecimal diffHigh = high.subtract(highPrev).setScale(5, RoundingMode.HALF_UP);
             BigDecimal diffLow = lowPrev.subtract(low).setScale(5, RoundingMode.HALF_UP);
 
-            BigDecimal negativeDM = (diffLow.abs().compareTo(diffHigh.abs()) > 0
+            BigDecimal negativeDM = (diffLow.compareTo(diffHigh) > 0
             && diffLow.compareTo(BigDecimal.ZERO) > 0)
             ? diffLow
             : BigDecimal.ZERO;
