@@ -120,14 +120,14 @@ const AlertsPage = () => {
             className={activeTab === 'trade' ? 'active' : ''}
             onClick={() => setActiveTab('trade')}
           >
-            Trade Alerts
+            Trade Orders
           </button>
         </div>
 
         {activeTab === 'email' && (
           <>
             <button onClick={handleOpenCreateEmailModal} className="create-alert-button">
-              Create New Email Alert
+              Create New Email Order
             </button>
             {showCreateEmailModal && (
               <CreateEmailAlertModal

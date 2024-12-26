@@ -3,12 +3,15 @@ import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import BuyAssetModal from '../../Transaction/BuyAssetModal/BuyAssetModal';
 import debounce from 'lodash.debounce';
+import Charts from '../../Charts/Charts';
 import './AvailableCurrencies.css';
 
 const AvailableCurrencies = () => {
   const [portfolios, setPortfolios] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showCharts, setShowCharts] = useState(false);
+  const [selectedCurrencyForChart, setSelectedCurrencyForChart] = useState(null);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
@@ -47,7 +50,7 @@ const AvailableCurrencies = () => {
 
   useEffect(() => {
     fetchAvailableAssets();
-    const interval = setInterval(fetchAvailableAssets, 20000); // Trzeba to zmienić imo, bo co 20 sekund całą tabele refreshuje by zmienić ceny xd
+    const interval = setInterval(fetchAvailableAssets, 50000); //Ja to narazie podsniosłem fest bo mnie denerwuje XD
     return () => clearInterval(interval);
   }, [page]);
 
@@ -68,6 +71,11 @@ const AvailableCurrencies = () => {
     setShowBuyModal(true);
   };
 
+  const handleViewChart = (currency) => {
+    setSelectedCurrencyForChart(currency);
+    setShowCharts(true);
+  };
+
   const handleCloseBuyModal = () => {
     setShowBuyModal(false);
     setSelectedCurrency(null);
@@ -84,11 +92,11 @@ const AvailableCurrencies = () => {
   const formatLargeNumber = (num) => {
     if (num === undefined || num === null || isNaN(num)) return 'N/A';
 
-    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T'; // Biliony
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';  // Miliardy
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';  // Miliony
-    if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';  // Tysiące
-    return num.toFixed(0); // Jeśli liczba jest mniejsza niż 1000
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+    return num.toFixed(0);
   };
 
   if (isLoading) {
@@ -98,6 +106,17 @@ const AvailableCurrencies = () => {
   if (error) {
     return <p className="error-message">{error}</p>;
   }
+
+if (showCharts && selectedCurrencyForChart) {
+  return (
+    <Charts
+      currencyId={selectedCurrencyForChart.id}
+      currencySymbol={selectedCurrencyForChart.symbol}
+      portfolios={portfolios}
+      onClose={() => setShowCharts(false)}
+    />
+  );
+}
 
   const filteredCurrencies = data.filter((currency) =>
     currency.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -154,8 +173,8 @@ const AvailableCurrencies = () => {
               <div className="cell">${formatLargeNumber(currency.volume_24h)}</div>
               <div className="cell">${formatLargeNumber(currency.market_cap)}</div>
               <div className="cell">
-                <button className="action-button" onClick={() => handleBuyClick(currency)}>
-                  Buy
+                <button className="action-button" onClick={() => handleViewChart(currency)}>
+                  Buy/Chart
                 </button>
               </div>
             </div>
