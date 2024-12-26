@@ -20,6 +20,8 @@ public class IndicatorScheduler {
     private final IndicatorCacheService indicatorCacheService;
     private final List<String> intervals = List.of("1m", "3m", "5m", "30m", "1h", "1d");
     private final AdxCalculator adxCalculator;
+    private final BullBearPowerCalculator bullBearPowerCalculator;
+    private final EmaCalculatorFactory emaCalculatorFactory;
 
     @LogExecutionTime
     @Scheduled(fixedRate = 1000 * 71, initialDelay = 1000 * 60)
@@ -30,9 +32,10 @@ public class IndicatorScheduler {
                     BigDecimal sma = analyticsService.calculateIndicator(symbol, interval, new SmaCalculator(30));
                     indicatorCacheService.saveSma(symbol, interval, 30, sma);
 
-                    List<BigDecimal> emaSeries = analyticsService.calculateIndicator(symbol, interval, new EmaCalculator(12));
-                    BigDecimal latestEma = emaSeries.get(emaSeries.size() - 1);
-                    indicatorCacheService.saveEma(symbol, interval, 14, latestEma);
+                    EmaCalculator emaCalc12 = emaCalculatorFactory.create(14);
+                    List<BigDecimal> emaSeries12 = analyticsService.calculateIndicator(symbol, interval, emaCalc12);
+                    BigDecimal latestEma12 = emaSeries12.get(emaSeries12.size() - 1);
+                    indicatorCacheService.saveEma(symbol, interval, 14, latestEma12);
 
                     BigDecimal rsi = analyticsService.calculateIndicator(symbol, interval, new RsiCalculator(14));
                     indicatorCacheService.saveRsi(symbol, interval, 14, rsi);
@@ -45,6 +48,9 @@ public class IndicatorScheduler {
 
                     BigDecimal adx = analyticsService.calculateIndicator(symbol, interval, adxCalculator);
                     indicatorCacheService.saveAdx(symbol, interval, adx);
+
+                    BigDecimal bp = analyticsService.calculateIndicator(symbol, interval, bullBearPowerCalculator);
+                    indicatorCacheService.saveBP(symbol, interval, bp);
                 } catch (Exception e) {
                     System.err.println("Failed to update analytics for " + symbol + " " + interval + ": " + e.getMessage());
                 }
