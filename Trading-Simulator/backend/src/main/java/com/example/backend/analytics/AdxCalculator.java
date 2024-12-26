@@ -38,7 +38,7 @@ public class AdxCalculator implements IndicatorCalculator<BigDecimal> {
 
     @Override
     public BigDecimal calculate(List<HistoricalKline> klines) {
-        if (klines.size() < PERIODS) {
+        if (klines.size() < PERIODS * 2 + 1) {
             throw new NotEnoughDataForCalculationException("Not enough ADX data to calculate");
         }
         // WZORY NA WSZYSTKO: EXCEL ADX_KALKULATOR
@@ -48,9 +48,9 @@ public class AdxCalculator implements IndicatorCalculator<BigDecimal> {
         List<BigDecimal> negativeDMs = negativeDMCalculator.calculate(klines);
 
         // liczymy wygładzenie, wygładzone  +-DM
-        List<BigDecimal> smoothedTR = wilderSmoothingCalculator.calculateFromValues(trueRanges);
-        List<BigDecimal> smoothedPositiveDM = wilderSmoothingCalculator.calculateFromValues(positiveDMs);
-        List<BigDecimal> smoothedNegativeDM = wilderSmoothingCalculator.calculateFromValues(negativeDMs);
+        List<BigDecimal> smoothedTR = wilderSmoothingCalculator.calculate(trueRanges);
+        List<BigDecimal> smoothedPositiveDM = wilderSmoothingCalculator.calculate(positiveDMs);
+        List<BigDecimal> smoothedNegativeDM = wilderSmoothingCalculator.calculate(negativeDMs);
 
         // Liczymy +-DI
         List<BigDecimal> positiveDI = directionalIndicatorCalculator.calculate(smoothedPositiveDM, smoothedTR);
@@ -60,7 +60,7 @@ public class AdxCalculator implements IndicatorCalculator<BigDecimal> {
         List<BigDecimal> dxValues = dxCalculator.calculate(positiveDI, negativeDI);
 
         // ADX (z czego interere ostatni)
-        List<BigDecimal> adxValues = wilderSmoothingCalculator.calculateFromValues(dxValues);
+        List<BigDecimal> adxValues = wilderSmoothingCalculator.calculate(dxValues);
 
         return adxValues.get(adxValues.size() - 1);
     }

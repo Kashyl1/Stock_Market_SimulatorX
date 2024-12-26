@@ -43,7 +43,7 @@ public class PositiveDMIntegrationTest extends BaseIntegrationTest {
         try {
             PositiveDMCalculator positiveDMCalculator = new PositiveDMCalculator();
             List<BigDecimal> positiveDMSeries = analyticsService.calculateIndicator(symbol, interval, positiveDMCalculator);
-            Assertions.assertEquals(expected.size(), positiveDMSeries.size(), "Negative DM series mismatch " + testName);
+            Assertions.assertEquals(expected.size(), positiveDMSeries.size(), "Positive DM series mismatch " + testName);
 
             for (int i = 0; i < expected.size(); i++) {
                 Assertions.assertEquals(0, expected.get(i).compareTo(positiveDMSeries.get(i)),
