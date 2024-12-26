@@ -25,7 +25,7 @@ public class IndicatorCacheService {
 
     public void saveSma(String symbol, String interval, int periods, BigDecimal value) {
         String key = "SMA:" + symbol + ":" + interval + ":" + periods;
-        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofSeconds(5));
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
     }
 
     public BigDecimal getSma(String symbol, String interval, int periods) {
@@ -41,7 +41,7 @@ public class IndicatorCacheService {
 
     public void saveEma(String symbol, String interval, int periods, BigDecimal value) {
         String key = "Ema:" + symbol + ":" + interval + ":" + periods;
-        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofSeconds(5));
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
     }
 
     public BigDecimal getEma(String symbol, String interval, int periods) {
@@ -57,7 +57,7 @@ public class IndicatorCacheService {
 
     public void saveRsi(String symbol, String interval, int periods, BigDecimal value) {
         String key = "Rsi:" + symbol + ":" + interval + ":" + periods;
-        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofSeconds(5));
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
     }
 
     public BigDecimal getRsi(String symbol, String interval, int periods) {
@@ -73,7 +73,7 @@ public class IndicatorCacheService {
 
     public void saveVolatility(String symbol, String interval, int periods, BigDecimal value) {
         String key = "Volatility:" + symbol + ":" + interval + ":" + periods;
-        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofSeconds(5));
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
     }
 
     public BigDecimal getVolatility(String symbol, String interval, int periods) {
@@ -92,7 +92,7 @@ public class IndicatorCacheService {
         try {
             MacdResult roundedResult = value.format(8);
             String json = objectMapper.writeValueAsString(roundedResult);
-            redisTemplate.opsForValue().set(key, json, Duration.ofSeconds(5));
+            redisTemplate.opsForValue().set(key, json, Duration.ofMinutes(1));
         } catch (JsonProcessingException e) {
             logger.error("Redis error saving MACD: {}", e.getMessage());
         }
@@ -111,7 +111,7 @@ public class IndicatorCacheService {
 
     public void saveAdx(String symbol, String interval, BigDecimal value) {
         String key = "ADX:" + symbol + ":" + interval;
-        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(5)); // Ustaw czas przechowywania np. 5 minut
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
     }
 
     public BigDecimal getAdx(String symbol, String interval) {

@@ -1,121 +1,145 @@
 package com.example.backend.analytics;
 
 import com.example.backend.currency.Currency;
+import com.example.backend.currency.HistoricalKline;
 import com.example.backend.exceptions.CurrencyNotFoundException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Stream;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class TrueRangeIntegrationTest extends BaseIntegrationTest {
 
     // FOrmula: MAX(High Price - Low Price, ABS(High Price - previous close Price), ABS(LowPrice - previous close price)
-    @Test
-    void testCalculateTrueRangeFromDatabaseUsingCalculateIndicator() {
-        Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
 
-        createAndSaveHistoricalKline(currency, "1h", 1L, 100, 110, 90, 100, 1000L);
-        createAndSaveHistoricalKline(currency, "1h", 2L, 105, 115, 95, 105, 2000L);
-        createAndSaveHistoricalKline(currency, "1h", 3L, 108, 112, 102, 108, 3000L);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("trueRangeIntegrationTestCases")
+    void testCalculateTrueRangeFromDatabaseUsingCalculateIndicator(String testName, String symbol, String interval,
+                                                                   List<HistoricalKline> klines, List<BigDecimal> expected) {
+        Currency currency = createAndSaveCurrency(symbol, "toMarka");
 
-        try {
-            List<BigDecimal> trueRangeSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new TrueRangeCalculator());
-            Assertions.assertEquals(2, trueRangeSeries.size(), "True Range series size mismatch");
-
-            BigDecimal firstTr = trueRangeSeries.get(0); // max(115-95, abs.115-100, abs(95-100)) == 20
-            BigDecimal secondTr = trueRangeSeries.get(1); // max(112-102, abs.112-105, abs.102-108) = 10
-
-            Assertions.assertEquals(0, firstTr.compareTo(new BigDecimal("20.00000")),
-                    "First True range value did not match the expected dvalue");
-            Assertions.assertEquals(0, secondTr.compareTo(new BigDecimal("10.00000")),
-                    "Second True range value did not match the expected value");
-        } catch (CurrencyNotFoundException e) {
-            Assertions.fail("Currency should be found.");
+        for (HistoricalKline kline : klines) {
+            createAndSaveHistoricalKline(currency, interval, kline.getOpenTime(),
+                    kline.getOpenPrice().doubleValue(),
+                    kline.getHighPrice().doubleValue(),
+                    kline.getLowPrice().doubleValue(),
+                    kline.getClosePrice().doubleValue(),
+                    kline.getCloseTime());
         }
-    }
-
-    @Test
-    void testCalculateTrueRangeWithNoData() {
-        try {
-            analyticsService.calculateIndicator("NON_EXISTING_COIN", "1h", new TrueRangeCalculator());
-            Assertions.fail("Should have trown CurrencyNotFoundException due to non existing coin");
-        } catch (CurrencyNotFoundException e) {
-            // jo nie je git
-        }
-    }
-
-    @Test
-    void testCalculateTrueRangeWithSingleKline() {
-        Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
-        createAndSaveHistoricalKline(currency, "1h", 1L, 20, 30, 20, 30, 1000L);
 
         try {
-            List<BigDecimal> trueRangeSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new TrueRangeCalculator());
-            Assertions.assertTrue(trueRangeSeries.isEmpty(), "You can't calculate true range with <= 1 kline");
-        } catch (CurrencyNotFoundException e) {
-            Assertions.fail("Currency should be found.");
-        }
-    }
-
-    @Test
-    void testCalculateTrueRangeWithMultipleIntervals() {
-        Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
-
-        // 1h
-        createAndSaveHistoricalKline(currency, "1h", 1L, 100, 110, 90, 100, 1000L);
-        createAndSaveHistoricalKline(currency, "1h", 2L, 105, 115, 95, 105, 2000L);
-
-        // 5m interval
-        createAndSaveHistoricalKline(currency, "5m", 1L, 50, 60, 40, 50, 3000L);
-        createAndSaveHistoricalKline(currency, "5m", 2L, 55, 65, 45, 55, 4000L);
-        createAndSaveHistoricalKline(currency, "5m", 3L, 60, 70, 50, 60, 5000L);
-
-        try {
-            List<BigDecimal> trueRange5m = analyticsService.calculateIndicator("ROYAL_COIN", "5m", new TrueRangeCalculator());
-            Assertions.assertEquals(2, trueRange5m.size(), "True range series size for 5m");
-            Assertions.assertEquals(0, trueRange5m.get(0).compareTo(new BigDecimal("20.00000")),
-                    "First True Range value for 5m did not match the expected value");
-            Assertions.assertEquals(0, trueRange5m.get(1).compareTo(new BigDecimal("20.00000")),
-                    "Second True Range value for 5m did not match the expected value");
-
-            List<BigDecimal> trueRange1h = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new TrueRangeCalculator());
-            Assertions.assertEquals(1, trueRange1h.size(), "True Range series size for 1h");
-            Assertions.assertEquals(0, trueRange1h.get(0).compareTo(new BigDecimal("20.00000")));
-        } catch (CurrencyNotFoundException e) {
-            Assertions.fail("Currency should be found");
-        }
-    }
-
-    @Test
-    void testCalculateTrueRangeWithVaryingHighLow() {
-        Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
-
-        createAndSaveHistoricalKline(currency, "1h", 1L, 100, 105, 95, 100, 1000L); // K1
-        createAndSaveHistoricalKline(currency, "1h", 2L, 102, 108, 101, 102, 2000L); // K2
-        createAndSaveHistoricalKline(currency, "1h", 3L, 101, 107, 99, 101, 3000L);  // K3
-        createAndSaveHistoricalKline(currency, "1h", 4L, 103, 109, 102, 103, 4000L); // K4
-
-        try {
-            List<BigDecimal> trueRangeSeries = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new TrueRangeCalculator());
-
-            List<BigDecimal> expected = List.of(
-                    new BigDecimal("8.00000"), // Max(108-101, abs.108-100, abs.102-100) = 8
-                    new BigDecimal("8.00000"), // Max(107-99, abs.107-102, abs.99-102) = 8
-                    new BigDecimal("8.00000") // Max(109-102, abs.109-101, abs.102-101) = 8
-            );
-            Assertions.assertEquals(expected.size(), trueRangeSeries.size(), "True range size");
+            TrueRangeCalculator trueRangeCalculator = new TrueRangeCalculator();
+            List<BigDecimal> trueRangeSeries = analyticsService.calculateIndicator(symbol, interval, trueRangeCalculator);
+            Assertions.assertEquals(expected.size(), trueRangeSeries.size(), "True Range series size mismatch for " + testName);
 
             for (int i = 0; i < expected.size(); i++) {
-                Assertions.assertEquals(0, trueRangeSeries.get(i).compareTo(expected.get(i)),
-                        "True Range at index: " + i + " did not match the expected value");
+                Assertions.assertEquals(0, expected.get(i).compareTo(trueRangeSeries.get(i)),
+                        "True Range at index: " + i + " did not match the expected value for " + testName);
             }
         } catch (CurrencyNotFoundException e) {
-            Assertions.fail("Currency should be found.");
+            Assertions.fail("Currency should be found for " + testName);
         }
+    }
+
+    static Stream<Arguments> trueRangeIntegrationTestCases() {
+        return Stream.of(
+                Arguments.of(
+                        "Basic True Range Integration Test",
+                        "ROYAL_COIN",
+                        "1h",
+                        List.of(
+                                createKline(new BigDecimal("100"), new BigDecimal("110"), new BigDecimal("90")),
+                                createKline(new BigDecimal("105"), new BigDecimal("115"), new BigDecimal("95")),
+                                createKline(new BigDecimal("108"), new BigDecimal("112"), new BigDecimal("102"))
+                        ),
+                        List.of(
+                                new BigDecimal("20.00000"), // TR K2: max(115-95=20, abs.115-100=15, abs.95-100=5) = 20
+                                new BigDecimal("10.00000")  // TR K3: max(112-102=10, abs.112-105=7, abs.102-105=3) = 10
+                        )
+                ),
+                Arguments.of(
+                        "True Range With Insufficient Data",
+                        "ROYAL_COIN",
+                        "1h",
+                        List.of(
+                                createKline(new BigDecimal("100"), new BigDecimal("110"), new BigDecimal("95"))
+                        ),
+                        List.of() // Kline size cant be <= 1
+                ),
+                Arguments.of(
+                        "True Range Calculation With Varying Values",
+                        "ROYAL_COIN",
+                        "1h",
+                        List.of(
+                                createKline(new BigDecimal("50"), new BigDecimal("60"), new BigDecimal("40")),
+                                createKline(new BigDecimal("55"), new BigDecimal("65"), new BigDecimal("50")),
+                                createKline(new BigDecimal("60"), new BigDecimal("70"), new BigDecimal("55")),
+                                createKline(new BigDecimal("65"), new BigDecimal("75"), new BigDecimal("60"))
+                        ),
+                        List.of(
+                                new BigDecimal("15.00000"), // TR K2: max(65-50=15, abs.50-50=0, abs.65-50=15) = 15
+                                new BigDecimal("15.00000"), // TR K3: max(70-55=15, abs.70-55=15, abs.55-55=0) = 15
+                                new BigDecimal("15.00000")  // TR K4: max(75-60=15, abs.75-60=15, abs.60-60=0) = 15
+                        )
+                ),
+                Arguments.of(
+                        "True Range Calculation With Varying High and Low Prices",
+                        "ROYAL_COIN",
+                        "1h",
+                        List.of(
+                                createKline(new BigDecimal("100"), new BigDecimal("105"), new BigDecimal("95")),
+                                createKline(new BigDecimal("102"), new BigDecimal("108"), new BigDecimal("90")),
+                                createKline(new BigDecimal("101"), new BigDecimal("107"), new BigDecimal("85")),
+                                createKline(new BigDecimal("103"), new BigDecimal("116"), new BigDecimal("80"))
+                        ),
+                        List.of(
+                                new BigDecimal("18.00000"), // TR K2: max(108-90=18, abs.108-100=8, abs.90-100=10) = 18
+                                new BigDecimal("22.00000"), // TR K3: max(107-85=22, abs.107-102=5, abs.85-102=17) = 22
+                                new BigDecimal("36.00000")  // TR K4: max(116-80=36, abs.116-101=15, abs.80-101=21) = 36
+                        )
+                ),
+                Arguments.of(
+                        "True Range Calculation With All Equal Differences expect low-prevClose",
+                        "ROYAL_COIN",
+                        "1h",
+                        List.of(
+                                createKline(new BigDecimal("100"), new BigDecimal("110"), new BigDecimal("100")),
+                                createKline(new BigDecimal("100"), new BigDecimal("110"), new BigDecimal("100"))
+                        ),
+                        List.of(
+                                new BigDecimal("10.00000") // TR K2: max(110-100=10, abs.110-100=10, abs.100-100=0) = 10
+                        )
+                ),
+                Arguments.of(
+                        "True Range Calculation With Decreasing Prices by same value",
+                        "ROYAL_COIN",
+                        "1h",
+                        List.of(
+                                createKline( new BigDecimal("200"), new BigDecimal("210"), new BigDecimal("190")),
+                                createKline( new BigDecimal("195"), new BigDecimal("205"), new BigDecimal("185")),
+                                createKline(new BigDecimal("190"), new BigDecimal("200"), new BigDecimal("180"))
+                        ),
+                        List.of(
+                                new BigDecimal("20.00000"), // TR K2: max(205-185=20, abs.205-200=5, abs.185-200=15) = 20
+                                new BigDecimal("20.00000")  // TR K3: max(200-180=20, abs.200-195=5, abs.180-195=15) = 20
+                        )
+                )
+        );
+    }
+
+    private static HistoricalKline createKline(BigDecimal closePrice, BigDecimal highPrice, BigDecimal lowPrice) {
+        return HistoricalKline.builder()
+                .closePrice(closePrice)
+                .highPrice(highPrice)
+                .lowPrice(lowPrice)
+                .build();
     }
 }
