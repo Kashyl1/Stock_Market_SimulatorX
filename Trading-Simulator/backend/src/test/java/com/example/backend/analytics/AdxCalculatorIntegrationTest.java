@@ -37,7 +37,7 @@ public class AdxCalculatorIntegrationTest extends BaseIntegrationTest {
      * 6. Average Directional Index (ADX):
      *    ADX is the smoothed average of DX values over the same period N:
      *    Smoothed ADX_n = ((Smoothed ADX_{n-1} * (N - 1)) + Current DX) / N
-     * The calculation requires at least PERIODS * 2 + 1 data points to stabilize the ADX value.
+     * ZZThe calculation requires at least PERIODS * 2 + 1 data points to stabilize the ADX value.
      */
 
     @Autowired

@@ -32,7 +32,7 @@ public class IndicatorScheduler {
 
                     List<BigDecimal> emaSeries = analyticsService.calculateIndicator(symbol, interval, new EmaCalculator(12));
                     BigDecimal latestEma = emaSeries.get(emaSeries.size() - 1);
-                    indicatorCacheService.saveEma(symbol, interval, 12, latestEma);
+                    indicatorCacheService.saveEma(symbol, interval, 14, latestEma);
 
                     BigDecimal rsi = analyticsService.calculateIndicator(symbol, interval, new RsiCalculator(14));
                     indicatorCacheService.saveRsi(symbol, interval, 14, rsi);
