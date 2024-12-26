@@ -1,6 +1,7 @@
 package com.example.backend.analytics;
 
 import com.example.backend.currency.HistoricalKline;
+import com.example.backend.exceptions.NotEnoughDataForCalculationException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,7 +18,7 @@ public class SmaCalculator implements IndicatorCalculator<BigDecimal> {
     @Override
     public BigDecimal calculate(List<HistoricalKline> klines) {
         if (klines.size() < periods) {
-            throw new IllegalArgumentException("Not enough data for SMA calculation");
+            throw new NotEnoughDataForCalculationException("Not enough data for SMA calculation");
         }
 
         List<HistoricalKline> subset = klines.subList(klines.size() - periods, klines.size());

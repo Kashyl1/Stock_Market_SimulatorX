@@ -125,4 +125,19 @@ public class IndicatorCacheService {
         }
     }
 
+    public void saveBP(String symbol, String interval, BigDecimal value) {
+        String key = "BP:" + symbol + ":" + interval;
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
+    }
+
+    public BigDecimal getBP(String symbol, String interval) {
+        String key = "BP:" + symbol + ":" + interval;
+        try {
+            String val = redisTemplate.opsForValue().get(key);
+            return val != null ? new BigDecimal(val) : null;
+        } catch (Exception e) {
+            logger.error("Redis error loading BP: {}", e.getMessage());
+            return null;
+        }
+    }
 }

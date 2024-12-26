@@ -40,37 +40,37 @@ public class ScheduledTasks {
     @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 5)
     @Operation(summary = "Update data for 1m", description = "Update 1 minute kline data every 1 minute")
     public void updateOneHourChartHistoricalData() {
-        currencyService.updateHistoricalData("1m", 100);
+        currencyService.updateHistoricalData("1m", 1000);
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 3, initialDelay = 1000 * 15)
     @Operation(summary = "Update data for 3m kline", description = "Update 3 minute kline data every 3 minute")
     public void updateThreeHourChartHistoricalData() {
-        currencyService.updateHistoricalData("3m", 100);
+        currencyService.updateHistoricalData("3m", 500);
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 5, initialDelay = 1000 * 25)
     @Operation(summary = "Update data for 5m klines", description = "Update 5 minute kline data every 5 minute")
     public void updateSixHourChartHistoricalData() {
-        currencyService.updateHistoricalData("5m", 100);
+        currencyService.updateHistoricalData("5m", 500);
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 35)
     @Operation(summary = "Update data for one 30m klines", description = "Update 30 minute kline data every 30 minute")
     public void updateOneDayChartHistoricalData() {
-        currencyService.updateHistoricalData("30m", 100);
+        currencyService.updateHistoricalData("30m", 500);
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 45)
     @Operation(summary = "Update data for 1h klines", description = "Update 1 hour kline data every 1 hour")
     public void updateOneWeekChartHistoricalData() {
-        currencyService.updateHistoricalData("1h", 168);
+        currencyService.updateHistoricalData("1h", 500);
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 55)
     @Operation(summary = "Update data for 1 day klines", description = "Update one day kline data every one day")
     public void updateOneMonthHistoricalData() {
-        currencyService.updateHistoricalData("1d", 100);
+        currencyService.updateHistoricalData("1d", 365);
     }
 
 }

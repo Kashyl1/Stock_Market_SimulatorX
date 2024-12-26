@@ -22,6 +22,7 @@ public class AnalyticsController {
     private final IndicatorCacheService indicatorCacheService;
     private static final Logger logger = LoggerFactory.getLogger(AnalyticsController.class);
     private final AdxCalculator adxCalculator;
+    private final BullBearPowerCalculator bullBearPowerCalculator;
 
     @GetMapping("/sma/{symbol}/{interval}/{periods}") // Pomyśleć nad logiką
     public ResponseEntity<BigDecimal> getSimpleMovingAverage(
@@ -141,6 +142,26 @@ public class AnalyticsController {
             return ResponseEntity.ok(adx);
         } catch (Exception e) {
             logger.error("Error retrieving ADX for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/bp/{symbol}/{interval}")
+    public ResponseEntity<BigDecimal> getBp(
+            @PathVariable String symbol,
+            @PathVariable String interval) {
+        try {
+            BigDecimal cached = indicatorCacheService.getBP(symbol.toUpperCase(), interval);
+            if (cached != null) {
+                return ResponseEntity.ok(cached);
+            }
+
+            BigDecimal bp = analyticsService.calculateIndicator(symbol, interval, bullBearPowerCalculator);
+            indicatorCacheService.saveBP(symbol, interval, bp);
+
+            return ResponseEntity.ok(bp);
+        } catch (Exception e) {
+            logger.error("Error retrieving BP for {}: {}", symbol, e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
