@@ -4,13 +4,13 @@ import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import './CreateTradeAlertModal.css';
 
-const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
+const CreateTradeAlertModal = ({ onClose, currencyIdProp}) => {
   const [tradeAlertType, setTradeAlertType] = useState('BUY');
   const [conditionPrice, setConditionPrice] = useState('');
   const [tradeAmount, setTradeAmount] = useState('');
   const [orderType, setOrderType] = useState('LIMIT');
   const [portfolioId, setPortfolioId] = useState('');
-  const [currencyId, setCurrencyId] = useState('');
+  const [currencyId, setCurrencyId] = useState(currencyIdProp || '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [currencies, setCurrencies] = useState([]);
@@ -77,9 +77,7 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
     setLoading(true);
     try {
       const newAlert = await createTradeAlert(alertData);
-      console.log('New Trade Alert:', newAlert);
       window.alert('Trade Alert has been successfully created.');
-      onTradeAlertCreated(newAlert);
       onClose();
     } catch (err) {
       console.error('Error creating Trade Alert:', err);
@@ -108,20 +106,29 @@ const CreateTradeAlertModal = ({ onClose, onTradeAlertCreated }) => {
           </select>
         </label>
 
-        <label>
-          Select Currency:
-          <select
-            value={currencyId}
-            onChange={(e) => setCurrencyId(e.target.value)}
-          >
-            {currencies.map((currency) => (
+
+    <label>
+     Select Currency:
+     <select
+       value={currencyId}
+        onChange={(e) => setCurrencyId(e.target.value)}
+       disabled={!!currencyIdProp}
+        >
+       {currencyIdProp
+         ? currencies
+             .filter((currency) => currency.id === currencyIdProp)
+              .map((currency) => (
+               <option key={currency.currencyid} value={currency.currencyid}>
+                  {currency.name} ({currency.symbol})
+                   </option>
+              ))
+         : currencies.map((currency) => (
               <option key={currency.currencyid} value={currency.currencyid}>
                 {currency.name} ({currency.symbol})
               </option>
             ))}
-          </select>
-        </label>
-
+     </select>
+    </label>
         <label>
           Trade Alert Type:
           <select
