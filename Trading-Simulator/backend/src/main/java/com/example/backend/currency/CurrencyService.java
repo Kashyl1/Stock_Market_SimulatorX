@@ -360,6 +360,9 @@ public class CurrencyService {
                                 .retrieve()
                                 .bodyToMono(String.class)
                                 .flatMap(responseStr -> processKlinesResponse(responseStr, currency, interval))
+                                .doOnSuccess(v -> {
+                                    removeOldKlines(currency, interval);
+                                })
                                 .onErrorResume(e -> {
                                     logger.error("Error fetching klines for symbol {}", symbolWithUSDT, e);
                                     return Mono.empty();
@@ -426,5 +429,15 @@ public class CurrencyService {
                 logger.info("No new klines found for symbol {}", currency.getSymbol());
             }
         });
+    }
+
+    private void removeOldKlines(Currency currency, String interval) {
+        List<HistoricalKline> klinesSorted = historicalKlineRepository.findByCurrencyAndTimeIntervalOrderByOpenTimeAsc(currency, interval);
+
+        int size = klinesSorted.size();
+        if (size > 1000) {
+            List<HistoricalKline> toDelete = klinesSorted.subList(0, size - 1000);
+            historicalKlineRepository.deleteAll(toDelete);
+        }
     }
 }
