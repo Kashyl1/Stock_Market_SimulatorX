@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class AdxCalculator implements IndicatorCalculator<BigDecimal> {
 
-    private static final int PERIODS = 14; // Stały okres
+    private static final int PERIODS = 14;
 
     private final TrueRangeCalculator trueRangeCalculator;
     private final PositiveDMCalculator positiveDMCalculator;
