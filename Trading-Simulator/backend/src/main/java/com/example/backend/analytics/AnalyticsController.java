@@ -165,4 +165,24 @@ public class AnalyticsController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @GetMapping("/williamsR/{symbol}/{interval}")
+    public ResponseEntity<BigDecimal> getWilliamsR(
+            @PathVariable String symbol,
+            @PathVariable String interval) {
+        try {
+            BigDecimal cached = indicatorCacheService.getWilliamsR(symbol.toUpperCase(), interval);
+            if (cached != null) {
+                return ResponseEntity.ok(cached);
+            }
+
+            BigDecimal williamsR = analyticsService.calculateIndicator(symbol, interval, new WilliamsRCalculator());
+            indicatorCacheService.saveBP(symbol, interval, williamsR);
+
+            return ResponseEntity.ok(williamsR);
+        } catch (Exception e) {
+            logger.error("Error retrieving williamsR for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

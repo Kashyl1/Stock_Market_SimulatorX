@@ -51,6 +51,9 @@ public class IndicatorScheduler {
 
                     BigDecimal bp = analyticsService.calculateIndicator(symbol, interval, bullBearPowerCalculator);
                     indicatorCacheService.saveBP(symbol, interval, bp);
+
+                    BigDecimal williamsR = analyticsService.calculateIndicator(symbol, interval, new WilliamsRCalculator());
+                    indicatorCacheService.saveWilliamsR(symbol, interval, williamsR);
                 } catch (Exception e) {
                     System.err.println("Failed to update analytics for " + symbol + " " + interval + ": " + e.getMessage());
                 }

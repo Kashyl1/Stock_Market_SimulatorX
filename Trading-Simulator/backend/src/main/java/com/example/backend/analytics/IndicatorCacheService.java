@@ -140,4 +140,20 @@ public class IndicatorCacheService {
             return null;
         }
     }
+
+    public void saveWilliamsR(String symbol, String interval, BigDecimal value) {
+        String key = "WilliamsR:" + symbol + ":" + interval;
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
+    }
+
+    public BigDecimal getWilliamsR(String symbol, String interval) {
+        String key = "WilliamsR:" + symbol + ":" + interval;
+        try {
+            String val = redisTemplate.opsForValue().get(key);
+            return val != null ? new BigDecimal(val) : null;
+        } catch (Exception e) {
+            logger.error("Redis error loading WilliamsR: {}", e.getMessage());
+            return null;
+        }
+    }
 }
