@@ -156,4 +156,20 @@ public class IndicatorCacheService {
             return null;
         }
     }
+
+    public void saveCci(String symbol, String interval, BigDecimal value) {
+    String key = "Cci:" + symbol + ":" + interval;
+    redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
+    }
+
+    public BigDecimal getCci(String symbol, String interval) {
+        String key = "Cci:" + symbol + ":" + interval;
+        try {
+            String val = redisTemplate.opsForValue().get(key);
+            return val != null ? new BigDecimal(val) : null;
+        } catch (Exception e) {
+            logger.error("Redis error loading Cci: {}", e.getMessage());
+            return null;
+        }
+    }
 }

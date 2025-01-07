@@ -185,4 +185,25 @@ public class AnalyticsController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @GetMapping("/cci/{symbol}/{interval}")
+    public ResponseEntity<BigDecimal> getCci(
+            @PathVariable String symbol,
+            @PathVariable String interval) {
+        try {
+            BigDecimal cached = indicatorCacheService.getCci(symbol.toUpperCase(), interval);
+            if (cached != null) {
+                return ResponseEntity.ok(cached);
+            }
+
+            BigDecimal cci = analyticsService.calculateIndicator(symbol, interval, new CciCalculator());
+
+            indicatorCacheService.saveCci(symbol, interval, cci);
+
+            return ResponseEntity.ok(cci);
+        } catch (Exception e) {
+            logger.error("Error retrieving Cci for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
