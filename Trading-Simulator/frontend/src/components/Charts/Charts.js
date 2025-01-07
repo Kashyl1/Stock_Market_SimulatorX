@@ -13,6 +13,11 @@ import { Chart } from 'react-chartjs-2';
 import { fetchChartData } from '../../services/ChartsService';
 import { buyAsset } from '../../services/TransactionService';
 import CreateTradeAlertModal from '../../components/Alerts/TradeAlerts/CreateTradeAlertModal';
+import AnalyticalModule from '../../components/AnalyticalModule/AnalyticalModule';
+import MovingAverages from '../../components/AnalyticalModule/MovingAverages';
+import Summary from '../../components/AnalyticalModule/Summary';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
 import './Charts.css';
 
 ChartJS.register(
@@ -25,7 +30,9 @@ ChartJS.register(
   Legend
 );
 
-const Charts = ({ currencyId, currencySymbol, portfolios, onClose }) => {
+const Charts = ({ currencyId, currencySymbol, portfolios, onClose, currentPrice}) => {
+  const [analyticalSummary, setAnalyticalSummary] = useState({});
+  const [movingAveragesSummary, setMovingAveragesSummary] = useState({});
   const [chartData, setChartData] = useState([]);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +44,14 @@ const Charts = ({ currencyId, currencySymbol, portfolios, onClose }) => {
   const [buyError, setBuyError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showCreateTradeModal, setShowCreateTradeModal] = useState(false);
+
+   const handleSummaryChange = (summary, type) => {
+      if (type === 'analytical') {
+        setAnalyticalSummary(summary);
+      } else if (type === 'movingAverages') {
+        setMovingAveragesSummary(summary);
+      }
+    };
 
 const getChartTitle = (interval, currencyId) => {
   switch (interval) {
@@ -105,51 +120,60 @@ const getChartTitle = (interval, currencyId) => {
     setInterval(newInterval);
   };
 
-  const handleBuy = async () => {
-    setBuyError('');
-    if (!selectedPortfolioId) {
-      setBuyError('Please select a portfolio.');
-      return;
-    }
+   const notyf = new Notyf({
+     ripple: false,
+   });
 
-    if (buyType === 'USD' && (!amountInUSD || parseFloat(amountInUSD) <= 0)) {
-      setBuyError('Please enter a valid amount in USD.');
-      return;
-    }
+const handleBuy = async () => {
+  if (!selectedPortfolioId) {
+    notyf.error('Please select a portfolio.');
+    return;
+  }
 
-    if (buyType === 'Crypto' && (!amountOfCrypto || parseFloat(amountOfCrypto) <= 0)) {
-      setBuyError('Please enter a valid amount of cryptocurrency.');
-      return;
-    }
+  if (buyType === 'USD' && (!amountInUSD || parseFloat(amountInUSD) <= 0)) {
+    notyf.error('Please enter a valid amount in USD.');
+    return;
+  }
 
-    const purchaseData = {
-      portfolioId: selectedPortfolioId,
-      currencyId,
-      amountInUSD: buyType === 'USD' ? parseFloat(amountInUSD) : null,
-      amountOfCrypto: buyType === 'Crypto' ? parseFloat(amountOfCrypto) : null,
-    };
+  if (buyType === 'Crypto' && (!amountOfCrypto || parseFloat(amountOfCrypto) <= 0)) {
+    notyf.error('Please enter a valid amount of cryptocurrency.');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await buyAsset(
-        purchaseData.portfolioId,
-        purchaseData.currencyId,
-        purchaseData.amountInUSD,
-        purchaseData.amountOfCrypto
-      );
-      alert('Asset purchased successfully');
-      setAmountInUSD('');
-      setAmountOfCrypto('');
-    } catch (err) {
-      let errorMessage = 'An unexpected error occurred.';
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-      setBuyError('Failed to purchase asset. ' + errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const purchaseData = {
+    portfolioId: selectedPortfolioId,
+    currencyId,
+    amountInUSD: buyType === 'USD' ? parseFloat(amountInUSD) : null,
+    amountOfCrypto: buyType === 'Crypto' ? parseFloat(amountOfCrypto) : null,
   };
+
+  setLoading(true);
+  try {
+    await buyAsset(
+      purchaseData.portfolioId,
+      purchaseData.currencyId,
+      purchaseData.amountInUSD,
+      purchaseData.amountOfCrypto
+    );
+
+    notyf.success({
+      message: 'Asset purchased successfully',
+    });
+
+    setAmountInUSD('');
+    setAmountOfCrypto('');
+  } catch (err) {
+    let errorMessage = 'An unexpected error occurred.';
+    if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    }
+    notyf.error({
+      message: 'Failed to purchase asset. ' + errorMessage,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const timeUnit = interval === '1m' ? 'minute' :
                    interval === '3m' ? 'minute' :
@@ -323,6 +347,9 @@ const getChartTitle = (interval, currencyId) => {
       </div>
 
       <Chart type="candlestick" data={data} options={options} />
+      <Summary  movingAveragesSummary={movingAveragesSummary} analyticalSummary={analyticalSummary} />
+      <AnalyticalModule currencyId={currencyId} interval={interval} onSummaryChange={(summary) => handleSummaryChange(summary, 'analytical')} />
+      <MovingAverages currencyId={currencyId} interval={interval} currentPrice={currentPrice} onSummaryChange={(summary) => handleSummaryChange(summary, 'movingAverages')} />
     </div>
   );
 };

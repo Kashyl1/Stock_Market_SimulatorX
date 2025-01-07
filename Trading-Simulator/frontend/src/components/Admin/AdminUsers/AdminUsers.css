@@ -39,6 +39,26 @@
   align-items: center;
 }
 
+.table-header_trade {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr ;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid #333;
+  font-weight: bold;
+  padding: 15px 0;
+  text-align: left;
+  color: #d4af37;
+}
+
+
+.table-row_trade {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  padding: 15px 0;
+  border-bottom: 1px solid #333;
+  align-items: center;
+}
+
 .table-header_suspicious {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1.5fr 1.5fr 1fr 1.5fr 1.5fr;

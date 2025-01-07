@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
-import BuyAssetModal from '../../Transaction/BuyAssetModal/BuyAssetModal';
 import debounce from 'lodash.debounce';
 import Charts from '../../Charts/Charts';
 import './AvailableCurrencies.css';
@@ -50,7 +49,7 @@ const AvailableCurrencies = () => {
 
   useEffect(() => {
     fetchAvailableAssets();
-    const interval = setInterval(fetchAvailableAssets, 50000); //Ja to narazie podsniosłem fest bo mnie denerwuje XD
+    const interval = setInterval(fetchAvailableAssets, 5000000); //Ja to narazie podsniosłem fest bo mnie denerwuje XD
     return () => clearInterval(interval);
   }, [page]);
 
@@ -114,6 +113,7 @@ if (showCharts && selectedCurrencyForChart) {
       currencySymbol={selectedCurrencyForChart.symbol}
       portfolios={portfolios}
       onClose={() => setShowCharts(false)}
+      currentPrice={selectedCurrencyForChart.price_in_usd}
     />
   );
 }

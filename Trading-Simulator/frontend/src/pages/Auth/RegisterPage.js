@@ -9,9 +9,6 @@ const RegisterPage = () => {
     <div className="auth-page">
     <CustomParticlesBackground />
       <div className="static-background"></div>
-      <div className="home-button">
-        <Link to="/">Home</Link>
-      </div>
       <RegisterForm />
       <canvas className="background"></canvas>
     </div>

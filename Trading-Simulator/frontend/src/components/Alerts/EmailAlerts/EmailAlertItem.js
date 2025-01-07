@@ -1,33 +1,35 @@
 import React from 'react';
 import { deactivateAlert, deleteAlert } from '../../../services/MailAlertService';
 import './EmailAlertItem.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const EmailAlertItem = ({ alertData, onAlertDeactivated, onAlertDeleted }) => {
-  const handleDeactivate = async () => {
-    if (window.confirm('Are you sure you want to deactivate this alert?')) {
-      try {
-        await deactivateAlert(alertData.alertId);
-        window.alert('Alert has been deactivated.');
-        onAlertDeactivated(alertData.alertId);
-      } catch (err) {
-        const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
-        window.alert(`Failed to deactivate alert. ${errorMessage}`);
-      }
-    }
-  };
+const handleDeactivate = async () => {
+  try {
+    await deactivateAlert(alertData.alertId);
+    notyf.success('Alert has been deactivated.');
+    onAlertDeactivated(alertData.alertId);
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
+    notyf.error(`Failed to deactivate alert. ${errorMessage}`);
+  }
+};
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this alert?')) {
-      try {
-        await deleteAlert(alertData.alertId);
-        window.alert('Alert has been deleted.');
-        onAlertDeleted(alertData.alertId);
-      } catch (err) {
-        const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
-        window.alert(`Failed to delete alert. ${errorMessage}`);
-      }
-    }
-  };
+const handleDelete = async () => {
+  try {
+    await deleteAlert(alertData.alertId);
+    notyf.success('Alert has been deleted.');
+    onAlertDeleted(alertData.alertId);
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
+    notyf.error(`Failed to delete alert. ${errorMessage}`);
+  }
+};
 
   return (
     <div className="table-row">

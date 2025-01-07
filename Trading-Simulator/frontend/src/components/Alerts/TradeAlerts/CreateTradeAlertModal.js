@@ -3,6 +3,12 @@ import { createTradeAlert } from '../../../services/TradeAlertService';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import './CreateTradeAlertModal.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const CreateTradeAlertModal = ({ onClose, currencyIdProp}) => {
   const [tradeAlertType, setTradeAlertType] = useState('BUY');
@@ -35,62 +41,60 @@ const CreateTradeAlertModal = ({ onClose, currencyIdProp}) => {
           setPortfolioId(userPortfolios[0].portfolioid);
         }
       } catch (err) {
-        console.error('Error fetching data:', err);
+        notyf.error('Error fetching data:', err);
         setError('Failed to fetch necessary data.');
       }
     };
     fetchData();
   }, []);
 
-  const handleCreateAlert = async () => {
-    setError('');
+ const handleCreateAlert = async () => {
+   if (!portfolioId) {
+     notyf.error('Please select a portfolio.');
+     return;
+   }
 
-    if (!portfolioId) {
-      setError('Please select a portfolio.');
-      return;
-    }
+   if (!currencyId) {
+     notyf.error('Please select a currency.');
+     return;
+   }
 
-    if (!currencyId) {
-      setError('Please select a currency.');
-      return;
-    }
+   if (!conditionPrice || isNaN(conditionPrice) || parseFloat(conditionPrice) <= 0) {
+     notyf.error('Condition price must be a positive number.');
+     return;
+   }
 
-    if (!conditionPrice || isNaN(conditionPrice) || parseFloat(conditionPrice) <= 0) {
-      setError('Condition price must be a positive number.');
-      return;
-    }
+   if (!tradeAmount || isNaN(tradeAmount) || parseFloat(tradeAmount) <= 0) {
+     notyf.error('Trade amount must be a positive number.');
+     return;
+   }
 
-    if (!tradeAmount || isNaN(tradeAmount) || parseFloat(tradeAmount) <= 0) {
-      setError('Trade amount must be a positive number.');
-      return;
-    }
+   const alertData = {
+     portfolioId,
+     currencyId,
+     tradeAlertType,
+     conditionPrice: parseFloat(conditionPrice),
+     tradeAmount: parseFloat(tradeAmount),
+     orderType,
+   };
 
-    const alertData = {
-      portfolioId,
-      currencyId,
-      tradeAlertType,
-      conditionPrice: parseFloat(conditionPrice),
-      tradeAmount: parseFloat(tradeAmount),
-      orderType,
-    };
-
-    setLoading(true);
-    try {
-      const newAlert = await createTradeAlert(alertData);
-      window.alert('Trade Alert has been successfully created.');
-      onClose();
-    } catch (err) {
-      console.error('Error creating Trade Alert:', err);
-      setError(err.message || 'Failed to create trade alert.');
-    } finally {
-      setLoading(false);
-    }
-  };
+   setLoading(true);
+   try {
+     const newAlert = await createTradeAlert(alertData);
+     notyf.success('Trade Alert has been successfully created.');
+     onClose();
+   } catch (err) {
+     console.error('Error creating Trade Alert:', err);
+     notyf.error(err.message || 'Failed to create trade alert.');
+   } finally {
+     setLoading(false);
+   }
+ };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Create Trade Alert</h2>
+        <h2>Create Trade Order</h2>
 
         <label>
           Select Portfolio:
@@ -130,7 +134,7 @@ const CreateTradeAlertModal = ({ onClose, currencyIdProp}) => {
      </select>
     </label>
         <label>
-          Trade Alert Type:
+          Trade Order Type:
           <select
             value={tradeAlertType}
             onChange={(e) => setTradeAlertType(e.target.value)}

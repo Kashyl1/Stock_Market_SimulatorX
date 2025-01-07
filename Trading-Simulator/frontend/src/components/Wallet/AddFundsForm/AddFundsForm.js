@@ -1,37 +1,48 @@
 import React, { useState } from 'react';
 import { addFunds } from '../../../services/WalletService';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const AddFundsForm = ({ onFundsAdded }) => {
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    if (!amount || parseFloat(amount) <= 0) {
-    setError('Amount must be greater than zero.');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+
+  if (!amount || parseFloat(amount) <= 0) {
+    notyf.error('Amount must be greater than zero.');
     return;
   }
-    try {
-      const response = await addFunds(amount);
-      setMessage('Funds added successfully');
-      setAmount('');
-      onFundsAdded();
-    } catch (error) {
-        let errorMessage = 'Failed to add funds. Please try again.';
-        if (error.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        } else if (error.response?.data) {
-          const errors = Object.values(error.response.data).join(' ');
-          if (errors) {
-            errorMessage = errors;
-          }
-        }
-        setError(errorMessage);
+
+  try {
+    const response = await addFunds(amount);
+    notyf.success({
+      message: 'Funds added successfully',
+    });
+    setAmount('');
+    onFundsAdded();
+  } catch (error) {
+    let errorMessage = 'Failed to add funds. Please try again.';
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.response?.data) {
+      const errors = Object.values(error.response.data).join(' ');
+      if (errors) {
+        errorMessage = errors;
       }
-  };
+    }
+    notyf.error({
+      message: errorMessage,
+    });
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="add-funds-form">

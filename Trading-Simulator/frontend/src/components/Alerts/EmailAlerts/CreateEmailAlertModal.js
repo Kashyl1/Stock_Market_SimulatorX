@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { createAlert } from '../../../services/MailAlertService';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import './CreateEmailAlertModal.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
   const [mailAlertType, setMailAlertType] = useState('PERCENTAGE');
@@ -41,7 +48,7 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
     setError('');
 
     if (!selectedCurrencyId) {
-      setError('Please select a currency.');
+      notyf.error('Please select a currency.');
       return;
     }
 
@@ -49,7 +56,7 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
       mailAlertType === 'PERCENTAGE' &&
       (!percentageChange || isNaN(percentageChange) || parseFloat(percentageChange) === 0)
     ) {
-      setError('Percentage change must be a non-zero number.');
+      notyf.error('Percentage change must be a non-zero number.');
       return;
     }
 
@@ -57,7 +64,7 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
       mailAlertType === 'PRICE' &&
       (!targetPrice || isNaN(targetPrice) || parseFloat(targetPrice) <= 0)
     ) {
-      setError('Target price must be a number greater than zero.');
+      notyf.error('Target price must be a number greater than zero.');
       return;
     }
 
@@ -71,12 +78,12 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
     setLoading(true);
     try {
       const newAlert = await createAlert(alertData);
-      window.alert('Alert has been successfully created.');
+      notyf.success('Alert has been successfully created.');
       onAlertCreated(newAlert);
       onClose();
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
-      setError(`Failed to create alert. ${errorMessage}`);
+      notyf.error(`Failed to create alert. ${errorMessage}`);
     } finally {
       setLoading(false);
     }

@@ -50,6 +50,10 @@ background-color: #1e1e1e;
   transition: border-color 0.3s, background-color 0.3s;
 }
 
+.modal-content input{
+    width: 95%;
+}
+
 .modal-content select {
   background-color: #333333;
   color: #ffffff;

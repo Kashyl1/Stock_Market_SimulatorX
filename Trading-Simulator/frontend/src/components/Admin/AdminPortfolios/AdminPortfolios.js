@@ -18,7 +18,7 @@ const AdminPortfolios = ({ userId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [editStatus, setEditStatus] = useState(null); 
+  const [editStatus, setEditStatus] = useState(null);
   const pageSize = 20;
 
   const fetchPortfolios = async () => {
