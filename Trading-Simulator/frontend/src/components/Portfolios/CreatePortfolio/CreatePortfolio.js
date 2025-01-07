@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { createPortfolio } from '../../../services/PortfolioService';
 import '../Portfolios.css';
 import './CreatePortfolio.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const CreatePortfolio = ({ onPortfolioCreated }) => {
   const [name, setName] = useState('');
@@ -12,6 +18,7 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
 
     if (name.length > 12) {
       setError('Portfolio name cannot exceed 12 characters.');
+      notyf.error('Portfolio name cannot exceed 12 characters.');
       return;
     }
 
@@ -20,6 +27,7 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
       setName('');
       setError('');
       onPortfolioCreated(newPortfolio);
+      notyf.success('Portfolio created successfully.');
     } catch (err) {
       let errorMessage = 'Failed to create portfolio. Please try again.';
       if (err.response?.data?.message) {
@@ -31,6 +39,7 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
         }
       }
       setError(errorMessage);
+      notyf.error(`Failed to create portfolio: ${errorMessage}`);
     }
   };
 

@@ -9,9 +9,6 @@ const LoginPage = ({ setIsLoggedIn }) => {
     <div className="auth-page">
     <CustomParticlesBackground />
       <div className="static-background"></div>
-      <div className="home-button">
-        <Link to="/">Home</Link>
-      </div>
       <LoginForm setIsLoggedIn={setIsLoggedIn} />
       <canvas className="background"></canvas>
     </div>

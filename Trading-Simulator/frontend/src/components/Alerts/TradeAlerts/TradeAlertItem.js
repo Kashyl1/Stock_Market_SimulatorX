@@ -1,39 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { deactivateTradeAlert, deleteTradeAlert } from '../../../services/TradeAlertService';
+import { getPortfolioByid } from '../../../services/PortfolioService';
 import './TradeAlertItem.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const TradeAlertItem = ({ tradeAlertData, onTradeAlertDeactivated, onTradeAlertDeleted }) => {
-  console.log('Trade Alert Data:', tradeAlertData);
+  const [portfolioName, setPortfolioName] = useState('Loading...');
 
-  const handleDeactivate = async () => {
-    if (window.confirm('Are you sure you want to deactivate this trade alert?')) {
-      try {
-        await deactivateTradeAlert(tradeAlertData.tradeAlertId);
-        window.alert('Trade alert has been deactivated.');
-        onTradeAlertDeactivated(tradeAlertData.tradeAlertId);
-      } catch (err) {
-        const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
-        window.alert(`Failed to deactivate trade alert. ${errorMessage}`);
-      }
-    }
-  };
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this trade alert?')) {
+  useEffect(() => {
+    const fetchPortfolioName = async () => {
       try {
-        await deleteTradeAlert(tradeAlertData.tradeAlertId);
-        window.alert('Trade alert has been deleted.');
-        onTradeAlertDeleted(tradeAlertData.tradeAlertId);
-      } catch (err) {
-        const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
-        window.alert(`Failed to delete trade alert. ${errorMessage}`);
+        const portfolio = await getPortfolioByid(tradeAlertData.portfolioId);
+        setPortfolioName(portfolio.name);
+      } catch (error) {
+        console.error('Failed to fetch portfolio name:', error);
+        setPortfolioName('Unknown');
       }
+    };
+
+    if (tradeAlertData.portfolioId) {
+      fetchPortfolioName();
     }
-  };
+  }, [tradeAlertData.portfolioId]);
+
+const handleDeactivate = async () => {
+  try {
+    await deactivateTradeAlert(tradeAlertData.tradeAlertId);
+    notyf.success('Trade order has been deactivated.');
+    onTradeAlertDeactivated(tradeAlertData.tradeAlertId);
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
+    notyf.error(`Failed to deactivate trade alert. ${errorMessage}`);
+  }
+};
+
+const handleDelete = async () => {
+  try {
+    await deleteTradeAlert(tradeAlertData.tradeAlertId);
+    notyf.success('Trade order has been deleted.');
+    onTradeAlertDeleted(tradeAlertData.tradeAlertId);
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
+    notyf.error(`Failed to delete trade alert. ${errorMessage}`);
+  }
+};
 
   return (
-    <div className="table-row">
+    <div className="table-row_trade">
       <div className="cell">{tradeAlertData.currencyName}</div>
+       <div className="cell">{portfolioName}</div>
       <div className="cell">
         {tradeAlertData.initialPrice ? `$${tradeAlertData.initialPrice.toFixed(2)}` : 'N/A'}
       </div>

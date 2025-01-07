@@ -18,8 +18,9 @@ const TradeAlertList = ({ tradeAlerts, loading, error, onTradeAlertDeactivated, 
   return (
     <div className="trade-alert-list">
       <div className="assets-table">
-        <div className="table-header">
+        <div className="table-header_trade">
           <div className="header-cell">Currency</div>
+          <div className="header-cell">Portfolio</div>
           <div className="header-cell">Initial Price</div>
           <div className="header-cell">Alert Type</div>
           <div className="header-cell">Condition Price</div>

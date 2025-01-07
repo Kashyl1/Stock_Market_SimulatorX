@@ -36,13 +36,13 @@ const AlertsPage = () => {
     }
   };
 
-  const fetchTradeAlerts = async () => {
+const fetchTradeAlerts = async () => {
     setTradeLoading(true);
     try {
       const userTradeAlerts = await getUserTradeAlerts();
       setTradeAlerts(userTradeAlerts);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to fetch trade alerts.';
+      const errorMessage = err.response?.data?.message || 'Failed to fetch trade orders.';
       setTradeError(errorMessage);
     } finally {
       setTradeLoading(false);
@@ -54,7 +54,7 @@ const AlertsPage = () => {
       const availableCurrencies = await getAvailableAssets(0, 100);
       setTradeCurrencies(availableCurrencies.content);
     } catch (err) {
-      console.error('Failed to fetch currencies for trade alerts.');
+      console.error('Failed to fetch currencies for trade orders.');
     }
   };
 
@@ -90,6 +90,7 @@ const AlertsPage = () => {
 
   const handleCloseCreateTradeModal = () => {
     setShowCreateTradeModal(false);
+    fetchTradeAlerts(); //to dosyć głupie obejście ale działa XD
   };
 
   const handleTradeAlertCreated = () => {
@@ -148,7 +149,7 @@ const AlertsPage = () => {
         {activeTab === 'trade' && (
           <>
             <button onClick={handleOpenCreateTradeModal} className="create-trade-alert-button">
-              Create New Trade Alert
+              Create New Trade Order
             </button>
             {showCreateTradeModal && (
               <CreateTradeAlertModal
