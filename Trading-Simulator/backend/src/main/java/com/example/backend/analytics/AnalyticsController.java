@@ -23,6 +23,7 @@ public class AnalyticsController {
     private static final Logger logger = LoggerFactory.getLogger(AnalyticsController.class);
     private final AdxCalculator adxCalculator;
     private final BullBearPowerCalculator bullBearPowerCalculator;
+    private final AtrCalculator atrCalculator;
 
     @GetMapping("/sma/{symbol}/{interval}/{periods}") // Pomyśleć nad logiką
     public ResponseEntity<BigDecimal> getSimpleMovingAverage(
@@ -203,6 +204,25 @@ public class AnalyticsController {
             return ResponseEntity.ok(cci);
         } catch (Exception e) {
             logger.error("Error retrieving Cci for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/atr/{symbol}/{interval}")
+    public ResponseEntity<BigDecimal> getAtr(
+            @PathVariable String symbol,
+            @PathVariable String interval) {
+        try {
+            BigDecimal cached = indicatorCacheService.getAtr(symbol, interval);
+            if (cached != null) {
+                return ResponseEntity.ok(cached);
+            }
+
+            BigDecimal atr = analyticsService.calculateIndicator(symbol, interval, atrCalculator);
+            indicatorCacheService.saveAtr(symbol, interval, atr);
+            return ResponseEntity.ok(atr);
+        } catch (Exception e) {
+            logger.error("Error retrieving Atr for {}: {}", symbol, e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
