@@ -172,4 +172,20 @@ public class IndicatorCacheService {
             return null;
         }
     }
+
+    public void saveAtr(String symbol, String interval, BigDecimal value) {
+        String key = "Atr:" + symbol + ":" + interval;
+        redisTemplate.opsForValue().set(key, value.toPlainString(), Duration.ofMinutes(1));
+    }
+
+    public BigDecimal getAtr(String symbol, String interval) {
+        String key = "Atr:" + symbol + ":" + interval;
+        try {
+            String val = redisTemplate.opsForValue().get(key);
+            return val != null ? new BigDecimal(val) : null;
+        } catch (Exception e) {
+            logger.error("Redis error loading Atr: {}", e.getMessage());
+            return null;
+        }
+    }
 }
