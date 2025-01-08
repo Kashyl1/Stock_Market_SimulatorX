@@ -11,10 +11,10 @@ import exampleImageOne from '../../assets/gold_chart.png';
 import exampleImageTwo from '../../assets/vision.png';
 import Footer from '../../components/Footer/Footer'
 
-function scrollToSection(event, offset) {
+function scrollToSection(event, offset, targetId = null) {
     event.preventDefault();
-    const targetId = event.currentTarget.getAttribute("href").substring(1);
-    const targetElement = document.getElementById(targetId);
+    const id = targetId || event.currentTarget.getAttribute("href").substring(1);
+    const targetElement = document.getElementById(id);
 
     if (targetElement) {
         window.scrollTo({
@@ -24,26 +24,33 @@ function scrollToSection(event, offset) {
     }
 }
 
+
 const HomePage = () => {
 
   return (
     <div className="home-page">
       <CustomParticlesBackground />
       <div className="static-background"></div>
-      <div className="start_menu">
-            <div className="logo-container_start">
-              <img src={logo} alt="Logo" className="logo_start"/>
-            </div>
-            <div className="links">
-               <a href="#home" onClick={(e) => scrollToSection(e, 100)}>Home</a>
-               <a href="#about-us" onClick={(e) => scrollToSection(e, 90)}>About us</a>
-               <a href="#education" onClick={(e) => scrollToSection(e, 100)}>Education</a>
-            </div>
-             <div className="button-container">
-               <Link to="/login" className="button">Login</Link>
-               <Link to="/register" className="button">Register</Link>
-              </div>
-          </div>
+     <div className="start_menu">
+       <div className="logo-container_start">
+        <img
+          src={logo}
+          alt="Logo"
+          className="logo_start"
+          onClick={(e) => scrollToSection(e, 100, "home")}
+          style={{ cursor: "pointer" }}
+        />
+       </div>
+       <div className="links">
+         <a href="#home" onClick={(e) => scrollToSection(e, 100)}>Home</a>
+         <a href="#about-us" onClick={(e) => scrollToSection(e, 90)}>About us</a>
+         <a href="#education" onClick={(e) => scrollToSection(e, 100)}>Education</a>
+       </div>
+       <div className="button-container">
+         <Link to="/login" className="button">Login</Link>
+         <Link to="/register" className="button">Register</Link>
+       </div>
+     </div>
       <header id="home" className="header">
         <h1>Get started in crypto trading <span>without risking your own money</span></h1>
         <p>Sign up for a free Demo account today to gain real market experience with Demo funds!</p>

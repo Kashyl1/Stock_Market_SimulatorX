@@ -114,14 +114,15 @@
   color: #888;
 }
 
-
-
 .summary-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-
   margin-bottom: -50px;
 }
 
+.summary strong {
+  margin-left: 5px;
+
+}

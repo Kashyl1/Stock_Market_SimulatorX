@@ -182,7 +182,7 @@ const CreateTradeAlertModal = ({ onClose, currencyIdProp}) => {
           <button onClick={handleCreateAlert} disabled={loading}>
             {loading ? 'Creating...' : 'Create Alert'}
           </button>
-          <button onClick={onClose} disabled={loading} className="cancel-button">
+          <button className="sam-cancel-button" onClick={onClose} disabled={loading} >
             Cancel
           </button>
         </div>

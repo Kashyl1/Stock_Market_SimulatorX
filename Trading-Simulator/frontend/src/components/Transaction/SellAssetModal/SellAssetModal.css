@@ -94,7 +94,6 @@
 
 .sam-confirm-button {
   background-color: #d4af37;
-  font-family: 'Cinzel', serif;
   font-size: 1em;
   padding: 10px 20px;
   border: none;
@@ -116,7 +115,6 @@
 
 .sam-cancel-button {
   background-color: #555555;
-  font-family: 'Cinzel', serif;
   font-size: 1em;
   padding: 10px 20px;
   border: none;
