@@ -1,4 +1,3 @@
-/* Ogólny styl strony */
 .wallet-page {
   flex: 1;
   display: flex;
@@ -52,15 +51,13 @@
 .add-funds-form button {
   width: 100%;
   padding: 12px;
-  background-color: #d4af37; /* Złoty kolor */
+  background-color: #d4af37;
   color: white;
   border: none;
   border-radius: 10px;
   font-size: 16px;
   cursor: pointer;
   transition: filter 0.3s ease;
-  font-family: "Cinzel", serif;
-  font-weight: 500;
 }
 
 .add-funds-form button:hover {

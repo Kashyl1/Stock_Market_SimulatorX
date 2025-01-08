@@ -27,6 +27,7 @@ background-color: #1e1e1e;
   color: #d4af37;
   font-family: 'Cinzel', serif;
   text-align: center;
+  margin-bottom: 10px;
 }
 
 .modal-content label {
@@ -74,7 +75,6 @@ background-color: #1e1e1e;
 
 .modal-buttons button {
 background-color: #d4af37;
-  font-family: 'Cinzel', serif;
   font-size: 1em;
   padding: 10px 20px;
   border: none;
@@ -97,8 +97,14 @@ background-color: #d4af37;
   margin-bottom: 5px;
 }
 
+.modal-buttons .sam-cancel-button {
+  background-color: #555555 !important;
+  color: white;
+}
 
-
+.modal-buttons .sam-cancel-button:hover {
+  background-color: #444444 !important;
+}
 
 @media (max-width: 500px) {
   .modal-content {

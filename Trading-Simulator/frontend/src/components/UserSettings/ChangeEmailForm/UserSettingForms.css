@@ -55,13 +55,13 @@
   width: 40%;
   padding: 15px;
   background-color: #d4af37;
-  font-family: 'Cinzel', serif;
   font-size: 1.2em;
   color: #ffffff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-weight: 600;
 }
 
 .user-settings-form p {

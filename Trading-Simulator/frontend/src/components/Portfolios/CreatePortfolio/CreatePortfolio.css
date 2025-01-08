@@ -1,16 +1,4 @@
-.portfolio-button {
-  font-family: "Cinzel", serif;
-  font-optical-sizing: auto;
-  font-size: 1em;
-  font-style: normal;
-  background-color: #d4af37;
-  transition: background-color 0.3s ease;
-  border-radius: 6px;
-}
 
-.portfolio-button:hover {
-  background-color: #b58c2e;
-}
 
 .portfolio-input {
 width: 25%;

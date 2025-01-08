@@ -18,6 +18,11 @@
     margin-right: 10px;
 }
 
+.buy-form button:hover,
+.close-charts:hover {
+    background-color: #c09c31;
+}
+
 .interval-switcher {
   margin-bottom: 20px;
   display: flex;

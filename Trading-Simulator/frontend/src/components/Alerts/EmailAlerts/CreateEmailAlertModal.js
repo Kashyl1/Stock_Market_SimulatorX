@@ -154,7 +154,7 @@ const CreateEmailAlertModal = ({ onClose, onAlertCreated }) => {
           <button onClick={handleCreateAlert} disabled={loading}>
             {loading ? 'Creating...' : 'Create Alert'}
           </button>
-          <button onClick={onClose} disabled={loading}>
+          <button className="sam-cancel-button"onClick={onClose} disabled={loading}>
             Cancel
           </button>
         </div>

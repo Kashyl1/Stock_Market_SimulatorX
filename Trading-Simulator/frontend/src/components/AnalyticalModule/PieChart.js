@@ -4,23 +4,23 @@ import { PieChart, Pie, Cell, Text } from 'recharts';
 const RADIAN = Math.PI / 180;
 
 const data = [
-  { name: 'Strong Sell', value: 20, color: '#ff0000' },
-  { name: 'Sell', value: 20, color: '#ff6600' },
-  { name: 'Neutral', value: 10, color: '#ffff00' },
-  { name: 'Buy', value: 20, color: '#66cc66' },
-  { name: 'Strong Buy', value: 20, color: '#009900' },
+  { name: 'Strong Sell', value: 20, color: '#d91400' },
+  { name: 'Sell', value: 20, color: '#da8b83' },
+  { name: 'Neutral', value: 10, color: '#d8d9d8' },
+  { name: 'Buy', value: 20, color: '#8dc5a3' },
+  { name: 'Strong Buy', value: 20, color: '#007c32' },
 ];
 
 const cx = 150;
 const cy = 150;
-const iR = 50;
+const iR = 80;
 const oR = 100;
 
 
 const getNeedleAngle = (signal) => {
   const signalAngles = {
     'Strong Sell': 10,
-    'Sell': 35,
+    'Sell': 30,
     'Neutral': 50,
     'Buy': 70,
     'Strong Buy': 90,
@@ -35,7 +35,7 @@ const needle = (signal, cx, cy, iR, oR, color) => {
   const sin = Math.sin(-RADIAN * ang);
   const cos = Math.cos(-RADIAN * ang);
   const r = 5;
-  const x0 = cx;
+  const x0 = cx + 5;
   const y0 = cy;
   const xba = x0 + r * sin;
   const yba = y0 - r * cos;
@@ -76,7 +76,6 @@ const PieChartWithNeedle = ({ overallSignal }) => {
           ))}
         </Pie>
         {needle(overallSignal, cx, cy, iR, oR, '#d0d000')}
-
         {data.map((entry, index) => {
           const angle = 180 * (1 - (entry.value / 100));
           const radius = (iR + oR) / 2;
