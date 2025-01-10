@@ -1,5 +1,6 @@
 package com.example.backend.currency;
 
+import com.example.backend.exceptions.CurrencyNotFoundException;
 import com.example.backend.util.LogExecutionTime;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -439,5 +440,12 @@ public class CurrencyService {
             List<HistoricalKline> toDelete = klinesSorted.subList(0, size - 1000);
             historicalKlineRepository.deleteAll(toDelete);
         }
+    }
+
+    public BigDecimal getCurrentPrice(String symbol) {
+        Currency currency = currencyRepository.findBySymbol(symbol.toUpperCase())
+                .orElseThrow(() -> new CurrencyNotFoundException("Currency with symbol: " + symbol + " not found!"));
+
+        return currency.getCurrentPrice();
     }
 }
