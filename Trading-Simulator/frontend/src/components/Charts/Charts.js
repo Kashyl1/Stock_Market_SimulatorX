@@ -10,6 +10,7 @@ import {
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import 'chartjs-adapter-date-fns';
 import { Chart } from 'react-chartjs-2';
+import { useQuery } from '@tanstack/react-query';
 import { fetchChartData } from '../../services/ChartsService';
 import { buyAsset } from '../../services/TransactionService';
 import CreateTradeAlertModal from '../../components/Alerts/TradeAlerts/CreateTradeAlertModal';
@@ -33,10 +34,9 @@ ChartJS.register(
 const Charts = ({ currencyId, currencySymbol, portfolios, onClose, currentPrice}) => {
   const [analyticalSummary, setAnalyticalSummary] = useState({});
   const [movingAveragesSummary, setMovingAveragesSummary] = useState({});
-  const [chartData, setChartData] = useState([]);
+
   const [selectedPortfolioId, setSelectedPortfolioId] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [interval, setInterval] = useState('1m');
   const [buyType, setBuyType] = useState('USD');
   const [amountInUSD, setAmountInUSD] = useState('');
@@ -70,51 +70,38 @@ const getChartTitle = (interval, currencyId) => {
   }
 };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
+ const { data: chartData, isLoading, isError } = useQuery({
+   queryKey: ['chartData', currencyId, interval],
+   queryFn: async () => {
+     const data = await fetchChartData(currencyId, interval);
+     const now = Date.now();
 
-        const data = await fetchChartData(currencyId, interval);
+     let filteredData;
+     if (interval === '1m') {
+       filteredData = data.filter((item) => item.openTime >= now - 60 * 60 * 1000);
+     } else if (interval === '3m') {
+       filteredData = data.filter((item) => item.openTime >= now - 3 * 60 * 60 * 1000);
+     } else if (interval === '5m') {
+       filteredData = data.filter((item) => item.openTime >= now - 6 * 60 * 60 * 1000);
+     } else if (interval === '30m') {
+       filteredData = data.filter((item) => item.openTime >= now - 24 * 60 * 60 * 1000);
+     } else if (interval === '1h') {
+       filteredData = data.filter((item) => item.openTime >= now - 7 * 24 * 60 * 60 * 1000);
+     }
 
-        const now = Date.now();
-        let filteredData;
+     return filteredData.map((item) => ({
+       x: item.openTime,
+       o: item.openPrice,
+       h: item.highPrice,
+       l: item.lowPrice,
+       c: item.closePrice,
+     }));
+   },
+   staleTime: 300000,
+   refetchInterval: 10000,
+   retry: 1,
+ });
 
-        if (interval === '1m') {
-          const oneHourAgo = now - 60 * 60 * 1000;
-          filteredData = data.filter((item) => item.openTime >= oneHourAgo);
-        } else if (interval === '3m') {
-          const threeHoursAgo = now - 3 * 60 * 60 * 1000;
-          filteredData = data.filter((item) => item.openTime >= threeHoursAgo);
-        } else if (interval === '5m') {
-          const sixHoursAgo = now - 6 * 60 * 60 * 1000;
-          filteredData = data.filter((item) => item.openTime >= sixHoursAgo);
-        } else if (interval === '30m') {
-          const oneDayAgo = now - 24 * 60 * 60 * 1000;
-          filteredData = data.filter((item) => item.openTime >= oneDayAgo);
-        } else if (interval === '1h') {
-          const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
-          filteredData = data.filter((item) => item.openTime >= oneWeekAgo);
-        }
-
-        const formattedData = filteredData.map((item) => ({
-          x: item.openTime,
-          o: item.openPrice,
-          h: item.highPrice,
-          l: item.lowPrice,
-          c: item.closePrice,
-        }));
-        setChartData(formattedData);
-        setIsLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load chart data.');
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [currencyId, interval]);
 
   const handleIntervalChange = (newInterval) => {
     setInterval(newInterval);
@@ -236,8 +223,9 @@ const handleBuy = async () => {
     ],
   };
 
-  if (isLoading) return <p>Loading chart data...</p>;
-  if (error) return <p className="error-message">{error}</p>;
+ if (isLoading) return <p>Loading chart data...</p>;
+ if (isError) return <p className="error-message">Failed to load chart data.</p>;
+
 
   const handleOpenCreateTradeModal = () => {
     setShowCreateTradeModal(true);
