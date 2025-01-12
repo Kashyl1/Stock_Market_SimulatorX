@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchAnalyticsData } from '../../services/AnalyticalModuleService';
+import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/AnalyticalModuleService';
 import './AnalyticalModule.css';
 
-const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange }) => {
+const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
+  const [currentPrice, setCurrentPrice] = useState(null);
+
   const movingAverages = ['sma', 'ema'];
   const periods = [5, 10, 20, 50, 100, 200];
 
   const determineDecision = (maValue) => {
-    console.log({currentPrice})
     if (currentPrice > maValue) return 'Buy';
     if (currentPrice < maValue) return 'Sell';
     return 'Neutral';
@@ -73,7 +74,22 @@ const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange })
     refetchInterval: 10000,
   });
 
-  if (isLoading) {
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await fetchCurrentPrice(currencyId);
+        setCurrentPrice(price);
+      } catch (err) {
+        console.error('Error fetching current price:', err);
+      }
+    };
+
+    const intervalId = setInterval(fetchPrice, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [currencyId]);
+
+  if (isLoading || currentPrice === null) {
     return (
       <div className="analytical-module">
         <p>Loading moving averages data...</p>

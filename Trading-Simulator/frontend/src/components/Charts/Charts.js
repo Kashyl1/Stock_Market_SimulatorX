@@ -31,7 +31,7 @@ ChartJS.register(
   Legend
 );
 
-const Charts = ({ currencyId, currencySymbol, portfolios, onClose, currentPrice}) => {
+const Charts = ({ currencyId, currencySymbol, portfolios, onClose}) => {
   const [analyticalSummary, setAnalyticalSummary] = useState({});
   const [movingAveragesSummary, setMovingAveragesSummary] = useState({});
 
@@ -178,6 +178,10 @@ const handleBuy = async () => {
         type: 'time',
         time: {
           unit: timeUnit,
+          displayFormats: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+          },
         },
         title: {
           display: true,
@@ -337,7 +341,7 @@ const handleBuy = async () => {
       <Chart type="candlestick" data={data} options={options} />
       <Summary  movingAveragesSummary={movingAveragesSummary} analyticalSummary={analyticalSummary} />
       <AnalyticalModule currencyId={currencyId} interval={interval} onSummaryChange={(summary) => handleSummaryChange(summary, 'analytical')} />
-      <MovingAverages currencyId={currencyId} interval={interval} currentPrice={currentPrice} onSummaryChange={(summary) => handleSummaryChange(summary, 'movingAverages')} />
+      <MovingAverages currencyId={currencyId} interval={interval} onSummaryChange={(summary) => handleSummaryChange(summary, 'movingAverages')} />
     </div>
   );
 };

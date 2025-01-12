@@ -99,7 +99,6 @@ const AvailableCurrencies = () => {
         currencySymbol={selectedCurrencyForChart.symbol}
         portfolios={portfolios}
         onClose={() => setShowCharts(false)}
-        currentPrice={selectedCurrencyForChart.price_in_usd}
       />
     );
   }

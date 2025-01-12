@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchAnalyticsData } from '../../services/AnalyticalModuleService';
+import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/AnalyticalModuleService';
 import './AnalyticalModule.css';
 
-const AnalyticalModule = ({ currencyId, interval, onSummaryChange, currentPrice }) => {
+const AnalyticalModule = ({ currencyId, interval, onSummaryChange}) => {
   const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'atr', 'williamsR', 'volatility'];
   const [summary, setSummary] = useState({});
+  const [currentPrice, setCurrentPrice] = useState(null);
 
   const indicatorNames = {
     adx: 'ADX',
@@ -82,9 +83,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange, currentPrice 
     }
   };
 
- const { data, isLoading, error } = useQuery({
-  queryKey: ['analyticsData', currencyId, interval],
-  queryFn: async () => {
+  const fetchIndicators = async () => {
     const results = await Promise.all(
       indicators.map((indicator) =>
         fetchAnalyticsData(indicator, currencyId, interval).then((value) => ({
@@ -98,10 +97,29 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange, currentPrice 
     setSummary(signalCounts);
     onSummaryChange(signalCounts);
     return results;
-  },
-  staleTime: 300000,
-  refetchInterval: 10000,
-});
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['analyticsData', currencyId, interval],
+    queryFn: fetchIndicators,
+    staleTime: 300000,
+    refetchInterval: 10000,
+  });
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await fetchCurrentPrice(currencyId);
+        setCurrentPrice(price);
+      } catch (err) {
+        console.error('Error fetching current price:', err);
+      }
+    };
+
+    const intervalId = setInterval(fetchPrice, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [currencyId]);
 
   const calculateSummary = (results) => {
     const signalCounts = { Buy: 0, Sell: 0, Neutral: 0 };
@@ -116,7 +134,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange, currentPrice 
     return signalCounts;
   };
 
-  if (isLoading) {
+  if (isLoading || currentPrice === null) {
     return (
       <div className="analytical-module">
         <p>Loading indicators data...</p>

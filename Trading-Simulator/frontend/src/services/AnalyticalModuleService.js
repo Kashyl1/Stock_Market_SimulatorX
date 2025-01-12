@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = '/api/analytics';
+const BASE_URL = '/api/currency';
 
 export const fetchAnalyticsData = async (indicator, currencyId, interval, periods = null) => {
   const token = localStorage.getItem('jwtToken');
@@ -19,7 +20,6 @@ export const fetchAnalyticsData = async (indicator, currencyId, interval, period
   })();
 
   try {
-    console.log(url);
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -33,4 +33,20 @@ export const fetchAnalyticsData = async (indicator, currencyId, interval, period
   }
 };
 
+export const fetchCurrentPrice = async (currencyId) => {
+  const token = localStorage.getItem('jwtToken');
+  const url = `${BASE_URL}/current-price/${currencyId}`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return parseFloat(response.data);
+  } catch (error) {
+    console.error('Error in fetchCurrentPrice:', error.response || error.message || error);
+    throw error;
+  }
+};
 
