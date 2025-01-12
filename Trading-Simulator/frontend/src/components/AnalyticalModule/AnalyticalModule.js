@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAnalyticsData } from '../../services/AnalyticalModuleService';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/AnalyticalModuleService';
 import './AnalyticalModule.css';
 
-const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
-  const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'williamsR', 'volatility'];
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+const AnalyticalModule = ({ currencyId, interval, onSummaryChange}) => {
+  const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'atr', 'williamsR', 'volatility'];
   const [summary, setSummary] = useState({});
+  const [currentPrice, setCurrentPrice] = useState(null);
 
   const indicatorNames = {
     adx: 'ADX',
@@ -16,7 +15,8 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
     macd: 'MACD',
     cci: 'CCI(20)',
     rsi: 'RSI(14)',
-    volatility: 'Royal Coin Indicator'
+    volatility: 'Royal Coin Indicator',
+    atr: 'ATR(14)',
   };
 
   const determineDecision = (indicator, value) => {
@@ -65,6 +65,13 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
         if (value > -200) return 'Sell';
         return 'Sell';
 
+      case 'atr':
+        if (!currentPrice || currentPrice <= 0) return 'Neutral';
+        const relativeVolatility = (value / currentPrice) * 100;
+        if (relativeVolatility > 1.75) return 'High Volatility';
+        if (relativeVolatility > 0.75) return 'Moderate Volatility';
+        return 'Low Volatility';
+
       case 'volatility':
         if (value === 'High Volatility') return 'High Volatility';
         if (value === 'Moderate Volatility') return 'Moderate Volatility';
@@ -75,6 +82,44 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
         return 'Neutral';
     }
   };
+
+  const fetchIndicators = async () => {
+    const results = await Promise.all(
+      indicators.map((indicator) =>
+        fetchAnalyticsData(indicator, currencyId, interval).then((value) => ({
+          indicator,
+          value,
+          decision: determineDecision(indicator, value),
+        }))
+      )
+    );
+    const signalCounts = calculateSummary(results);
+    setSummary(signalCounts);
+    onSummaryChange(signalCounts);
+    return results;
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['analyticsData', currencyId, interval],
+    queryFn: fetchIndicators,
+    staleTime: 300000,
+    refetchInterval: 10000,
+  });
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await fetchCurrentPrice(currencyId);
+        setCurrentPrice(price);
+      } catch (err) {
+        console.error('Error fetching current price:', err);
+      }
+    };
+
+    const intervalId = setInterval(fetchPrice, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [currencyId]);
 
   const calculateSummary = (results) => {
     const signalCounts = { Buy: 0, Sell: 0, Neutral: 0 };
@@ -89,36 +134,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
     return signalCounts;
   };
 
-  const fetchAllIndicators = async () => {
-    try {
-      setIsLoading(true);
-
-      const results = await Promise.all(
-        indicators.map((indicator) =>
-          fetchAnalyticsData(indicator, currencyId, interval).then((value) => ({
-            indicator,
-            value,
-            decision: determineDecision(indicator, value),
-          }))
-        )
-      );
-
-      setData(results);
-      setSummary(calculateSummary(results));
-      onSummaryChange(calculateSummary(results));
-    } catch (err) {
-      console.error('Error fetching analytics data:', err);
-      setError('Failed to load analytical data.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllIndicators();
-  }, [currencyId, interval]);
-
-  if (isLoading) {
+  if (isLoading || currentPrice === null) {
     return (
       <div className="analytical-module">
         <p>Loading indicators data...</p>
@@ -129,7 +145,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
   if (error) {
     return (
       <div className="analytical-module">
-        <p className="error-message">{error}</p>
+        <p className="error-message">Failed to load analytical data.</p>
       </div>
     );
   }
@@ -137,9 +153,10 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange  }) => {
   return (
     <div className="analytical-module">
       <h2 className="table-title">Technical Indicators</h2>
-
       <div className="summary">
-        <p className="summary-decision">Summary: {summary.Buy > summary.Sell ? 'Buy' : (summary.Sell > summary.Buy ? 'Sell' : 'Neutral')}</p>
+        <p className="summary-decision">
+          Summary: {summary.Buy > summary.Sell ? 'Buy' : summary.Sell > summary.Buy ? 'Sell' : 'Neutral'}
+        </p>
         <p className="buy-count"><strong>Buy:</strong> {summary.Buy}</p>
         <p className="sell-count"><strong>Sell:</strong> {summary.Sell}</p>
         <p className="neutral-count"><strong>Neutral:</strong> {summary.Neutral}</p>

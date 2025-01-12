@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
 import debounce from 'lodash.debounce';
@@ -7,18 +8,14 @@ import './AvailableCurrencies.css';
 
 const AvailableCurrencies = () => {
   const [portfolios, setPortfolios] = useState([]);
-  const [selectedCurrency, setSelectedCurrency] = useState(null);
-  const [showBuyModal, setShowBuyModal] = useState(false);
   const [showCharts, setShowCharts] = useState(false);
   const [selectedCurrencyForChart, setSelectedCurrencyForChart] = useState(null);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
-  const [size] = useState(50);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const size = 50;
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchPortfolios = async () => {
       try {
         const portfoliosData = await getUserPortfolios();
@@ -31,53 +28,33 @@ const AvailableCurrencies = () => {
     fetchPortfolios();
   }, []);
 
-  const fetchAvailableAssets = async () => {
-    setIsLoading(true);
-    try {
-      const availableAssets = await getAvailableAssets(page, size);
-      setData(availableAssets.content);
-      setIsLoading(false);
-    } catch (err) {
-      let errorMessage = 'Failed to fetch available assets.';
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-      setError(errorMessage);
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAvailableAssets();
-    const interval = setInterval(fetchAvailableAssets, 5000000); //Ja to narazie podsniosłem fest bo mnie denerwuje XD
-    return () => clearInterval(interval);
-  }, [page]);
+  const {
+    data,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['availableAssets', page],
+    queryFn: () => getAvailableAssets(page, size),
+    refetchInterval: 2000,
+    keepPreviousData: true,
+  });
 
   const handleNextPage = () => {
     if (data && page < data.totalPages - 1) {
-      setPage(prevPage => prevPage + 1);
+      setPage((prevPage) => prevPage + 1);
     }
   };
 
   const handlePrevPage = () => {
     if (page > 0) {
-      setPage(prevPage => prevPage - 1);
+      setPage((prevPage) => prevPage - 1);
     }
-  };
-
-  const handleBuyClick = (currency) => {
-    setSelectedCurrency(currency);
-    setShowBuyModal(true);
   };
 
   const handleViewChart = (currency) => {
     setSelectedCurrencyForChart(currency);
     setShowCharts(true);
-  };
-
-  const handleCloseBuyModal = () => {
-    setShowBuyModal(false);
-    setSelectedCurrency(null);
   };
 
   const debouncedSetSearchTerm = debounce((value) => {
@@ -98,30 +75,6 @@ const AvailableCurrencies = () => {
     return num.toFixed(0);
   };
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p className="error-message">{error}</p>;
-  }
-
-if (showCharts && selectedCurrencyForChart) {
-  return (
-    <Charts
-      currencyId={selectedCurrencyForChart.id}
-      currencySymbol={selectedCurrencyForChart.symbol}
-      portfolios={portfolios}
-      onClose={() => setShowCharts(false)}
-      currentPrice={selectedCurrencyForChart.price_in_usd}
-    />
-  );
-}
-
-  const filteredCurrencies = data.filter((currency) =>
-    currency.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const formatPrice = (price) => {
     if (price === undefined || price === null || isNaN(price)) return 'N/A';
     if (price >= 1) return price.toFixed(2);
@@ -130,6 +83,29 @@ if (showCharts && selectedCurrencyForChart) {
     if (price >= 0.00000001) return price.toFixed(8);
     return price.toFixed(12);
   };
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error || queryError) {
+    return <p className="error-message">{error || queryError.message}</p>;
+  }
+
+  if (showCharts && selectedCurrencyForChart) {
+    return (
+      <Charts
+        currencyId={selectedCurrencyForChart.id}
+        currencySymbol={selectedCurrencyForChart.symbol}
+        portfolios={portfolios}
+        onClose={() => setShowCharts(false)}
+      />
+    );
+  }
+
+  const filteredCurrencies = data?.content.filter((currency) =>
+    currency.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="main-container">
@@ -150,7 +126,7 @@ if (showCharts && selectedCurrencyForChart) {
             <div className="header-cell">Market cap</div>
             <div className="header-cell">Action</div>
           </div>
-          {filteredCurrencies.map((currency, index) => (
+          {filteredCurrencies?.map((currency, index) => (
             <div className="table-row" key={index}>
               <div className="cell currency-info">
                 <img src={currency.image_url} alt={currency.name} className="currency-icon" />
@@ -190,13 +166,6 @@ if (showCharts && selectedCurrencyForChart) {
             Next
           </button>
         </div>
-        {showBuyModal && selectedCurrency && (
-          <BuyAssetModal
-            currency={selectedCurrency}
-            portfolios={portfolios}
-            onClose={handleCloseBuyModal}
-          />
-        )}
       </div>
     </div>
   );

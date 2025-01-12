@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAnalyticsData } from '../../services/AnalyticalModuleService';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/AnalyticalModuleService';
 import './AnalyticalModule.css';
 
-const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange  }) => {
+const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
+  const [currentPrice, setCurrentPrice] = useState(null);
+
   const movingAverages = ['sma', 'ema'];
   const periods = [5, 10, 20, 50, 100, 200];
-  const [data, setData] = useState([]);
-  const [summary, setSummary] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const determineDecision = (maValue) => {
+    if (currentPrice > maValue) return 'Buy';
+    if (currentPrice < maValue) return 'Sell';
+    return 'Neutral';
+  };
 
   const calculateSummary = (results) => {
     let buyCount = 0;
@@ -38,50 +43,53 @@ const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange  }
     return { summaryDecision, buyCount, sellCount, neutralCount };
   };
 
-  const determineDecision = (maValue) => {
-    if (currentPrice > maValue) return 'Buy';
-    if (currentPrice < maValue) return 'Sell';
-    return 'Neutral';
-  };
-
-  const fetchAllMovingAverages = async () => {
-    try {
-      setIsLoading(true);
-
-      const results = await Promise.all(
-        movingAverages.flatMap((maType) =>
-          periods.map((period) =>
-            fetchAnalyticsData(maType, currencyId, interval, period).then((value) => ({
-              maType,
-              period,
-              value,
-              decision: determineDecision(value),
-            }))
-          )
+  const fetchMovingAverages = async () => {
+    const results = await Promise.all(
+      movingAverages.flatMap((maType) =>
+        periods.map((period) =>
+          fetchAnalyticsData(maType, currencyId, interval, period).then((value) => ({
+            maType,
+            period,
+            value,
+            decision: determineDecision(value),
+          }))
         )
-      );
+      )
+    );
 
-      const groupedResults = periods.map((period) => ({
-        period,
-        values: results.filter((item) => item.period === period),
-      }));
+    const groupedResults = periods.map((period) => ({
+      period,
+      values: results.filter((item) => item.period === period),
+    }));
 
-      setData(groupedResults);
-      setSummary(calculateSummary(groupedResults));
-      onSummaryChange(calculateSummary(groupedResults));
-    } catch (err) {
-      console.error('Error fetching moving averages data:', err);
-      setError('Failed to load moving averages data.');
-    } finally {
-      setIsLoading(false);
-    }
+    const summary = calculateSummary(groupedResults);
+    onSummaryChange(summary);
+    return { groupedResults, summary };
   };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['movingAverages', currencyId, interval],
+    queryFn: fetchMovingAverages,
+    staleTime: 300000,
+    refetchInterval: 10000,
+  });
 
   useEffect(() => {
-    fetchAllMovingAverages();
-  }, [currencyId, interval]);
+    const fetchPrice = async () => {
+      try {
+        const price = await fetchCurrentPrice(currencyId);
+        setCurrentPrice(price);
+      } catch (err) {
+        console.error('Error fetching current price:', err);
+      }
+    };
 
-  if (isLoading) {
+    const intervalId = setInterval(fetchPrice, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [currencyId]);
+
+  if (isLoading || currentPrice === null) {
     return (
       <div className="analytical-module">
         <p>Loading moving averages data...</p>
@@ -92,10 +100,12 @@ const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange  }
   if (error) {
     return (
       <div className="analytical-module">
-        <p className="error-message">{error}</p>
+        <p className="error-message">Failed to load moving averages data.</p>
       </div>
     );
   }
+
+  const { groupedResults, summary } = data;
 
   return (
     <div className="analytical-module">
@@ -105,6 +115,7 @@ const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange  }
         <p className="summary-decision">Summary: {summary.summaryDecision}</p>
         <p className="buy-count">Buy: {summary.buyCount}</p>
         <p className="sell-count">Sell: {summary.sellCount}</p>
+        <p className="neutral-count">Neutral: {summary.neutralCount}</p>
       </div>
 
       <table className="indicator-table">
@@ -118,7 +129,7 @@ const MovingAverages = ({ currencyId, interval, currentPrice, onSummaryChange  }
           </tr>
         </thead>
         <tbody>
-          {data.map(({ period, values }) => (
+          {groupedResults.map(({ period, values }) => (
             <tr key={period}>
               <td>MA{period}</td>
               {values.map(({ maType, value, decision }) => (
