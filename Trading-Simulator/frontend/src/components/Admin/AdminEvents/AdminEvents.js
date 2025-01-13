@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { getAdminActions, deleteAdminEvent } from '../../../services/AdminService';
 import debounce from 'lodash.debounce';
 import './AdminEvents.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const AdminActions = () => {
   const [allActions, setAllActions] = useState([]);
@@ -54,10 +60,10 @@ const AdminActions = () => {
       await deleteAdminEvent(id);
       setFilteredActions((prev) => prev.filter((action) => action.id !== id));
       setAllActions((prev) => prev.filter((action) => action.id !== id));
-      alert('Deleted event with Id: ',id);
+      notyf.success(`Event with Id: ${id} deleted successfully!`);
     } catch (err) {
       console.error('Error deleting event:', err);
-      alert('Failed to delete event. Please try again.');
+      notyf.error('Failed to delete event. Please try again.');
     }
   };
 

@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { getTransactions, markTransactionSuspicious } from '../../../services/AdminService';
 import './AdminTransactions.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const AdminTransactionsUnique = () => {
   const [transactions, setTransactions] = useState([]);
-  const [allTransactions, setAllTransactions] = useState([]); // Przechowuje wszystkie transakcje dla wyszukiwania
+  const [allTransactions, setAllTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
@@ -19,12 +25,11 @@ const AdminTransactionsUnique = () => {
       setTransactions(data.content);
       setTotalPages(data.totalPages);
       if (page === 0) {
-        // Przy pierwszym ładowaniu pobierz wszystkie transakcje
         let allData = [];
         let currentPage = 0;
         let response;
         do {
-          response = await getTransactions(currentPage, 100); // Większa liczba na stronę, żeby szybciej zebrać dane
+          response = await getTransactions(currentPage, 100);
           allData = [...allData, ...response.content];
           currentPage++;
         } while (!response.last);
@@ -44,7 +49,7 @@ const AdminTransactionsUnique = () => {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     if (e.target.value === '') {
-      setTransactions(allTransactions.slice(page * 20, (page + 1) * 20)); // Przywróć widok paginacji
+      setTransactions(allTransactions.slice(page * 20, (page + 1) * 20));
     } else {
       const filteredTransactions = allTransactions.filter(transaction =>
         transaction.transactionid.toString().includes(e.target.value)
@@ -56,6 +61,7 @@ const AdminTransactionsUnique = () => {
   const handleMarkSuspicious = async (transactionId, currentStatus) => {
     try {
       const updatedTransaction = await markTransactionSuspicious(transactionId, !currentStatus);
+
       setTransactions(prev =>
         prev.map(transaction =>
           transaction.transactionid === transactionId
@@ -63,6 +69,7 @@ const AdminTransactionsUnique = () => {
             : transaction
         )
       );
+
       setAllTransactions(prev =>
         prev.map(transaction =>
           transaction.transactionid === transactionId
@@ -70,9 +77,21 @@ const AdminTransactionsUnique = () => {
             : transaction
         )
       );
+
+      const statusMessage = !currentStatus
+        ? `Transaction ${transactionId} marked as suspicious.`
+        : `Transaction ${transactionId} marked as not suspicious.`;
+
+      notyf.success(statusMessage);
+
+    console.log('Sending data:', { transactionId, newStatus: !currentStatus });
+
+
     } catch (err) {
-      setError('Error updating transaction status.');
+      console.error('Error marking transaction suspicious:', err.response?.data || err.message);
+      notyf.error(err.response?.data?.message || 'Error updating transaction status.');
     }
+
   };
 
   const handlePrevPage = () => {
@@ -133,11 +152,15 @@ const AdminTransactionsUnique = () => {
                       onClick={() =>
                         handleMarkSuspicious(transaction.transactionid, transaction.suspicious)
                       }
+                      disabled={transaction.suspicious}
+                      className={transaction.suspicious ? 'btn-disabled' : 'btn-active'}
                     >
                       {transaction.suspicious ? 'Mark as Unsuspicious' : 'Mark as Suspicious'}
                     </button>
                   </div>
                 </div>
+
+
               ))}
             </div>
           </div>

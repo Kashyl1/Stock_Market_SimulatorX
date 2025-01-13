@@ -1,5 +1,11 @@
 import { useState } from 'react';
 import { createAdmin } from '../../../services/AdminService';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const AdminCreate = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +35,7 @@ const AdminCreate = () => {
 
     try {
       const response = await createAdmin(formData);
-      setResponseMessage('Admin created successfully!');
+      notyf.success('Admin created successfully!');
       setFormData({
         firstname: '',
         lastname: '',

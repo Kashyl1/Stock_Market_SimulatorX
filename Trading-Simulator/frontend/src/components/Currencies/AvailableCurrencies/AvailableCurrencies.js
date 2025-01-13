@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAvailableAssets } from '../../../services/CurrenciesService';
 import { getUserPortfolios } from '../../../services/PortfolioService';
@@ -12,10 +12,34 @@ const AvailableCurrencies = () => {
   const [selectedCurrencyForChart, setSelectedCurrencyForChart] = useState(null);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(0);
+  const [savedSearchTerm, setSavedSearchTerm] = useState('');
+  const [allCurrencies, setAllCurrencies] = useState([]);
   const size = 50;
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const fetchAllAssets = async () => {
+      try {
+        let allData = [];
+        let currentPage = 0;
+        let totalPages = 1;
+
+        while (currentPage < totalPages) {
+          const response = await getAvailableAssets(currentPage, size);
+          allData = [...allData, ...response.content];
+          totalPages = response.totalPages;
+          currentPage++;
+        }
+
+        setAllCurrencies(allData);
+      } catch (err) {
+        setError('Failed to fetch all currencies.');
+      }
+    };
+
+    fetchAllAssets();
+  }, []);
+
+  useEffect(() => {
     const fetchPortfolios = async () => {
       try {
         const portfoliosData = await getUserPortfolios();
@@ -28,33 +52,15 @@ const AvailableCurrencies = () => {
     fetchPortfolios();
   }, []);
 
-  const {
-    data,
-    isLoading,
-    error: queryError,
-    refetch,
-  } = useQuery({
-    queryKey: ['availableAssets', page],
-    queryFn: () => getAvailableAssets(page, size),
-    refetchInterval: 2000,
-    keepPreviousData: true,
-  });
-
-  const handleNextPage = () => {
-    if (data && page < data.totalPages - 1) {
-      setPage((prevPage) => prevPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (page > 0) {
-      setPage((prevPage) => prevPage - 1);
-    }
-  };
-
   const handleViewChart = (currency) => {
+    setSavedSearchTerm(searchTerm);
     setSelectedCurrencyForChart(currency);
     setShowCharts(true);
+  };
+
+  const handleBackFromCharts = () => {
+    setShowCharts(false);
+    setSearchTerm(savedSearchTerm);
   };
 
   const debouncedSetSearchTerm = debounce((value) => {
@@ -84,12 +90,8 @@ const AvailableCurrencies = () => {
     return price.toFixed(12);
   };
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error || queryError) {
-    return <p className="error-message">{error || queryError.message}</p>;
+  if (error) {
+    return <p className="error-message">{error}</p>;
   }
 
   if (showCharts && selectedCurrencyForChart) {
@@ -98,14 +100,16 @@ const AvailableCurrencies = () => {
         currencyId={selectedCurrencyForChart.id}
         currencySymbol={selectedCurrencyForChart.symbol}
         portfolios={portfolios}
-        onClose={() => setShowCharts(false)}
+        onClose={handleBackFromCharts}
       />
     );
   }
 
-  const filteredCurrencies = data?.content.filter((currency) =>
-    currency.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCurrencies = allCurrencies
+    .filter((currency) =>
+      currency.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => b.market_cap - a.market_cap);
 
   return (
     <div className="main-container">
@@ -115,6 +119,7 @@ const AvailableCurrencies = () => {
           type="text"
           placeholder="Search for crypto..."
           onChange={handleSearchChange}
+          value={searchTerm}
           className="search-input"
         />
         <div className="scroll-container">
@@ -155,16 +160,6 @@ const AvailableCurrencies = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="pagination-controls">
-          <button onClick={handlePrevPage} disabled={page === 0}>
-            Previous
-          </button>
-          <span>Page {page + 1}</span>
-          <button onClick={handleNextPage} disabled={data && page >= data.totalPages - 1}>
-            Next
-          </button>
         </div>
       </div>
     </div>

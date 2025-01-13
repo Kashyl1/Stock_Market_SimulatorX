@@ -8,6 +8,13 @@ import {
 import Sidebar from '../../../pages/Sidebar/Sidebar';
 import UserTransactions from '../../../components/Admin/AdminTransactions/UserTransactions';
 import  './AdminPortfloios.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
+
 
 const AdminPortfolios = ({ userId }) => {
   const [allPortfolios, setAllPortfolios] = useState([]);
@@ -51,22 +58,26 @@ const AdminPortfolios = ({ userId }) => {
 
   const handleEditPortfolio = async (portfolioId) => {
     if (!editingName.trim()) {
-      setEditStatus({ success: false, message: 'Name cannot be empty.' });
-      setTimeout(() => setEditStatus(null), 3000);
+      notyf.error({
+        message: 'Portfolio name cannot be empty.',
+      });
       return;
     }
     try {
       await updatePortfolioName(portfolioId, { name: editingName });
       fetchPortfolios();
       setSelectedPortfolio((prev) => ({ ...prev, name: editingName }));
-      setEditStatus({ success: true, message: 'Portfolio name updated successfully!' });
+      notyf.success({
+        message: 'Portfolio name updated successfully!',
+      });
     } catch (error) {
       console.error('Error updating portfolio:', error);
-      setEditStatus({ success: false, message: 'Failed to update portfolio name.' });
-    } finally {
-      setTimeout(() => setEditStatus(null), 3000);
+      notyf.error({
+        message: 'Failed to update portfolio name. Please try again.',
+      });
     }
   };
+
 
 const handleSearchChange = (term) => {
   setSearchTerm(term);
@@ -111,16 +122,20 @@ const handleSearchChange = (term) => {
   };
 
   const handleDeletePortfolio = async (portfolioId) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this portfolio?');
-    if (confirmDelete) {
-      try {
-        await deletePortfolio(portfolioId);
-        fetchPortfolios();
-      } catch (error) {
-        console.error('Error deleting portfolio:', error);
-      }
+    try {
+      await deletePortfolio(portfolioId);
+      notyf.success({
+        message: 'Portfolio has been deleted successfully.',
+      });
+      fetchPortfolios();
+    } catch (error) {
+      console.error('Error deleting portfolio:', error);
+      notyf.error({
+        message: 'Failed to delete portfolio. Please try again.',
+      });
     }
   };
+
 
   useEffect(() => {
     fetchPortfolios();
@@ -151,13 +166,13 @@ const handleSearchChange = (term) => {
              >
             Update Name
            </button>
-                       {editStatus && (
-                         <span
-                           className={`edit-status ${editStatus.success ? 'success' : 'error'}`}
-                         >
-                           {editStatus.message}
-                         </span>
-                       )}
+           {editStatus && (
+           <span
+            className={`edit-status ${editStatus.success ? 'success' : 'error'}`}
+            >
+            {editStatus.message}
+            </span>
+            )}
           </div>
 
           <div>

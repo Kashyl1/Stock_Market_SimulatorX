@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getGlobalAlerts, deleteGlobalAlert } from '../../../services/AdminService';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const AdminAlerts = () => {
   const [allAlerts, setAllAlerts] = useState([]);
@@ -48,10 +54,10 @@ const AdminAlerts = () => {
       await deleteGlobalAlert(id);
       setFilteredAlerts((prev) => prev.filter((alert) => alert.globalAlertid !== id));
       setAllAlerts((prev) => prev.filter((alert) => alert.globalAlertid !== id));
-      alert('Deleted global alert with ID: ' + id);
+      notyf.success(`Global alert with ID: ${id} deleted successfully!`);
     } catch (err) {
       console.error('Error deleting global alert:', err);
-      alert('Failed to delete alert. Please try again.');
+      notyf.error('Failed to delete alert. Please try again.');
     }
   };
 

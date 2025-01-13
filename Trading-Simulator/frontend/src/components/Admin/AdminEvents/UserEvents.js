@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getUserEvents, deleteUserEvent } from '../../../services/AdminService';
 import debounce from 'lodash.debounce';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const UserEvents = () => {
   const [allEvents, setAllEvents] = useState([]);
@@ -56,10 +62,10 @@ const UserEvents = () => {
       await deleteUserEvent(id);
       setFilteredEvents((prev) => prev.filter((event) => event.id !== id));
       setAllEvents((prev) => prev.filter((event) => event.id !== id));
-      alert(`Deleted event with ID: ${id}`);
+      notyf.success(`Event with ID: ${id} deleted successfully!`);
     } catch (err) {
       console.error('Error deleting event:', err);
-      alert('Failed to delete event. Please try again.');
+      notyf.error('Failed to delete event. Please try again.');
     }
   };
 

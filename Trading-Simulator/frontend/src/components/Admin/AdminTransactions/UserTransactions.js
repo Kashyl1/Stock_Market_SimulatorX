@@ -192,6 +192,8 @@ useEffect(() => {
                     onClick={() =>
                       handleMarkSuspicious(transaction.transactionid, transaction.suspicious)
                     }
+                    disabled={transaction.suspicious}
+                    className={transaction.suspicious ? 'btn-disabled' : 'btn-active'}
                   >
                     {transaction.suspicious ? 'Mark as Unsuspicious' : 'Mark as Suspicious'}
                   </button>
@@ -199,6 +201,7 @@ useEffect(() => {
               </div>
             ))}
           </div>
+
         </div>
       ) : (
         <p>No transactions found.</p>

@@ -3,6 +3,12 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './AdminAlertsCreate.css';
 import { postGlobalAlert } from '../../../services/AdminService';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const AdminAlertsCreate = () => {
   const [message, setMessage] = useState('');
@@ -16,20 +22,18 @@ const AdminAlertsCreate = () => {
     setLoading(true);
     setError(null);
     setSuccess(false);
-
     try {
       const alertBody = {
         message,
         scheduledFor: scheduledFor ? scheduledFor.toISOString() : null,
       };
-
       await postGlobalAlert(alertBody);
       setMessage('');
       setScheduledFor(null);
-      setSuccess(true);
+      notyf.success('Global alert created successfully!');
     } catch (err) {
       console.error('Error creating alert:', err);
-      setError('Failed to create alert. Please try again.');
+      notyf.error('Failed to create alert. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -57,7 +61,9 @@ const AdminAlertsCreate = () => {
             selected={scheduledFor}
             onChange={(date) => setScheduledFor(date)}
             showTimeSelect
-            dateFormat="Pp"
+            dateFormat="yyyy-MM-dd HH:mm"
+            timeFormat="HH:mm"
+            timeCaption="Time"
             placeholderText="Select a date and time"
           />
         </div>
