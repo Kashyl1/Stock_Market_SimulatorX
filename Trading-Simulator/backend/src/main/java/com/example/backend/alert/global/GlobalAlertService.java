@@ -61,4 +61,12 @@ public class GlobalAlertService {
         );
         adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.DELETE_GLOBAL_ALERT, details);
     }
+
+    public GlobalAlert getNewestActiveGlobalAlert() {
+        GlobalAlert alert = globalAlertRepository.findFirstByActiveTrueOrderByCreatedAtDesc();
+        if (alert == null) {
+            throw new GlobalAlertNotFoundException("Global alert not found!");
+        }
+        return alert;
+    }
 }

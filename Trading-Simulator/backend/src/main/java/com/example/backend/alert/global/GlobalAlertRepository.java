@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface GlobalAlertRepository extends JpaRepository<GlobalAlert, Integer> {
     List<GlobalAlert> findAllByActiveTrue();
+    GlobalAlert findFirstByActiveTrueOrderByCreatedAtDesc();
 }
