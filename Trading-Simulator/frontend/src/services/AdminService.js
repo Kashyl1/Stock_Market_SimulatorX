@@ -1,4 +1,3 @@
-/*{ In development }*/
 
 import axios from 'axios';
 
@@ -349,6 +348,21 @@ export const deleteGlobalAlert = async (alertId) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting global alert:', error);
+    throw error;
+  }
+};
+
+export const fetchGlobalAlert = async () => {
+  try {
+    const token = localStorage.getItem('jwtToken');
+    const response = await axios.get(`/api/global-alert`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching global alert:', error);
     throw error;
   }
 };

@@ -165,3 +165,9 @@
   background-color: #ff4c4c;
   color: #101010;
 }
+
+ .btn-disabled {
+  background-color: #555555 !important;
+  color: #fff !important;
+  cursor: not-allowed !important;
+}

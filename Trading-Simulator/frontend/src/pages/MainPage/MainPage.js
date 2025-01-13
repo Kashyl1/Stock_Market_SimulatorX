@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import './MainPage.css';
-import BalanceDisplay from '../../components/Wallet/BalanceDisplay/BalanceDisplay';
+import UserAlert from '../../components/Admin/AdminAlerts/UserAlert';
 import Sidebar from '../../pages/Sidebar/Sidebar';
 
 const MainPage = () => {
@@ -9,6 +9,7 @@ const MainPage = () => {
         <Sidebar />
         <div className="portfolio-details">
         <h1>Main Page </h1>
+        <UserAlert />
         </div>
     </div>
 

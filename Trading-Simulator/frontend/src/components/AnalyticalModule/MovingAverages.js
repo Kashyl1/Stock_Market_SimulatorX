@@ -1,21 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/AnalyticalModuleService';
 import './AnalyticalModule.css';
 
 const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
   const [currentPrice, setCurrentPrice] = useState(null);
+  const [priceUpdateTimer, setPriceUpdateTimer] = useState(null);
 
-  const movingAverages = ['sma', 'ema'];
-  const periods = [5, 10, 20, 50, 100, 200];
+  const movingAverages = useMemo(() => ['sma', 'ema'], []);
+  const periods = useMemo(() => [5, 10, 20, 50, 100, 200], []);
 
-  const determineDecision = (maValue) => {
-    if (currentPrice > maValue) return 'Buy';
-    if (currentPrice < maValue) return 'Sell';
-    return 'Neutral';
-  };
+  const determineDecision = useCallback(
+    (maValue) => {
+      if (currentPrice > maValue) return 'Buy';
+      if (currentPrice < maValue) return 'Sell';
+      return 'Neutral';
+    },
+    [currentPrice]
+  );
 
-  const calculateSummary = (results) => {
+  const calculateSummary = useCallback((results) => {
     let buyCount = 0;
     let sellCount = 0;
     let neutralCount = 0;
@@ -28,22 +32,21 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
       });
     });
 
-    let summaryDecision = 'Neutral';
-
-    if (buyCount > sellCount && buyCount > neutralCount) {
-      summaryDecision = 'Strong Buy';
-    } else if (buyCount > sellCount) {
-      summaryDecision = 'Buy';
-    } else if (sellCount > buyCount && sellCount > neutralCount) {
-      summaryDecision = 'Strong Sell';
-    } else if (sellCount > buyCount) {
-      summaryDecision = 'Sell';
-    }
+    const summaryDecision =
+      buyCount > sellCount
+        ? buyCount > neutralCount
+          ? 'Strong Buy'
+          : 'Buy'
+        : sellCount > buyCount
+        ? sellCount > neutralCount
+          ? 'Strong Sell'
+          : 'Sell'
+        : 'Neutral';
 
     return { summaryDecision, buyCount, sellCount, neutralCount };
-  };
+  }, []);
 
-  const fetchMovingAverages = async () => {
+  const fetchMovingAverages = useCallback(async () => {
     const results = await Promise.all(
       movingAverages.flatMap((maType) =>
         periods.map((period) =>
@@ -65,13 +68,13 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
     const summary = calculateSummary(groupedResults);
     onSummaryChange(summary);
     return { groupedResults, summary };
-  };
+  }, [currencyId, interval, determineDecision, calculateSummary, movingAverages, periods, onSummaryChange]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['movingAverages', currencyId, interval],
     queryFn: fetchMovingAverages,
     staleTime: 300000,
-    refetchInterval: 10000,
+    refetchInterval: 2000,
   });
 
   useEffect(() => {
@@ -84,10 +87,14 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
       }
     };
 
-    const intervalId = setInterval(fetchPrice, 10000);
+    fetchPrice();
 
-    return () => clearInterval(intervalId);
+    const timer = setInterval(fetchPrice, 2000);
+    setPriceUpdateTimer(timer);
+
+    return () => clearInterval(timer);
   }, [currencyId]);
+
 
   if (isLoading || currentPrice === null) {
     return (
@@ -115,7 +122,6 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
         <p className="summary-decision">Summary: {summary.summaryDecision}</p>
         <p className="buy-count">Buy: {summary.buyCount}</p>
         <p className="sell-count">Sell: {summary.sellCount}</p>
-        <p className="neutral-count">Neutral: {summary.neutralCount}</p>
       </div>
 
       <table className="indicator-table">

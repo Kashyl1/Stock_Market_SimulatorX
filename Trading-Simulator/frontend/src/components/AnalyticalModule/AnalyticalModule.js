@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/AnalyticalModuleService';
 import './AnalyticalModule.css';
 
-const AnalyticalModule = ({ currencyId, interval, onSummaryChange}) => {
+const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
   const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'atr', 'williamsR', 'volatility'];
   const [summary, setSummary] = useState({});
   const [currentPrice, setCurrentPrice] = useState(null);
@@ -99,27 +99,28 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange}) => {
     return results;
   };
 
+  const fetchPrice = async () => {
+    try {
+      const price = await fetchCurrentPrice(currencyId);
+      setCurrentPrice(price);
+    } catch (err) {
+      console.error('Error fetching current price:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPrice();
+
+    const intervalId = setInterval(fetchPrice, 2000);
+    return () => clearInterval(intervalId);
+  }, [currencyId]);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['analyticsData', currencyId, interval],
     queryFn: fetchIndicators,
     staleTime: 300000,
-    refetchInterval: 10000,
+    refetchInterval: 2000,
   });
-
-  useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const price = await fetchCurrentPrice(currencyId);
-        setCurrentPrice(price);
-      } catch (err) {
-        console.error('Error fetching current price:', err);
-      }
-    };
-
-    const intervalId = setInterval(fetchPrice, 10000);
-
-    return () => clearInterval(intervalId);
-  }, [currencyId]);
 
   const calculateSummary = (results) => {
     const signalCounts = { Buy: 0, Sell: 0, Neutral: 0 };
@@ -134,7 +135,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange}) => {
     return signalCounts;
   };
 
-  if (isLoading || currentPrice === null) {
+  if (isLoading) {
     return (
       <div className="analytical-module">
         <p>Loading indicators data...</p>

@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { getUsers, blockUser, deleteUser, unblockUser } from '../../../services/AdminService';
 import debounce from 'lodash.debounce';
 import './AdminUsers.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
+
 
 const AdminUsers = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -49,30 +56,32 @@ const AdminUsers = () => {
   const handleBlockUser = async (userId) => {
     try {
       await blockUser(userId);
-      alert(`User with ID: ${userId} has been blocked.`);
+      notyf.success(`User with ID: ${userId} has been blocked.`);
       fetchAllUsers();
     } catch (error) {
-      alert('Failed to block user.');
+      notyf.error('Failed to block user.');
     }
   };
 
+
    const handleUnblockUser = async (userId) => {
-       try {
-         await unblockUser(userId);
-         alert(`User with ID: ${userId} has been unblocked.`);
-         fetchAllUsers();
-       } catch (error) {
-         alert('Failed to unblock user.');
-       }
-     };
+     try {
+       await unblockUser(userId);
+       notyf.success(`User with ID: ${userId} has been unblocked.`);
+       fetchAllUsers();
+     } catch (error) {
+       notyf.error('Failed to unblock user.');
+     }
+   };
+
 
   const handleDeleteUser = async (userId) => {
     try {
       await deleteUser(userId);
-      alert(`User with ID: ${userId} has been deleted.`);
+      notyf.success(`User with ID: ${userId} has been deleted.`);
       fetchAllUsers();
     } catch (error) {
-      alert('Failed to delete user.');
+      notyf.error('Failed to delete user.');
     }
   };
 
