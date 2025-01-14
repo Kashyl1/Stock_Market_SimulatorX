@@ -47,4 +47,7 @@ public class Portfolio {
     @OneToMany(mappedBy = "portfolio", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Schema(description = "List of assets contained in the portfolio")
     private List<PortfolioAsset> portfolioAssets = new ArrayList<>();
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

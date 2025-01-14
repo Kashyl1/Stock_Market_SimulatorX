@@ -2,7 +2,6 @@ package com.example.backend.portfolio;
 
 import com.example.backend.exceptions.ErrorResponse;
 import io.swagger.v3.oas.annotations.Parameter;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,5 +84,18 @@ public class PortfolioController {
             @Parameter(description = "ID of the portfolio to calculate") @PathVariable Integer id) {
         BigDecimal gainOrLoss = portfolioService.calculateTotalPortfolioGainOrLoss(id);
         return ResponseEntity.ok(gainOrLoss);
+    }
+
+    @DeleteMapping("/{id}/delete-portfolio")
+    @Operation(summary = "Delete portfolio with assets",
+    description = "Endpoint that sells all assets in portfolio and then deletes the portfolio")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Portfolio deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Portfolio not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> deletePortfolio(
+            @Parameter(description = "ID of the portfolio to delete") @PathVariable Integer id) {
+        portfolioService.deletePortfolioForUser(id);
+        return ResponseEntity.ok("Portfolio has been deleted");
     }
 }

@@ -48,6 +48,7 @@ public class UserEvent {
         BUY_CRYPTO,
         SELL_CRYPTO,
         CREATE_PORTFOLIO,
+        DELETE_PORTFOLIO,
         DELETE_NOTIFICATION,
         CHANGE_PASSWORD,
         CHANGE_EMAIL,
