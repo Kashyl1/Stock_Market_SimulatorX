@@ -2,6 +2,7 @@ package com.example.backend.portfolio;
 
 import com.example.backend.adminEvent.AdminEvent;
 import com.example.backend.adminEvent.AdminEventTrackingService;
+import com.example.backend.transaction.TransactionService;
 import com.example.backend.userEvent.UserEventTrackingService;
 import com.example.backend.userEvent.UserEvent;
 import com.example.backend.admin.UpdatePortfolioRequest;
@@ -18,7 +19,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
@@ -41,13 +41,14 @@ public class PortfolioService {
     private final TradeAlertRepository tradeAlertRepository;
     private final UserEventTrackingService userEventTrackingService;
     private final AdminEventTrackingService adminEventTrackingService;
+    private final TransactionService transactionService;
 
     @Transactional
     @Operation(summary = "Create portfolio", description = "Creates a new portfolio for the authenticated user")
     public Portfolio createPortfolio(String name) {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
-        Optional<Portfolio> existingPortfolio = portfolioRepository.findByUserAndName(currentUser, name);
+        Optional<Portfolio> existingPortfolio = portfolioRepository.findActiveByUserAndName(currentUser, name);
         if (existingPortfolio.isPresent()) {
             throw new PortfolioAlreadyExistsException("Portfolio with that name already exists");
         }
@@ -76,7 +77,7 @@ public class PortfolioService {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
 
-        List<Portfolio> portfolios = portfolioRepository.findByUser(currentUser);
+        List<Portfolio> portfolios = portfolioRepository.findByUserAndDeletedFalse(currentUser);
 
         return portfolios.stream().map(portfolio -> {
             List<PortfolioAssetDTO> assets = portfolio.getPortfolioAssets().stream().map(asset -> new PortfolioAssetDTO(
@@ -96,7 +97,7 @@ public class PortfolioService {
     @Operation(summary = "Get portfolio by ID", description = "Retrieves a portfolio by its ID for the authenticated user")
     public PortfolioDTO getUserPortfolioByid(Integer portfolioid) {
         User currentUser = authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail());
-        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, currentUser)
+        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioid, currentUser)
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         List<PortfolioAssetDTO> assets = portfolio.getPortfolioAssets().stream().map(asset -> new PortfolioAssetDTO(
@@ -122,7 +123,7 @@ public class PortfolioService {
     @Transactional
     @Operation(summary = "Get portfolio assets with gains", description = "Calculates gains or losses for each asset in the portfolio")
     public List<PortfolioAssetDTO> getPortfolioAssetsWithGains(Integer portfolioid) {
-        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail()))
+        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioid, authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail()))
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         return portfolio.getPortfolioAssets().stream()
@@ -150,7 +151,7 @@ public class PortfolioService {
     @Transactional
     @Operation(summary = "Calculate total portfolio gain or loss", description = "Calculates the total gain or loss for a given portfolio")
     public BigDecimal calculateTotalPortfolioGainOrLoss(Integer portfolioid) {
-        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioid, authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail()))
+        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioid, authenticationService.getCurrentUser(authenticationService.getCurrentUserEmail()))
                 .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
 
         BigDecimal totalInitialValue = BigDecimal.ZERO;
@@ -195,31 +196,6 @@ public class PortfolioService {
     }
 
     @Transactional
-    @Operation(summary = "Delete portfolio by ID (admin)", description = "Deletes a portfolio by its ID (admin use)")
-    public void deletePortfolioById(Integer portfolioid) { // Przypominajka
-        Portfolio portfolio = portfolioRepository.findById(portfolioid)
-                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
-
-        String adminEmail = authenticationService.getCurrentUserEmail();
-
-        Map<String, Object> details = Map.of(
-                "portfolioId", portfolio.getPortfolioid(),
-                "portfolioName", portfolio.getName(),
-                "portfolioAssets", portfolio.getPortfolioAssets(),
-                "userPortfolioId", portfolio.getUser().getId(),
-                "userPortfolioEmail", portfolio.getUser().getEmail()
-        );
-
-        adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.DELETE_PORTFOLIO_BY_ID, details);
-
-        transactionRepository.deleteAllByPortfolio(portfolio);
-        tradeAlertRepository.deleteAllByPortfolio(portfolio);
-
-        portfolioAssetRepository.deleteAllByPortfolio(portfolio);
-        portfolioRepository.delete(portfolio);
-    }
-
-    @Transactional
     @Operation(summary = "Update portfolio (admin)", description = "Updates a portfolio's information (admin use)")
     public PortfolioDTO updatePortfolio(Integer portfolioId, UpdatePortfolioRequest request) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
@@ -244,5 +220,73 @@ public class PortfolioService {
         adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.UPDATE_PORTFOLIO, details);
 
         return portfolioMapper.toDTO(portfolio);
+    }
+
+    @Transactional
+    public void deletePortfolioForUser(Integer portfolioid) {
+        String email = authenticationService.getCurrentUserEmail();
+        User currentUser = authenticationService.getCurrentUser(email);
+        Portfolio portfolio = portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioid, currentUser)
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        sellAllAssetsAndDeletePortfolio(portfolio, currentUser, currentUser, false);
+    }
+
+    @Transactional
+    public void deletePortfolioForAdmin(Integer portfolioid) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioid)
+                .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+
+        String adminEmail = authenticationService.getCurrentUserEmail();
+        User currentAdmin = authenticationService.getCurrentUser(adminEmail);
+        User portfolioOwner = portfolio.getUser();
+
+        sellAllAssetsAndDeletePortfolio(portfolio, currentAdmin, portfolioOwner,true);
+    }
+
+    private void sellAllAssetsAndDeletePortfolio(Portfolio portfolio,
+                                                 User invoker,
+                                                 User receiver,
+                                                 boolean isAdmin) {
+        List<PortfolioAsset> assets = portfolio.getPortfolioAssets();
+        for (PortfolioAsset asset : assets) {
+            transactionService.sellAsset(
+                    portfolio.getPortfolioid(),
+                    asset.getCurrency().getCurrencyid(),
+                    asset.getAmount(),
+                    null,
+                    receiver
+            );
+        }
+
+        tradeAlertRepository.deleteAllByPortfolio(portfolio);
+        portfolio.setDeleted(true);
+        portfolioRepository.save(portfolio);
+
+        if (isAdmin) {
+            Map<String, Object> details = Map.of(
+                    "portfolioId", portfolio.getPortfolioid(),
+                    "portfolioName", portfolio.getName(),
+                    "assetSoldCount", assets.size(),
+                    "deletedBy", invoker.getEmail(),
+                    "portfolioOwner", receiver.getEmail()
+            );
+            adminEventTrackingService.logEvent(
+                    invoker.getEmail(),
+                    AdminEvent.EventType.DELETE_PORTFOLIO_BY_ID,
+                    details
+            );
+        } else {
+            Map<String, Object> details = Map.of(
+                    "portfolioId", portfolio.getPortfolioid(),
+                    "portfolioName", portfolio.getName(),
+                    "assetSoldCount", assets.size(),
+                    "userEmail", invoker.getEmail()
+            );
+            userEventTrackingService.logEvent(
+                    invoker.getEmail(),
+                    UserEvent.EventType.DELETE_PORTFOLIO,
+                    details
+            );
+        }
     }
 }

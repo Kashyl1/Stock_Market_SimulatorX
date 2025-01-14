@@ -75,7 +75,7 @@ public class AdminPortfolioController {
     })
     public ResponseEntity<String> deletePortfolio(
             @Parameter(description = "ID of the portfolio to delete") @PathVariable Integer portfolioId) {
-        portfolioService.deletePortfolioById(portfolioId);
+        portfolioService.deletePortfolioForAdmin(portfolioId);
         return ResponseEntity.ok("Portfolio has been deleted");
     }
 

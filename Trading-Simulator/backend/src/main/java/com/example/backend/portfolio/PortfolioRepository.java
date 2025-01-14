@@ -21,13 +21,30 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
 
     Page<Portfolio> findByUser(User user, Pageable pageable);
 
-    void deleteAllByUser(User user);
-
     Optional<Portfolio> findByPortfolioidAndUser(Integer portfolioid, User user);
-
+    List<Portfolio> findByUserAndDeletedFalse(User user);
     Optional<Portfolio> findByUserAndName(User user, String name);
 
+    @Query("""
+    SELECT p
+    FROM Portfolio p
+    WHERE p.user = :user
+      AND p.name = :name
+      AND p.deleted = false
+    """)
+    Optional<Portfolio> findActiveByUserAndName(@Param("user") User user, @Param("name") String name);
+
     @EntityGraph(attributePaths = {"portfolioAssets.currency", "portfolioAssets"})
-    @Query("SELECT p FROM Portfolio p WHERE p.portfolioid = :portfolioid AND p.user = :user")
-    Optional<Portfolio> findWithAssetsByPortfolioidAndUser(@Param("portfolioid") Integer portfolioid, @Param("user") User user);
+    @Query("""
+    SELECT p 
+    FROM Portfolio p 
+    WHERE p.portfolioid = :portfolioid 
+      AND p.user = :user 
+      AND p.deleted = false
+    """)
+    Optional<Portfolio> findWithAssetsByPortfolioidAndUserAndDeletedFalse(
+            @Param("portfolioid") Integer portfolioid,
+            @Param("user") User user
+    );
+
 }

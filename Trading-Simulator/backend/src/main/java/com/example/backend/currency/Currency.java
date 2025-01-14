@@ -10,7 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -31,7 +32,6 @@ public class Currency {
     private String name;
 
     @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
     @JsonIgnore
     @Schema(description = "List of portfolio assets associated with this currency")
     private List<PortfolioAsset> portfolioAssets;
