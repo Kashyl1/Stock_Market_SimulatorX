@@ -1,5 +1,6 @@
 package com.example.backend.transaction;
 
+import com.example.backend.currency.CurrencyService;
 import com.example.backend.exceptions.ErrorResponse;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.user.User;
@@ -30,8 +31,10 @@ import java.util.Map;
 @Tag(name = "Transaction Controller", description = "Handles buying and selling of assets")
 public class TransactionController {
 
-    private final TransactionService transactionService;
     private final AuthenticationService authenticationService;
+    private final CurrencyService currencyService;
+    private final TransactionOperationService transactionOperationService;
+    private final TransactionHistoryService transactionHistoryService;
 
     @PostMapping("/buy-asset")
     @Operation(summary = "Buy an asset", description = "Allows the user to buy an asset")
@@ -49,7 +52,7 @@ public class TransactionController {
             return ResponseEntity.badRequest().body("Please provide amount in USD or amount of Currency, not both.");
         }
 
-        transactionService.buyAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmountInUSD(), request.getAmountOfCurrency(), currentUser);
+        transactionOperationService.buyAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmountInUSD(), request.getAmountOfCurrency(), currentUser);
         return ResponseEntity.ok("Asset purchased successfully");
     }
 
@@ -67,7 +70,7 @@ public class TransactionController {
             return ResponseEntity.badRequest().body("Please provide amount in USD or amount of Currency, not both.");
         }
 
-        transactionService.sellAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmount(), request.getPriceInUSD(), currentUser);
+        transactionOperationService.sellAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmount(), request.getPriceInUSD(), currentUser);
         return ResponseEntity.ok("Asset sold successfully");
     }
 
@@ -76,7 +79,7 @@ public class TransactionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Assets retrieved successfully")
     })
     public ResponseEntity<Page<Map<String, Object>>> getAvailableAssets(@PageableDefault(page = 0, size = 50, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<Map<String, Object>> assets = transactionService.getAvailableAssetsWithPrices(pageable);
+        Page<Map<String, Object>> assets = currencyService.getAvailableAssetsWithPrices(pageable);
         return ResponseEntity.ok(assets);
     }
 
@@ -87,7 +90,7 @@ public class TransactionController {
     })
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionHistory(@PageableDefault(page = 0, size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<TransactionHistoryDTO> transactions = transactionService.getTransactionHistory(pageable);
+        Page<TransactionHistoryDTO> transactions = transactionHistoryService.getTransactionHistory(pageable);
         return ResponseEntity.ok(transactions);
     }
 
@@ -100,7 +103,7 @@ public class TransactionController {
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionHistoryByPortfolio(@Parameter(description = "ID of the portfolio to retrieve transaction history") @PathVariable Integer portfolioid,
             @PageableDefault(page = 0, size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<TransactionHistoryDTO> transactions = transactionService.getTransactionHistoryByPortfolio(portfolioid, pageable);
+        Page<TransactionHistoryDTO> transactions = transactionHistoryService.getTransactionHistoryByPortfolio(portfolioid, pageable);
         return ResponseEntity.ok(transactions);
     }
 }

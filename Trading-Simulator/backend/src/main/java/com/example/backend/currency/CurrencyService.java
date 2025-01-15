@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -447,5 +450,32 @@ public class CurrencyService {
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency with symbol: " + symbol + " not found!"));
 
         return currency.getCurrentPrice();
+    }
+
+    @Operation(summary = "Show assets", description = "Processes the asset show")
+    public Page<Map<String, Object>> getAvailableAssetsWithPrices(Pageable pageable) {
+        try {
+            Page<Currency> currencies = currencyRepository.findAll(pageable);
+
+            List<Map<String, Object>> assets = currencies.stream()
+                    .map(currency -> {
+                        Map<String, Object> assetMap = new HashMap<>();
+                        assetMap.put("id", currency.getSymbol());
+                        assetMap.put("name", currency.getName());
+                        assetMap.put("price_in_usd", currency.getCurrentPrice());
+                        assetMap.put("price_change_24h", currency.getPriceChange());
+                        assetMap.put("price_change_percent_24h", currency.getPriceChangePercent());
+                        assetMap.put("volume_24h", currency.getVolume().multiply(currency.getCurrentPrice()));
+                        assetMap.put("image_url", currency.getImageUrl());
+                        assetMap.put("currencyid", currency.getCurrencyid());
+                        assetMap.put("market_cap", currency.getMarketCap());
+                        return assetMap;
+                    })
+                    .collect(Collectors.toList());
+
+            return new PageImpl<>(assets, pageable, currencies.getTotalElements());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get available assets with prices.");
+        }
     }
 }

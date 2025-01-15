@@ -2,7 +2,8 @@ package com.example.backend.admin;
 
 import com.example.backend.exceptions.ErrorResponse;
 import com.example.backend.transaction.TransactionHistoryDTO;
-import com.example.backend.transaction.TransactionService;
+import com.example.backend.transaction.TransactionHistoryService;
+import com.example.backend.transaction.TransactionSecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Tag(name = "Admin Transaction Controller", description = "Management of user transactions")
 public class AdminTransactionController {
 
-    private final TransactionService transactionService;
+    private final TransactionHistoryService transactionHistoryService;
+    private final TransactionSecurityService transactionSecurityService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
@@ -36,7 +38,7 @@ public class AdminTransactionController {
             @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully")
     })
     public ResponseEntity<Page<TransactionHistoryDTO>> getAllTransactions(Pageable pageable) {
-        Page<TransactionHistoryDTO> transactions = transactionService.getAllTransactions(pageable);
+        Page<TransactionHistoryDTO> transactions = transactionHistoryService.getAllTransactions(pageable);
         return ResponseEntity.ok(transactions);
     }
 
@@ -50,7 +52,7 @@ public class AdminTransactionController {
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionsByUser(
             @Parameter(description = "ID of the user whose transactions to retrieve") @PathVariable Integer userid,
             Pageable pageable) {
-        Page<TransactionHistoryDTO> transactions = transactionService.getTransactionsByUser(userid, pageable);
+        Page<TransactionHistoryDTO> transactions = transactionHistoryService.getTransactionsByUser(userid, pageable);
         return ResponseEntity.ok(transactions);
     }
 
@@ -64,7 +66,7 @@ public class AdminTransactionController {
     public ResponseEntity<Page<TransactionHistoryDTO>> getTransactionsByPortfolio(
             @Parameter(description = "ID of the portfolio whose transactions to retrieve") @PathVariable Integer portfolioid,
             Pageable pageable) {
-        Page<TransactionHistoryDTO> transactions = transactionService.getTransactionsByPortfolio(portfolioid, pageable);
+        Page<TransactionHistoryDTO> transactions = transactionHistoryService.getTransactionsByPortfolio(portfolioid, pageable);
         return ResponseEntity.ok(transactions);
     }
 
@@ -78,7 +80,7 @@ public class AdminTransactionController {
     public ResponseEntity<String> markTransactionsAsSuspicious(
             @Parameter(description = "ID of the transaction to update") @PathVariable Integer transactionid,
             @Parameter(description = "Flag to mark as suspicious") @RequestParam boolean suspicious) {
-        transactionService.markTransactionAsSuspicious(transactionid, suspicious);
+        transactionSecurityService.markTransactionAsSuspicious(transactionid, suspicious);
         String status = suspicious ? "marked as suspicious" : "unmarked as suspicious";
         return ResponseEntity.ok("Transaction has been " + status + " successfully");
     }
@@ -94,7 +96,7 @@ public class AdminTransactionController {
         if (thresholdAmount == null) {
             thresholdAmount = new BigDecimal("100000");
         }
-        List<TransactionHistoryDTO> transactions = transactionService.getSuspiciousTransactions(thresholdAmount);
+        List<TransactionHistoryDTO> transactions = transactionSecurityService.getSuspiciousTransactions(thresholdAmount);
         return ResponseEntity.ok(transactions);
     }
 
@@ -107,7 +109,7 @@ public class AdminTransactionController {
     })
     public ResponseEntity<TransactionHistoryDTO> getTransactionById(
             @Parameter(description = "ID of the transaction to retrieve") @PathVariable Integer transactionid) {
-        TransactionHistoryDTO transaction = transactionService.getTransactionById(transactionid);
+        TransactionHistoryDTO transaction = transactionHistoryService.getTransactionById(transactionid);
         return ResponseEntity.ok(transaction);
     }
 }

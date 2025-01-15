@@ -2,6 +2,7 @@ package com.example.backend.transaction.transactionService.assets;
 
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
+import com.example.backend.currency.CurrencyService;
 import com.example.backend.transaction.TransactionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class AvailableAssetsWithPricesTest {
     @InjectMocks
-    private TransactionService transactionService;
+    private CurrencyService currencyService;
 
     @Mock
     private CurrencyRepository currencyRepository;
@@ -36,7 +37,7 @@ public class AvailableAssetsWithPricesTest {
 
         when(currencyRepository.findAll(any(Pageable.class))).thenReturn(currencies);
 
-        Page<Map<String, Object>> result = transactionService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
+        Page<Map<String, Object>> result = currencyService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -71,7 +72,7 @@ public class AvailableAssetsWithPricesTest {
         Page<Currency> currencies = new PageImpl<>(Collections.emptyList());
         when(currencyRepository.findAll(any(Pageable.class))).thenReturn(currencies);
 
-        Page<Map<String, Object>> result = transactionService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
+        Page<Map<String, Object>> result = currencyService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
@@ -83,7 +84,7 @@ public class AvailableAssetsWithPricesTest {
         when(currencyRepository.findAll(any(Pageable.class))).thenThrow(new RuntimeException("Database error"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
+            currencyService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
         });
 
         assertEquals("Failed to get available assets with prices.", exception.getMessage());

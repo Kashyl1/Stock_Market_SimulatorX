@@ -2,7 +2,7 @@ package com.example.backend.portfolio;
 
 import com.example.backend.adminEvent.AdminEvent;
 import com.example.backend.adminEvent.AdminEventTrackingService;
-import com.example.backend.transaction.TransactionService;
+import com.example.backend.transaction.TransactionOperationService;
 import com.example.backend.userEvent.UserEventTrackingService;
 import com.example.backend.userEvent.UserEvent;
 import com.example.backend.admin.UpdatePortfolioRequest;
@@ -11,7 +11,6 @@ import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.PortfolioAlreadyExistsException;
 import com.example.backend.exceptions.PortfolioNotFoundException;
 import com.example.backend.exceptions.UserNotFoundException;
-import com.example.backend.transaction.TransactionRepository;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,12 +35,10 @@ public class PortfolioService {
     private final AuthenticationService authenticationService;
     private final PortfolioMapper portfolioMapper;
     private final UserRepository userRepository;
-    private final PortfolioAssetRepository portfolioAssetRepository;
-    private final TransactionRepository transactionRepository;
     private final TradeAlertRepository tradeAlertRepository;
     private final UserEventTrackingService userEventTrackingService;
     private final AdminEventTrackingService adminEventTrackingService;
-    private final TransactionService transactionService;
+    private final TransactionOperationService transactionOperationService;
 
     @Transactional
     @Operation(summary = "Create portfolio", description = "Creates a new portfolio for the authenticated user")
@@ -249,7 +246,7 @@ public class PortfolioService {
                                                  boolean isAdmin) {
         List<PortfolioAsset> assets = portfolio.getPortfolioAssets();
         for (PortfolioAsset asset : assets) {
-            transactionService.sellAsset(
+            transactionOperationService.sellAsset(
                     portfolio.getPortfolioid(),
                     asset.getCurrency().getCurrencyid(),
                     asset.getAmount(),

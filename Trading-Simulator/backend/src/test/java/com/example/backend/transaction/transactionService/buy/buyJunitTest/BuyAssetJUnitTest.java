@@ -9,8 +9,8 @@ import com.example.backend.portfolio.PortfolioAsset;
 import com.example.backend.portfolio.PortfolioAssetRepository;
 import com.example.backend.portfolio.PortfolioRepository;
 import com.example.backend.transaction.Transaction;
+import com.example.backend.transaction.TransactionOperationService;
 import com.example.backend.transaction.TransactionRepository;
-import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class BuyAssetJUnitTest {
     @InjectMocks
-    private TransactionService transactionService;
+    private TransactionOperationService transactionOperationService;
 
     @Mock
     private PortfolioRepository portfolioRepository;
@@ -77,7 +77,7 @@ public class BuyAssetJUnitTest {
         when(userRepository.save(any(User.class))).thenReturn(currentUser);
         when(portfolioAssetRepository.findByPortfolioAndCurrency(portfolio, currency)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser));
+        assertDoesNotThrow(() -> transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser));
 
         assertEquals(BigDecimal.valueOf(500).setScale(8, RoundingMode.HALF_UP), currentUser.getBalance());
 
@@ -87,7 +87,6 @@ public class BuyAssetJUnitTest {
 
         BigDecimal expectedAmount = amountInUSD.divide(currency.getCurrentPrice(), 8, RoundingMode.HALF_UP);
         assertEquals(0, expectedAmount.compareTo(savedPortfolioAsset.getAmount()));
-        assertEquals(currency.getCurrentPrice(), savedPortfolioAsset.getCurrentPrice());
         assertEquals(currency.getCurrentPrice(), savedPortfolioAsset.getAveragePurchasePrice());
         assertEquals(portfolio, savedPortfolioAsset.getPortfolio());
         assertEquals(currency, savedPortfolioAsset.getCurrency());
@@ -129,7 +128,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(InsufficientFundsException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Insufficient balance", exception.getMessage());
@@ -157,7 +156,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(CurrencyNotFoundException.class, () -> {
-            transactionService.buyAsset(1, "UNKNOWN", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "UNKNOWN", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Currency not found in database", exception.getMessage());
@@ -188,7 +187,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(PriceNotAvailableException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Current price not available for BTC", exception.getMessage());
@@ -211,7 +210,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(PortfolioNotFoundException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Portfolio not found", exception.getMessage());
@@ -226,7 +225,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
         });
 
         assertEquals("Amount in USD must be positive", exception.getMessage());
@@ -249,7 +248,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(NullPointerException.class, () -> {
-            transactionService.buyAsset(1, null, amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, null, amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertNotNull(exception);
@@ -274,7 +273,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(CurrencyNotFoundException.class, () -> {
-            transactionService.buyAsset(1, "", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Currency not found in database", exception.getMessage());
@@ -286,7 +285,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
         });
 
         assertEquals("Either amountInUSD or amountOfCurrency must be provided.", exception.getMessage());
@@ -298,7 +297,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
         });
 
         assertEquals("Amount in USD must be positive", exception.getMessage());
@@ -323,7 +322,7 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Database connection error", exception.getMessage());
@@ -354,7 +353,7 @@ public class BuyAssetJUnitTest {
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Database write error"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser);
         });
 
         assertEquals("Database write error", exception.getMessage());
@@ -397,7 +396,7 @@ public class BuyAssetJUnitTest {
 
         BigDecimal originalBalance = currentUser.getBalance().setScale(8, RoundingMode.HALF_UP);
 
-        assertDoesNotThrow(() -> transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser));
+        assertDoesNotThrow(() -> transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser));
 
         BigDecimal amountInUSDCalculated = amountOfCurrency.multiply(currency.getCurrentPrice())
                 .setScale(8, RoundingMode.HALF_UP);
@@ -436,7 +435,7 @@ public class BuyAssetJUnitTest {
 
         BigDecimal originalBalance = currentUser.getBalance().setScale(8, RoundingMode.HALF_UP);
 
-        assertDoesNotThrow(() -> transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser));
+        assertDoesNotThrow(() -> transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser));
 
         BigDecimal expectedBalance = originalBalance.subtract(amountInUSD).setScale(8, RoundingMode.HALF_UP);
         BigDecimal actualBalance = currentUser.getBalance().setScale(8, RoundingMode.HALF_UP);
@@ -480,7 +479,7 @@ public class BuyAssetJUnitTest {
 
         BigDecimal originalBalance = currentUser.getBalance().setScale(8, RoundingMode.HALF_UP);
 
-        assertDoesNotThrow(() -> transactionService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser));
+        assertDoesNotThrow(() -> transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, currentUser));
 
         BigDecimal expectedBalance = originalBalance.subtract(amountInUSD).setScale(8, RoundingMode.HALF_UP);
         BigDecimal actualBalance = currentUser.getBalance().setScale(8, RoundingMode.HALF_UP);
