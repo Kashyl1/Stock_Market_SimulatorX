@@ -98,4 +98,12 @@ public class PortfolioController {
         portfolioService.deletePortfolioForUser(id);
         return ResponseEntity.ok("Portfolio has been deleted");
     }
+
+    @GetMapping("/global-gain")
+    @Operation(summary = "Get global gain/loss by user",
+    description = "Endpoint that gets all user assets and calculate his global gain/loss")
+    public ResponseEntity<BigDecimal> getGlobalGainByUser() {
+        BigDecimal globalGainOrLoss = portfolioService.calculateUserGlobalGainLoss();
+        return ResponseEntity.ok(globalGainOrLoss);
+    }
 }

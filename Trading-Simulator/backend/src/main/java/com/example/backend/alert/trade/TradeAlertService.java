@@ -239,7 +239,6 @@ public class TradeAlertService {
                             .currency(currency)
                             .amount(BigDecimal.ZERO)
                             .averagePurchasePrice(BigDecimal.ZERO)
-                            .currentPrice(rate)
                             .updatedAt(LocalDateTime.now())
                             .build());
 
@@ -251,7 +250,6 @@ public class TradeAlertService {
 
             portfolioAsset.setAmount(totalAmount);
             portfolioAsset.setAveragePurchasePrice(newAveragePrice);
-            portfolioAsset.setCurrentPrice(rate);
             portfolioAsset.setUpdatedAt(LocalDateTime.now());
 
             portfolio.setUpdatedAt(LocalDateTime.now());

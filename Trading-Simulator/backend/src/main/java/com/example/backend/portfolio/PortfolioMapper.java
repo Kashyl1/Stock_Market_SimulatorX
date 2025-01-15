@@ -19,7 +19,6 @@ public class PortfolioMapper {
                         .imageUrl(asset.getCurrency().getImageUrl())
                         .amount(asset.getAmount())
                         .averagePurchasePrice(asset.getAveragePurchasePrice())
-                        .currentPrice(asset.getCurrentPrice())
                         .currencyid(asset.getCurrency().getCurrencyid())
                         .build()).collect(Collectors.toList()))
                 .createdAt(portfolio.getCreatedAt())
