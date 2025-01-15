@@ -38,10 +38,6 @@ public class PortfolioAsset {
     private BigDecimal amount;
 
     @Column(nullable = true, precision = 30, scale = 10)
-    @Schema(description = "Current price of the currency", example = "50000.00")
-    private BigDecimal currentPrice;
-
-    @Column(nullable = true, precision = 30, scale = 10)
     @Schema(description = "Average purchase price of the currency", example = "48000.00")
     private BigDecimal averagePurchasePrice;
 

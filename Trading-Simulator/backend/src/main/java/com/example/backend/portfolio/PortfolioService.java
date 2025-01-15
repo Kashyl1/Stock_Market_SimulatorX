@@ -85,7 +85,7 @@ public class PortfolioService {
                     asset.getCurrency().getImageUrl(),
                     asset.getAmount(),
                     asset.getAveragePurchasePrice(),
-                    asset.getCurrentPrice(),
+                    asset.getCurrency().getCurrentPrice(),
                     null,
                     asset.getCurrency().getCurrencyid()
             )).collect(Collectors.toList());
@@ -105,7 +105,7 @@ public class PortfolioService {
                 asset.getCurrency().getImageUrl(),
                 asset.getAmount(),
                 asset.getAveragePurchasePrice(),
-                asset.getCurrentPrice(),
+                asset.getCurrency().getCurrentPrice(),
                 null,
                 asset.getCurrency().getCurrencyid()
         )).collect(Collectors.toList());
@@ -159,7 +159,7 @@ public class PortfolioService {
 
         for (PortfolioAsset asset : portfolio.getPortfolioAssets()) {
             BigDecimal amount = asset.getAmount();
-            BigDecimal currentPrice = asset.getCurrentPrice() != null ? asset.getCurrentPrice() : BigDecimal.ZERO;
+            BigDecimal currentPrice = asset.getCurrency().getCurrentPrice() != null ? asset.getCurrency().getCurrentPrice() : BigDecimal.ZERO;
             BigDecimal initialValue = amount.multiply(asset.getAveragePurchasePrice());
             BigDecimal currentValue = amount.multiply(currentPrice);
 
@@ -288,5 +288,11 @@ public class PortfolioService {
                     details
             );
         }
+    }
+
+    public BigDecimal calculateUserGlobalGainLoss() {
+        String email = authenticationService.getCurrentUserEmail();
+        User currentUser = authenticationService.getCurrentUser(email);
+        return portfolioRepository.findGlobalGainLossByUserId(currentUser.getId());
     }
 }
