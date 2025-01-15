@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class ScheduledTransactionChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTransactionChecker.class);
-    private final TransactionService transactionService;
+    private final TransactionSecurityService transactionSecurityService;
 
     /**
      * Checks for suspicious transactions every hour.
@@ -25,8 +25,8 @@ public class ScheduledTransactionChecker {
     public void checkSuspiciousTransactions() {
         try {
             BigDecimal highValueThreshold = new BigDecimal("100000");
-            transactionService.markHighValueTransaction(highValueThreshold);
-            transactionService.markFrequentTransactions();
+            transactionSecurityService.markHighValueTransaction(highValueThreshold);
+            transactionSecurityService.markFrequentTransactions();
         } catch (Exception e) {
             logger.info("Error occurred while checking for suspicious transactions: {}", e.getMessage());
         }

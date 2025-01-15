@@ -9,8 +9,8 @@ import com.example.backend.portfolio.PortfolioAsset;
 import com.example.backend.portfolio.PortfolioAssetRepository;
 import com.example.backend.portfolio.PortfolioRepository;
 import com.example.backend.transaction.Transaction;
+import com.example.backend.transaction.TransactionOperationService;
 import com.example.backend.transaction.TransactionRepository;
-import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class SellAssetTest {
     @InjectMocks
-    private TransactionService transactionService;
+    private TransactionOperationService transactionOperationService;
 
     @Mock
     private PortfolioRepository portfolioRepository;
@@ -85,7 +85,7 @@ public class SellAssetTest {
 
         BigDecimal originalBalance = currentUser.getBalance().setScale(8, RoundingMode.HALF_UP);
 
-        assertDoesNotThrow(() -> transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser));
+        assertDoesNotThrow(() -> transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser));
 
         BigDecimal amountInUSD = amountOfCurrency.multiply(currency.getCurrentPrice()).setScale(8, RoundingMode.HALF_UP);
         BigDecimal expectedBalance = originalBalance.add(amountInUSD).setScale(8, RoundingMode.HALF_UP);
@@ -146,7 +146,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(InsufficientAssetAmountException.class, () -> {
-            transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
+            transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
         });
 
         assertEquals("Insufficient amount of currency to sell", exception.getMessage());
@@ -175,7 +175,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(CurrencyNotFoundException.class, () -> {
-            transactionService.sellAsset(1, 99, amountOfCurrency, priceInUSD, currentUser);
+            transactionOperationService.sellAsset(1, 99, amountOfCurrency, priceInUSD, currentUser);
         });
 
         assertEquals("Currency not found in database", exception.getMessage());
@@ -208,7 +208,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(PriceNotAvailableException.class, () -> {
-            transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
+            transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
         });
 
         assertEquals("Current price not available for currency ID: 1", exception.getMessage());
@@ -232,7 +232,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(PortfolioNotFoundException.class, () -> {
-            transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
+            transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
         });
 
         assertEquals("Portfolio not found", exception.getMessage());
@@ -268,7 +268,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
+            transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
         });
 
         assertEquals("You do not own this currency", exception.getMessage());
@@ -284,7 +284,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, new User());
+            transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, new User());
         });
 
         assertEquals("Amount of currency must be positive", exception.getMessage());
@@ -309,7 +309,7 @@ public class SellAssetTest {
         BigDecimal priceInUSD = null;
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
+            transactionOperationService.sellAsset(1, 1, amountOfCurrency, priceInUSD, currentUser);
         });
 
         assertEquals("Database connection error", exception.getMessage());

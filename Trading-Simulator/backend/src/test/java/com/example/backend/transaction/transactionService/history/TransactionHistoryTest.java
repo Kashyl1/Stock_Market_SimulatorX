@@ -4,10 +4,7 @@ import com.example.backend.auth.AuthenticationService;
 import com.example.backend.currency.Currency;
 import com.example.backend.portfolio.Portfolio;
 import com.example.backend.portfolio.PortfolioRepository;
-import com.example.backend.transaction.Transaction;
-import com.example.backend.transaction.TransactionHistoryDTO;
-import com.example.backend.transaction.TransactionRepository;
-import com.example.backend.transaction.TransactionService;
+import com.example.backend.transaction.*;
 import com.example.backend.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class TransactionHistoryTest {
 
     @InjectMocks
-    private TransactionService transactionService;
+    private TransactionHistoryService transactionHistoryService;
 
     @Mock
     private PortfolioRepository portfolioRepository;
@@ -69,7 +66,7 @@ public class TransactionHistoryTest {
 
         when(transactionRepository.findByUser(eq(currentUser), any(Pageable.class))).thenReturn(transactions);
 
-        Page<TransactionHistoryDTO> result = transactionService.getTransactionHistory(PageRequest.of(0, 10));
+        Page<TransactionHistoryDTO> result = transactionHistoryService.getTransactionHistory(PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -95,7 +92,7 @@ public class TransactionHistoryTest {
         Page<Transaction> transactions = new PageImpl<>(Collections.emptyList());
         when(transactionRepository.findByUser(eq(currentUser), any(Pageable.class))).thenReturn(transactions);
 
-        Page<TransactionHistoryDTO> result = transactionService.getTransactionHistory(PageRequest.of(0, 10));
+        Page<TransactionHistoryDTO> result = transactionHistoryService.getTransactionHistory(PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
@@ -132,7 +129,7 @@ public class TransactionHistoryTest {
 
         when(transactionRepository.findByUserAndPortfolio(eq(currentUser), eq(portfolio), any(Pageable.class))).thenReturn(transactions);
 
-        Page<TransactionHistoryDTO> result = transactionService.getTransactionHistoryByPortfolio(1, PageRequest.of(0, 10));
+        Page<TransactionHistoryDTO> result = transactionHistoryService.getTransactionHistoryByPortfolio(1, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -158,7 +155,7 @@ public class TransactionHistoryTest {
         when(portfolioRepository.findByPortfolioidAndUser(1, currentUser)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.getTransactionHistoryByPortfolio(1, PageRequest.of(0, 10));
+            transactionHistoryService.getTransactionHistoryByPortfolio(1, PageRequest.of(0, 10));
         });
 
         assertEquals("Portfolio not found", exception.getMessage());
@@ -182,7 +179,7 @@ public class TransactionHistoryTest {
 
         when(transactionRepository.findByUserAndPortfolio(eq(currentUser), eq(portfolio), any(Pageable.class))).thenReturn(transactions);
 
-        Page<TransactionHistoryDTO> result = transactionService.getTransactionHistoryByPortfolio(1, PageRequest.of(0, 10));
+        Page<TransactionHistoryDTO> result = transactionHistoryService.getTransactionHistoryByPortfolio(1, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
@@ -200,7 +197,7 @@ public class TransactionHistoryTest {
 
         when(portfolioRepository.findByPortfolioidAndUser(1, currentUser)).thenReturn(Optional.of(portfolio));
 
-        Portfolio result = transactionService.getPortfolioByidAndUser(1, currentUser);
+        Portfolio result = transactionHistoryService.getPortfolioByidAndUser(1, currentUser);
 
         assertNotNull(result);
         assertEquals(portfolio, result);
@@ -214,7 +211,7 @@ public class TransactionHistoryTest {
         when(portfolioRepository.findByPortfolioidAndUser(1, currentUser)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            transactionService.getPortfolioByidAndUser(1, currentUser);
+            transactionHistoryService.getPortfolioByidAndUser(1, currentUser);
         });
 
         assertEquals("Portfolio not found", exception.getMessage());
@@ -223,7 +220,7 @@ public class TransactionHistoryTest {
     @Test
     public void testGetPortfolioByidAndUser_NullUser() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.getPortfolioByidAndUser(1, null);
+            transactionHistoryService.getPortfolioByidAndUser(1, null);
         });
 
         assertEquals("User cannot be null", exception.getMessage());
