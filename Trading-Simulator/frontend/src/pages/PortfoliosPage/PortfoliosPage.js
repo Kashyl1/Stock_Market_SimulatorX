@@ -26,6 +26,12 @@ const PortfoliosPage = () => {
     setPortfolios((prevPortfolios) => [...prevPortfolios, newPortfolio]);
   };
 
+  const handleDeleteSuccess = (deletedPortfolioId) => {
+      setPortfolios((prevPortfolios) =>
+        prevPortfolios.filter((portfolio) => portfolio.portfolioid !== deletedPortfolioId)
+      );
+    };
+
   return (
   <div className="main-page">
     <Sidebar />
@@ -33,7 +39,7 @@ const PortfoliosPage = () => {
          <h1>Your Portfolios</h1>
           <CreatePortfolio onPortfolioCreated={handlePortfolioCreated} />
           {error && <p className="error-message">{error}</p>}
-         <PortfolioList portfolios={portfolios} />
+         <PortfolioList portfolios={portfolios} onDeleteSuccess={handleDeleteSuccess} />
      </div>
     </div>
   );

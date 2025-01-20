@@ -7,7 +7,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
   const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'atr', 'williamsR', 'volatility'];
   const [summary, setSummary] = useState({});
   const [currentPrice, setCurrentPrice] = useState(null);
-
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const indicatorNames = {
     adx: 'ADX',
     bp: 'Bull/Bear Power(13)',
@@ -84,20 +84,26 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
   };
 
   const fetchIndicators = async () => {
-    const results = await Promise.all(
-      indicators.map((indicator) =>
-        fetchAnalyticsData(indicator, currencyId, interval).then((value) => ({
-          indicator,
-          value,
-          decision: determineDecision(indicator, value),
-        }))
-      )
-    );
-    const signalCounts = calculateSummary(results);
-    setSummary(signalCounts);
-    onSummaryChange(signalCounts);
-    return results;
+    try {
+      const results = await Promise.all(
+        indicators.map((indicator) =>
+          fetchAnalyticsData(indicator, currencyId, interval).then((value) => ({
+            indicator,
+            value,
+            decision: determineDecision(indicator, value),
+          }))
+        )
+      );
+      const signalCounts = calculateSummary(results);
+      setSummary(signalCounts);
+      onSummaryChange(signalCounts);
+      return results;
+    } catch (error) {
+      console.error('Error fetching indicators:', error);
+      return [];
+    }
   };
+
 
   const fetchPrice = async () => {
     try {
@@ -116,11 +122,16 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
   }, [currencyId]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['analyticsData', currencyId, interval],
-    queryFn: fetchIndicators,
-    staleTime: 300000,
-    refetchInterval: 2000,
-  });
+      queryKey: ['analyticsData', currencyId, interval],
+      queryFn: fetchIndicators,
+      staleTime: 300000,
+      refetchInterval: isFirstLoad ? 500 : 10000,
+      onSuccess: () => {
+        if (isFirstLoad) {
+          setIsFirstLoad(false);
+        }
+      },
+    });
 
   const calculateSummary = (results) => {
     const signalCounts = { Buy: 0, Sell: 0, Neutral: 0 };

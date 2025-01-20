@@ -18,7 +18,6 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
 
     if (name.length > 12) {
       setError('Portfolio name cannot exceed 12 characters.');
-      notyf.error('Portfolio name cannot exceed 12 characters.');
       return;
     }
 
@@ -39,7 +38,6 @@ const CreatePortfolio = ({ onPortfolioCreated }) => {
         }
       }
       setError(errorMessage);
-      notyf.error(`Failed to create portfolio: ${errorMessage}`);
     }
   };
 
