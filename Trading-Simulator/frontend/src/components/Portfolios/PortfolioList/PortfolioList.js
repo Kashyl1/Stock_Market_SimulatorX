@@ -1,16 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../Portfolios.css';
+import {deletePortfolio} from '../../../services/PortfolioService';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
 
-const PortfolioList = ({ portfolios }) => {
+const notyf = new Notyf({
+  ripple: false,
+});
 
-  if (!Array.isArray(portfolios)) {
-    return <p className="error-message">Invalid portfolios data.</p>;
-  }
-
-  if (portfolios.length === 0) {
-    return <p>No portfolios found. Create one to get started!</p>;
-  }
+const PortfolioList = ({ portfolios, onDeleteSuccess }) => {
+  const navigate = useNavigate();
 
   const formatDateTime = (dateTimeStr) => {
     if (!dateTimeStr) return 'N/A';
@@ -24,6 +24,18 @@ const PortfolioList = ({ portfolios }) => {
     return new Date(dateTimeStr).toLocaleString(undefined, options);
   };
 
+  const handleDeletePortfolio = async (portfolioid) => {
+      try {
+        await deletePortfolio(portfolioid);
+        notyf.success('Portfolio deleted successfully!');
+        onDeleteSuccess(portfolioid);
+      } catch (error) {
+        console.error('Error deleting portfolio:', error);
+        notyf.error('Failed to delete the portfolio.');
+      }
+
+  };
+
   return (
     <div className="portfolio-list">
       {portfolios.map((portfolio) => (
@@ -31,9 +43,20 @@ const PortfolioList = ({ portfolios }) => {
           <h3>{portfolio.name}</h3>
           <p>Created At: {formatDateTime(portfolio.createdAt)}</p>
           <p>Updated At: {formatDateTime(portfolio.updatedAt)}</p>
-          <Link to={`/portfolios/${portfolio.portfolioid}`}>
-            <button>View Details</button>
-          </Link>
+          <div className="portfolio-actions">
+            <button
+              onClick={() => navigate(`/portfolios/${portfolio.portfolioid}`)}
+              className="view-button"
+            >
+              View Details
+            </button>
+            <button
+              className="delete-button"
+              onClick={() => handleDeletePortfolio(portfolio.portfolioid)}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>

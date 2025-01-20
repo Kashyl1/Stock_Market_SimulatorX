@@ -6,6 +6,7 @@ import './AnalyticalModule.css';
 const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
   const [currentPrice, setCurrentPrice] = useState(null);
   const [priceUpdateTimer, setPriceUpdateTimer] = useState(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const movingAverages = useMemo(() => ['sma', 'ema'], []);
   const periods = useMemo(() => [5, 10, 20, 50, 100, 200], []);
@@ -74,7 +75,12 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
     queryKey: ['movingAverages', currencyId, interval],
     queryFn: fetchMovingAverages,
     staleTime: 300000,
-    refetchInterval: 2000,
+    refetchInterval: isFirstLoad ? 500 : 10000,
+    onSuccess: () => {
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+      }
+    },
   });
 
   useEffect(() => {
@@ -94,7 +100,6 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
 
     return () => clearInterval(timer);
   }, [currencyId]);
-
 
   if (isLoading || currentPrice === null) {
     return (

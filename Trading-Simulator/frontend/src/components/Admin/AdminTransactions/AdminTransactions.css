@@ -162,8 +162,7 @@
 }
 
 .delete-button:hover {
-  background-color: #ff4c4c;
-  color: #101010;
+  background-color: #b9433f !important;
 }
 
  .btn-disabled {

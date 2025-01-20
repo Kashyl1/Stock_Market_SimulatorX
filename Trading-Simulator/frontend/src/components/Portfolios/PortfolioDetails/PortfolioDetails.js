@@ -91,8 +91,14 @@ const PortfolioDetails = () => {
       <Sidebar />
       <div className="portfolio-details">
         <h2>{portfolio.name}</h2>
-        <p>Created At: {formatDateTime(portfolio.createdAt)}</p>
-        <p>Updated At: {formatDateTime(portfolio.updatedAt)}</p>
+        <p>
+          Total Gain/Loss:&nbsp;
+          <span
+            className={`currency-change ${totalGainOrLoss >= 0 ? 'positive' : 'negative'}`}
+          >
+            {totalGainOrLoss >= 0 ? '+' : ''}${totalGainOrLoss.toFixed(2)}
+          </span>
+        </p>
         <h3>Assets:</h3>
         {assetsWithGains && assetsWithGains.length > 0 ? (
           <div className="assets-table">
@@ -152,7 +158,6 @@ const PortfolioDetails = () => {
           />
         )}
       </div>
-
     </div>
   );
 };

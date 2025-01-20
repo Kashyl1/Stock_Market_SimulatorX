@@ -50,3 +50,10 @@
   color: red;
   margin-top: 5px;
 }
+
+.portfolio-actions {
+display: flex;
+flex: 1;
+  flex-direction: column;
+
+}

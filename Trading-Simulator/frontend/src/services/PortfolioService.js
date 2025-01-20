@@ -68,3 +68,18 @@ export const getTotalPortfolioGainOrLoss = async (portfolioid) => {
   });
   return response.data;
 };
+
+export const deletePortfolio = async (portfolioid) => {
+  const token = localStorage.getItem('jwtToken');
+  try {
+    const response = await axios.delete(`${API_URL}/${portfolioid}/delete-portfolio`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting portfolio:', error);
+    throw error;
+  }
+};
