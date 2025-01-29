@@ -3,7 +3,6 @@ package com.example.backend.transaction.transactionService.assets;
 import com.example.backend.currency.Currency;
 import com.example.backend.currency.CurrencyRepository;
 import com.example.backend.currency.CurrencyService;
-import com.example.backend.transaction.TransactionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

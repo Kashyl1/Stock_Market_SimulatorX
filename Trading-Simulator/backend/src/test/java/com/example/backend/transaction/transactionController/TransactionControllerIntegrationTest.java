@@ -8,7 +8,6 @@ import com.example.backend.currency.CurrencyRepository;
 import com.example.backend.portfolio.CreatePortfolioRequest;
 import com.example.backend.portfolio.PortfolioRepository;
 import com.example.backend.transaction.BuyAssetRequest;
-import com.example.backend.transaction.TransactionService;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,9 +41,6 @@ public class TransactionControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private TransactionService transactionService;
 
     @Autowired
     private UserRepository userRepository;

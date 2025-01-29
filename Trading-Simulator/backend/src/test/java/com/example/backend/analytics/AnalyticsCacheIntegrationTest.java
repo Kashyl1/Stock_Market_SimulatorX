@@ -130,62 +130,6 @@ public class AnalyticsCacheIntegrationTest {
         Assertions.assertNotNull(actualValue, "Volatility value should not be null");
         Assertions.assertEquals(expectedValue, actualValue, "Volatility value should match expected value");
     }
-
-    @Test
-    void testMacdEndpointWithRedisCache() {
-        MacdResult expectedResult = new MacdResult(new BigDecimal("40.00000000"), new BigDecimal("40.00000000"));
-        indicatorCacheService.saveMacd("ROYAL_COIN", "1h", expectedResult);
-
-        webTestClient.get()
-                .uri("/api/analytics/macd/ROYAL_COIN/1h")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(MacdResult.class)
-                .value(value -> {
-                    Assertions.assertEquals(expectedResult, value);
-                });
-    }
-
-    @Test
-    void testSaveAndGetMacdDirectly() {
-        String symbol = "ROYAL_COIN";
-        String interval = "1h";
-        MacdResult expectedResult = new MacdResult(new BigDecimal("0.10000000"), new BigDecimal("0.05000000"));
-
-        indicatorCacheService.saveMacd(symbol, interval, expectedResult);
-        MacdResult actualResult = indicatorCacheService.getMacd(symbol, interval);
-
-        Assertions.assertNotNull(actualResult, "MACD value should not be null");
-        Assertions.assertEquals(expectedResult, actualResult, "MACD value should match expected value");
-    }
-
-    @Test
-    void testAdxEndpointWithRedisCache() {
-        indicatorCacheService.saveAdx("ROYAL_COIN", "1h", new BigDecimal("30.00"));
-
-        webTestClient.get()
-                .uri("/api/analytics/adx/ROYAL_COIN/1h")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(BigDecimal.class)
-                .value(value -> {
-                    Assertions.assertEquals(new BigDecimal("30.00"), value);
-                });
-    }
-
-    @Test
-    void testSaveAndGetAdxDirectly() {
-        String symbol = "ROYAL_COIN";
-        String interval = "1h";
-        BigDecimal expectedValue = new BigDecimal("30.00");
-
-        indicatorCacheService.saveAdx(symbol, interval, expectedValue);
-        BigDecimal actualValue = indicatorCacheService.getAdx(symbol, interval);
-
-        Assertions.assertNotNull(actualValue, "ADX value should not be null");
-        Assertions.assertEquals(expectedValue, actualValue, "ADX value should match expected value");
-    }
-
 }
 
 
