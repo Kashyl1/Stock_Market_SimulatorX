@@ -1,28 +1,32 @@
+version: '3.8'
+
 services:
+  app:
+    image: kashylt/trading-simulator:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/application.properties:/app/config/application.properties
+    depends_on:
+      - postgres
+      - maildev
+
   postgres:
     image: postgres:14
     environment:
-      POSTGRES_DB: DB_NAME
-      POSTGRES_USER: DB_USERNAME
-      POSTGRES_PASSWORD: DB_PASSWORD
+      POSTGRES_DB: trading_simulator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
 
-  springboot:
-    image: myapp:latest
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost/DB_NAME
-      SPRING_DATASOURCE_USERNAME: DB_USERNAME
-      SPRING_DATASOURCE_PASSWORD: DB_PASSWORD
+  maildev:
+    image: maildev/maildev
     ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - maildev
-    restart: always
+      - "1080:1080"
+      - "1025:1025"
 
 volumes:
   postgres_data:

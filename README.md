@@ -1,115 +1,151 @@
-# Stock Market Simulator
+# Stock Market Simulator 🚀
 
-This project is a **Stock Market Simulator** that allows users to simulate cryptocurrency trading and manage their portfolios. The application provides various features for managing user accounts, wallets, and assets, giving a full simulation experience.
+[![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://royal-coin.duckdns.org)
+![Docker Image](https://img.shields.io/badge/docker%20image-kashylt/trading--simulator-blue)
 
-## Features
+Hosted on **Raspberry Pi** at: [https://royal-coin.duckdns.org](https://royal-coin.duckdns.org)
 
-### Authentication
-- **User Registration:** Allows new users to create an account.
-- **User Login:** Allows existing users to log in.
-- **Email Verification:** Sends a verification email to the user upon registration to confirm their email address.
+Advanced cryptocurrency trading simulator with portfolio management and real-time analytics.
 
-### Cryptocurrency Trading
-- **Buy Cryptocurrencies:** Users can now purchase cryptocurrencies within the simulator using virtual funds.
-- **Create Wallets:** Allows users to create and manage multiple cryptocurrency wallets.
-- **Add Funds:** Users can add virtual funds to their accounts for trading purposes.
-- **View Current Prices:** Displays real-time prices of available cryptocurrencies, allowing users to monitor the market.
+## Key Features ✨
 
-### Portfolio Management
-- **Manage Portfolio:** Users can view and manage their cryptocurrency investments, tracking their portfolio performance.
-- **Transaction History:** Keeps a log of all transactions, including purchases and wallet funding.
+### Core Functionality
+- **User Management**
+    - Secure JWT Authentication
+    - Email Verification Flow
+    - Password Recovery System
+    - Admin User Management
 
-### User Settings
-- **Update User Profile:** Users can update their personal details and configure settings in their accounts.
+- **Trading Engine**
+    - Real-time Crypto Prices
+    - Virtual Wallet Management
+    - Buy/Sell Orders Execution
+    - Transaction History Tracking
 
-## Technologies Used
+- **Portfolio Analytics**
+    - Performance Metrics
+    - Gain/Loss Calculations
+    - Asset Distribution Charts
+    - Historical Data Analysis
 
-- **Backend:**
-  - Java Spring Boot
-  - Spring Security
-  - JWT for authentication
-  - JPA/Hibernate for ORM
-  - Lombok for boilerplate code reduction
-  - Mockito and JUnit for testing
+### Advanced Features
+- **Alert System**
+    - Price Threshold Notifications
+    - Email & In-App Alerts
+    - Global Admin Announcements
 
-- **Frontend:**
-  - React.js
-  - Axios for HTTP requests
-  - React Router for routing
-  - FontAwesome for icons
+- **Technical Analysis**
+    - 10+ Indicators (RSI, MACD, SMA, EMA)
+    - Real-time Charts
+    - Volatility Metrics
+    - Market Trend Predictions
 
-- **Database:**
-  - PostgreSQL
+- **Security & Monitoring**
+    - Suspicious Activity Detection
+    - Admin Audit Logs
+    - User Activity Tracking
+    - Transaction Anomaly Detection
 
-- **Email:**
-  - MailDev for email testing
+## Tech Stack 🛠️
 
-## Getting Started
+| Layer        | Technologies                                                                 |
+|--------------|------------------------------------------------------------------------------|
+| **Frontend** | React, Axios, React Router, Chart.js, FontAwesome                            |
+| **Backend**  | Spring Boot, Spring Security, JWT, JPA/Hibernate, Lombok, Swagger            |
+| **Database** | PostgreSQL, Redis Cache                                                     |
+| **DevOps**   | Docker, GitHub Actions, Raspberry Pi, Nginx, DuckDNS                        |
+
+## Getting Started 🚦
 
 ### Prerequisites
+- Docker 20.10+
+- Docker Compose 2.20+
 
-- Java 11 or higher
-- Node.js and npm
-- PostgreSQL
-- MailDev
+### Quick Deployment with Docker
 
-### Installation
-### Installation
-
-1. **Pull the latest container from Docker Hub:**
-
-   To download the latest image of your application from Docker Hub, run the following command:
-
-   ```bash
-   docker pull kashylt/trading-simulator:latest
-
-2. **Create the application.properties file:**
-    The example is here: Trading-Simulator/backend/src/main/resources/application.example.properties
-
-3. **Set up PostgreSQL database:**
-Ensure that PostgreSQL is running and accessible for the application. If you want to run the database in a Docker container, use the following steps:
-Run the PostgreSQL container:
-```
-   docker run -d \
-  --name postgres \
-  -e POSTGRES_DB=trading_simulator_local \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=123 \
-  -p 5432:5432 \
-  postgres:14
-```
-4. **Run the application container with volume:**
-To run the application container while mounting the application.properties file, use the following command:
-
-```
-docker run -d \
-  --name trading-simulator \
-  --link postgres:postgres \
-  -p 8080:8080 \
-  -v /path/to/your/application.properties:/app/config/application.properties \
-  kashylt/trading-simulator:latest
-```
-5. Access the application:
-  ```
-   The application should now be available at http://localhost:8080
+1. **Create config directory**
+```bash
+mkdir -p ./config
 ```
 
-### Configuration
-   The application will automatically serve both the backend and frontend from the same container.
-Adjust the settings in the application.properties file as needed to suit your requirements.
-  
- -*Email Configuration:*
-   Update the email service configuration in the backend to ensure email functionality works.
+2. **Create application.properties (minimal config)
+```
+# Database
+spring.datasource.url=jdbc:postgresql://postgres:5432/trading_simulator
+spring.datasource.username=postgres
+spring.datasource.password=your_strong_password
 
-### Contributing
-   Contributions are welcome! Please fork the repository and create a pull request with your changes.
+# JWT
+jwt.secret=your_64_char_secure_secret
 
-### License
-   This project is licensed under the MIT License. See the LICENSE file for details.
+# Email (MailDev)
+spring.mail.host=maildev
+spring.mail.port=1025
+
+# Frontend Configuration
+app.frontend.url=http://localhost:8080
+
+```
+
+3. Start services:
+```bash
+docker compose up -d
+```
+
+4. Access services:
+
+- Application: http://localhost:8080
+
+- API Docs: http://localhost:8080/swagger-ui.html
+
+- MailDev: http://localhost:1080
+
+- PostgreSQL: postgres:5432
+
+## Configuration ⚙️
+### Docker Compose Template(docker-compose.yml file at root directory)
+
+```
+version: '3.8'
+
+services:
+  app:
+    image: kashylt/trading-simulator:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/application.properties:/app/config/application.properties
+    depends_on:
+      - postgres
+      - maildev
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: trading_simulator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_strong_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:1080"
+
+volumes:
+  postgres_data:
+```
+
+## API Documentation 📚
+
+### Explore interactive API documentation:
+
+- Local: http://localhost:8080/swagger-ui.html
+
+- Production: https://royal-coin.duckdns.org/swagger-ui.html
 
 
 
 
 
-   
-   

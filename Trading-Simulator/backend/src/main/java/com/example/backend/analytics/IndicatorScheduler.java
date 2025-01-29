@@ -24,7 +24,7 @@ public class IndicatorScheduler {
     private final EmaCalculatorFactory emaCalculatorFactory;
 
     @LogExecutionTime
-    @Scheduled(fixedRate = 1000 * 71, initialDelay = 1000 * 60)
+    @Scheduled(fixedRate = 1000 * 60 * 30, initialDelay = 1000 * 60 * 5)
     public void updateIndicators() {
         for (String symbol : CURRENCY_SYMBOLS) {
             for (String interval : intervals) {
