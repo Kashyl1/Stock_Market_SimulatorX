@@ -1,7 +1,7 @@
 # Stock Market Simulator 🚀
 
 [![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://royal-coin.duckdns.org)
-![Docker Image](https://img.shields.io/badge/docker%20image-kashylt/trading--simulator-blue)
+[![Docker Image](https://img.shields.io/badge/docker%20image-kashylt/trading--simulator-blue)](https://hub.docker.com/r/kashylt/trading-simulator)
 
 Hosted on **Raspberry Pi** at: [https://royal-coin.duckdns.org](https://royal-coin.duckdns.org)
 
