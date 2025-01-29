@@ -199,7 +199,7 @@ public class CurrencyService {
                             return existingCurrency;
                         }
                         return null;
-                    })))
+                    })) )
                     .collectList()
                     .block();
 

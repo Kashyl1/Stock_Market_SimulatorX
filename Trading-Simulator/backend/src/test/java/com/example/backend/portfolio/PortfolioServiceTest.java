@@ -1,17 +1,17 @@
 package com.example.backend.portfolio;
 
-import com.example.backend.userEvent.UserEventTrackingService;
-import com.example.backend.userEvent.UserEvent;
 import com.example.backend.auth.AuthenticationService;
 import com.example.backend.exceptions.PortfolioAlreadyExistsException;
 import com.example.backend.exceptions.PortfolioNotFoundException;
 import com.example.backend.user.User;
+import com.example.backend.userEvent.UserEvent;
+import com.example.backend.userEvent.UserEventTrackingService;
+import com.example.backend.currency.Currency;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import com.example.backend.currency.Currency;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,11 +29,11 @@ class PortfolioServiceTest {
     @Mock
     private AuthenticationService authenticationService;
 
-    @InjectMocks
-    private PortfolioService portfolioService;
-
     @Mock
     private UserEventTrackingService userEventTrackingService;
+
+    @InjectMocks
+    private PortfolioService portfolioService;
 
     private User user;
 
@@ -51,7 +51,8 @@ class PortfolioServiceTest {
 
         when(authenticationService.getCurrentUserEmail()).thenReturn(user.getEmail());
         when(authenticationService.getCurrentUser(user.getEmail())).thenReturn(user);
-        when(portfolioRepository.findByUserAndName(user, portfolioName)).thenReturn(Optional.empty());
+
+        when(portfolioRepository.findActiveByUserAndName(user, portfolioName)).thenReturn(Optional.empty());
 
         Portfolio savedPortfolio = new Portfolio();
         savedPortfolio.setPortfolioid(1);
@@ -62,7 +63,6 @@ class PortfolioServiceTest {
 
         when(portfolioRepository.save(any(Portfolio.class))).thenReturn(savedPortfolio);
 
-        // Mock eventTrackingService.logEvent
         doNothing().when(userEventTrackingService).logEvent(anyString(), any(UserEvent.EventType.class), anyMap());
 
         Portfolio result = portfolioService.createPortfolio(portfolioName);
@@ -85,12 +85,11 @@ class PortfolioServiceTest {
         Portfolio existingPortfolio = new Portfolio();
         existingPortfolio.setName(portfolioName);
 
-        when(portfolioRepository.findByUserAndName(user, portfolioName)).thenReturn(Optional.of(existingPortfolio));
+        when(portfolioRepository.findActiveByUserAndName(user, portfolioName)).thenReturn(Optional.of(existingPortfolio));
 
         assertThrows(PortfolioAlreadyExistsException.class, () -> portfolioService.createPortfolio(portfolioName));
 
         verify(portfolioRepository, never()).save(any(Portfolio.class));
-        // No need to mock eventTrackingService here since save is never called
     }
 
     @Test
@@ -112,7 +111,7 @@ class PortfolioServiceTest {
         portfolio2.setCreatedAt(LocalDateTime.now());
         portfolio2.setUpdatedAt(LocalDateTime.now());
 
-        when(portfolioRepository.findByUser(user)).thenReturn(Arrays.asList(portfolio1, portfolio2));
+        when(portfolioRepository.findByUserAndDeletedFalse(user)).thenReturn(Arrays.asList(portfolio1, portfolio2));
 
         List<PortfolioDTO> portfolios = portfolioService.getUserPortfolios();
 
@@ -137,7 +136,7 @@ class PortfolioServiceTest {
         portfolio.setUpdatedAt(LocalDateTime.now());
         portfolio.setPortfolioAssets(new ArrayList<>());
 
-        when(portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioId, user)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioId, user)).thenReturn(Optional.of(portfolio));
 
         PortfolioDTO result = portfolioService.getUserPortfolioByid(portfolioId);
 
@@ -153,7 +152,7 @@ class PortfolioServiceTest {
         when(authenticationService.getCurrentUserEmail()).thenReturn(user.getEmail());
         when(authenticationService.getCurrentUser(user.getEmail())).thenReturn(user);
 
-        when(portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioId, user)).thenReturn(Optional.empty());
+        when(portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioId, user)).thenReturn(Optional.empty());
 
         assertThrows(PortfolioNotFoundException.class, () -> portfolioService.getUserPortfolioByid(portfolioId));
     }
@@ -173,7 +172,6 @@ class PortfolioServiceTest {
         PortfolioAsset asset = new PortfolioAsset();
         asset.setAmount(new BigDecimal("10"));
         asset.setAveragePurchasePrice(new BigDecimal("50"));
-        asset.setCurrentPrice(new BigDecimal("60"));
 
         Currency currency = new Currency();
         currency.setName("Bitcoin");
@@ -184,7 +182,8 @@ class PortfolioServiceTest {
 
         portfolio.setPortfolioAssets(new ArrayList<>(List.of(asset)));
 
-        when(portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioId, user)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioId, user))
+                .thenReturn(Optional.of(portfolio));
 
         List<PortfolioAssetDTO> assetsWithGains = portfolioService.getPortfolioAssetsWithGains(portfolioId);
 
@@ -206,9 +205,10 @@ class PortfolioServiceTest {
         when(authenticationService.getCurrentUserEmail()).thenReturn(user.getEmail());
         when(authenticationService.getCurrentUser(user.getEmail())).thenReturn(user);
 
-        when(portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioId, user)).thenReturn(Optional.empty());
+        when(portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioId, user))
+                .thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> portfolioService.getPortfolioAssetsWithGains(portfolioId));
+        assertThrows(PortfolioNotFoundException.class, () -> portfolioService.getPortfolioAssetsWithGains(portfolioId));
     }
 
     @Test
@@ -226,35 +226,31 @@ class PortfolioServiceTest {
         PortfolioAsset asset1 = new PortfolioAsset();
         asset1.setAmount(new BigDecimal("10"));
         asset1.setAveragePurchasePrice(new BigDecimal("50"));
-        asset1.setCurrentPrice(new BigDecimal("60"));
 
         Currency currency1 = new Currency();
         currency1.setName("Bitcoin");
         currency1.setCurrencyid(1);
         currency1.setCurrentPrice(new BigDecimal("60"));
-
         asset1.setCurrency(currency1);
 
         PortfolioAsset asset2 = new PortfolioAsset();
         asset2.setAmount(new BigDecimal("5"));
         asset2.setAveragePurchasePrice(new BigDecimal("100"));
-        asset2.setCurrentPrice(new BigDecimal("90"));
 
         Currency currency2 = new Currency();
         currency2.setName("Ethereum");
         currency2.setCurrencyid(2);
         currency2.setCurrentPrice(new BigDecimal("90"));
-
         asset2.setCurrency(currency2);
 
         portfolio.setPortfolioAssets(new ArrayList<>(List.of(asset1, asset2)));
 
-        when(portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioId, user)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioId, user))
+                .thenReturn(Optional.of(portfolio));
 
         BigDecimal totalGainOrLoss = portfolioService.calculateTotalPortfolioGainOrLoss(portfolioId);
-
         assertNotNull(totalGainOrLoss);
-        assertEquals(new BigDecimal("50.00"), totalGainOrLoss);
+        assertEquals(new BigDecimal("50"), totalGainOrLoss);
     }
 
     @Test
@@ -264,8 +260,9 @@ class PortfolioServiceTest {
         when(authenticationService.getCurrentUserEmail()).thenReturn(user.getEmail());
         when(authenticationService.getCurrentUser(user.getEmail())).thenReturn(user);
 
-        when(portfolioRepository.findWithAssetsByPortfolioidAndUser(portfolioId, user)).thenReturn(Optional.empty());
+        when(portfolioRepository.findWithAssetsByPortfolioidAndUserAndDeletedFalse(portfolioId, user))
+                .thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> portfolioService.calculateTotalPortfolioGainOrLoss(portfolioId));
+        assertThrows(PortfolioNotFoundException.class, () -> portfolioService.calculateTotalPortfolioGainOrLoss(portfolioId));
     }
 }

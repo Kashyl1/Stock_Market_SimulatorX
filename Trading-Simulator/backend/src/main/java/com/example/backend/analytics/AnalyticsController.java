@@ -178,7 +178,7 @@ public class AnalyticsController {
             }
 
             BigDecimal williamsR = analyticsService.calculateIndicator(symbol, interval, new WilliamsRCalculator());
-            indicatorCacheService.saveBP(symbol, interval, williamsR);
+            indicatorCacheService.saveWilliamsR(symbol, interval, williamsR);
 
             return ResponseEntity.ok(williamsR);
         } catch (Exception e) {
