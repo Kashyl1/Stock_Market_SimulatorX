@@ -1,74 +1,146 @@
-Aplikacja do zarządzania subskrypcjami mogłaby działać jako webowa i/lub mobilna platforma, która pomaga użytkownikom śledzić, analizować i optymalizować ich miesięczne subskrypcje. Poniżej opisuję architekturę, funkcje oraz technologie, które mogłyby zostać użyte w tym projekcie.
+# Stock Market Simulator 🚀
 
-🔹 Główne funkcje aplikacji
-📌 Lista subskrypcji
+[![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://royal-coin.duckdns.org)
+[![Docker Image](https://img.shields.io/badge/docker%20image-kashylt/trading--simulator-blue)](https://hub.docker.com/r/kashylt/trading-simulator)
 
-Możliwość ręcznego dodania subskrypcji (nazwa, cena, cykl płatności, metoda płatności).
-Możliwość importu subskrypcji z konta bankowego (za pomocą Open Banking API lub integracji z e-mailami, np. Gmail API).
-Wsparcie dla różnych walut.
-📅 Powiadomienia o nadchodzących płatnościach
+Hosted on **Raspberry Pi** at: [https://royal-coin.duckdns.org](https://royal-coin.duckdns.org)
 
-Przypomnienia o płatnościach (np. 3 dni przed pobraniem środków).
-Alerty o kończących się okresach próbnych.
-📊 Analiza wydatków na subskrypcje
+Advanced cryptocurrency trading simulator with portfolio management and real-time analytics.
 
-Miesięczne raporty pokazujące sumę wydatków na subskrypcje.
-Wizualizacja, jakie subskrypcje pochłaniają najwięcej środków.
-Możliwość filtrowania subskrypcji według kategorii (np. streaming, SaaS, fitness, gaming).
-🧐 Sugestie optymalizacji wydatków
+## Key Features ✨
 
-Analiza użytkowania subskrypcji (np. „Nie korzystałeś z Netflix od 2 miesięcy, czy chcesz anulować?”).
-Sugerowanie tańszych alternatyw (np. „Czy wiesz, że Amazon Prime daje Ci dostęp do Amazon Video w tej samej cenie?”).
-Możliwość łączenia rodzinnych planów subskrypcyjnych.
-📱 Integracja z aplikacjami i bankami
+### Core Functionality
+- **User Management**
+    - Secure JWT Authentication
+    - Email Verification Flow
+    - Password Recovery System
+    - Admin User Management
 
-Pobieranie transakcji bankowych i wykrywanie subskrypcji (Open Banking API).
-Integracja z e-mailami (skanowanie faktur subskrypcyjnych z Gmail / Outlook).
-Synchronizacja z kalendarzem Google/Outlook, aby dodawać przypomnienia o płatnościach.
-🔄 Import i eksport danych
+- **Trading Engine**
+    - Real-time Crypto Prices
+    - Virtual Wallet Management
+    - Buy/Sell Orders Execution
+    - Transaction History Tracking
 
-Możliwość eksportu danych do CSV/PDF.
-Import istniejących subskrypcji z innych aplikacji.
-🔐 Bezpieczeństwo
+- **Portfolio Analytics**
+    - Performance Metrics
+    - Gain/Loss Calculations
+    - Asset Distribution Charts
+    - Historical Data Analysis
 
-Logowanie za pomocą OAuth (Google, Facebook, Apple).
-Szyfrowanie danych użytkownika.
-🛠️ Technologie
-Backend (serwer)
-Java + Spring Boot – do obsługi logiki aplikacji.
-PostgreSQL / MongoDB – do przechowywania danych o subskrypcjach.
-Spring Security + JWT – do uwierzytelniania użytkowników.
-Open Banking API / Gmail API – do pobierania danych o subskrypcjach.
-Frontend (klient)
-React.js / Next.js – dla wersji webowej.
-React Native / Flutter – jeśli chcesz zrobić aplikację mobilną.
-Dodatkowe technologie
-WebSockets – jeśli chcesz wprowadzić powiadomienia w czasie rzeczywistym.
-Docker + Kubernetes – dla skalowalności aplikacji.
-RabbitMQ / Kafka – jeśli aplikacja wymaga kolejkowania zdarzeń (np. przetwarzanie powiadomień).
-🖼️ Jak mogłaby wyglądać aplikacja? (UI/UX)
-Ekran główny (Dashboard)
-Kafelki z najbliższymi płatnościami („Spotify – 19,99 zł – za 3 dni”).
-Wykres kołowy procentowego podziału subskrypcji.
-Łączna kwota wydawana miesięcznie na subskrypcje.
-Lista subskrypcji
-Sortowanie po dacie następnej płatności.
-Możliwość grupowania subskrypcji (np. „Rozrywka”, „Praca”, „Sport”).
-Kolorowe oznaczenia aktywne/subskrypcja wygasa wkrótce.
-Widok szczegółowy subskrypcji
-Data rozpoczęcia, cykl płatności.
-Historia płatności.
-Możliwość ustawienia przypomnienia o rezygnacji przed kolejnym cyklem.
-Strona analizy wydatków
-Wykresy miesięcznych wydatków na subskrypcje.
-Historia wydatków z podziałem na miesiące.
-💡 Jak możesz rozwijać projekt w przyszłości?
-Dodanie AI do analizy subskrypcji i sugestii optymalizacji.
-Integracja z ChatGPT, aby można było pytać: „Na czym mogę oszczędzić?”.
-Obsługa subskrypcji rodzinnych i współdzielenia wydatków z innymi.
-Automatyczna anulacja subskrypcji (jeśli API usług na to pozwala).
-To projekt, który: ✅ Jest praktyczny – ludzie naprawdę potrzebują czegoś takiego.
-✅ Może zaimponować pracodawcom – używa wielu ciekawych technologii.
-✅ Jest rozszerzalny – możesz dodać AI, analizy, powiązać z bankami.
+### Advanced Features
+- **Alert System**
+    - Price Threshold Notifications
+    - Email & In-App Alerts
+    - Global Admin Announcements
 
-Co myślisz? Podoba Ci się taki projekt? 🚀
+- **Technical Analysis**
+    - 10+ Indicators (RSI, MACD, SMA, EMA)
+    - Real-time Charts
+    - Volatility Metrics
+    - Market Trend Predictions
+
+- **Security & Monitoring**
+    - Suspicious Activity Detection
+    - Admin Audit Logs
+    - User Activity Tracking
+    - Transaction Anomaly Detection
+
+## Tech Stack 🛠️
+
+| Layer        | Technologies                                                                 |
+|--------------|------------------------------------------------------------------------------|
+| **Frontend** | React, Axios, React Router, Chart.js, FontAwesome                            |
+| **Backend**  | Spring Boot, Spring Security, JWT, JPA/Hibernate, Lombok, Swagger            |
+| **Database** | PostgreSQL, Redis Cache                                                     |
+| **DevOps**   | Docker, GitHub Actions, Raspberry Pi, Nginx, DuckDNS                        |
+
+## Getting Started 🚦
+
+### Prerequisites
+- Docker 20.10+
+- Docker Compose 2.20+
+
+### Quick Deployment with Docker
+
+1. **Create config directory**
+```bash
+mkdir -p ./config
+```
+
+2. **Create application.properties (minimal config)
+```
+# Database
+spring.datasource.url=jdbc:postgresql://postgres:5432/trading_simulator
+spring.datasource.username=postgres
+spring.datasource.password=your_strong_password
+
+# JWT
+jwt.secret=your_64_char_secure_secret
+
+# Email (MailDev)
+spring.mail.host=maildev
+spring.mail.port=1025
+
+# Frontend Configuration
+app.frontend.url=http://localhost:8080
+
+```
+
+3. Start services:
+```bash
+docker compose up -d
+```
+
+4. Access services:
+
+- Application: http://localhost:8080
+
+- API Docs: http://localhost:8080/swagger-ui.html
+
+- MailDev: http://localhost:1080
+
+- PostgreSQL: postgres:5432
+
+## Configuration ⚙️
+### Docker Compose Template(docker-compose.yml file at root directory)
+
+```
+version: '3.8'
+
+services:
+  app:
+    image: kashylt/trading-simulator:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/application.properties:/app/config/application.properties
+    depends_on:
+      - postgres
+      - maildev
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: trading_simulator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_strong_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:1080"
+
+volumes:
+  postgres_data:
+```
+
+## API Documentation 📚
+
+### Explore interactive API documentation:
+
+- Local: http://localhost:8080/swagger-ui.html
+
+- Production: https://royal-coin.duckdns.org/swagger-ui.html
