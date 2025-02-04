@@ -17,7 +17,7 @@ public class ScheduledTasks {
         this.currencyService = currencyService;
     }
 
-    @Scheduled(fixedRate = 1000 * 25, initialDelay = 0)
+    @Scheduled(fixedRate = 1000 * 10, initialDelay = 0)
     @Operation(summary = "Update current prices", description = "Scheduled task to update current prices every 10 seconds")
     public synchronized void updateCurrentPrices() {
         currencyService.updateCurrentPrice();

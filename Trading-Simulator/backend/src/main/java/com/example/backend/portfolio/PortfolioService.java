@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
@@ -291,5 +292,13 @@ public class PortfolioService {
         String email = authenticationService.getCurrentUserEmail();
         User currentUser = authenticationService.getCurrentUser(email);
         return portfolioRepository.findGlobalGainLossByUserId(currentUser.getId());
+    }
+
+    public List<UserRankingDTO> getTop3GlobalGain() {
+        List<UserRankingProjection> ranking = portfolioRepository.findUserRanking(PageRequest.of(0, 3));
+
+        return ranking.stream()
+                .map(r -> new UserRankingDTO(r.getFirstname(), r.getTotalGain()))
+                .toList();
     }
 }

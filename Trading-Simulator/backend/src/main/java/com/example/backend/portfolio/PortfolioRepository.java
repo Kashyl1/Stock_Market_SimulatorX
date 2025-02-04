@@ -58,5 +58,17 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
 """)
     BigDecimal findGlobalGainLossByUserId(@Param("userId") Integer userId);
 
+    @Query("""
+    SELECT p.user.id AS userId,
+       p.user.firstname AS firstname,
+       COALESCE(SUM(pa.amount * (pa.currency.currentPrice - pa.averagePurchasePrice)), 0) AS totalGain
+    FROM Portfolio p
+    JOIN p.portfolioAssets pa
+    WHERE p.deleted = false
+    GROUP BY p.user.id, p.user.firstname
+    ORDER BY totalGain DESC
+    """)
+    List<UserRankingProjection> findUserRanking(Pageable pageable);
+
 
 }
