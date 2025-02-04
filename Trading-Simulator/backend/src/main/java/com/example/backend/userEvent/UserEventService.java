@@ -1,6 +1,5 @@
 package com.example.backend.userEvent;
 
-import com.example.backend.adminEvent.AdminEvent;
 import com.example.backend.exceptions.EventNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;

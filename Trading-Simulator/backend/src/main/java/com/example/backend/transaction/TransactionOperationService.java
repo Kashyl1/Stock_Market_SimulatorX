@@ -10,6 +10,7 @@ import com.example.backend.portfolio.PortfolioRepository;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import com.example.backend.userEvent.UserEvent;
+import com.example.backend.userEvent.UserEventService;
 import com.example.backend.userEvent.UserEventTrackingService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
