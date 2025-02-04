@@ -41,7 +41,7 @@ public class ScheduledAlertChecker {
     /**
      * Checks all types of alerts at a fixed rate.
      */
-    @Scheduled(fixedRate = 1000 * 45)
+    @Scheduled(fixedRate = 1000 * 60)
     @Operation(summary = "Check all alerts", description = "Scheduled method to check and trigger all types of alerts")
     public void checkAllAlerts() {
         checkEmailAlerts();

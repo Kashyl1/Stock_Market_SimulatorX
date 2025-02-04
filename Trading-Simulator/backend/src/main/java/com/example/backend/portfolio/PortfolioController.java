@@ -106,4 +106,15 @@ public class PortfolioController {
         BigDecimal globalGainOrLoss = portfolioService.calculateUserGlobalGainLoss();
         return ResponseEntity.ok(globalGainOrLoss);
     }
+
+    @GetMapping("/ranking/top3")
+    @Operation(summary = "Get top 3 users by global gain",
+            description = "Returns a list of 3 users with the highest global gain (only first name).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ranking retrieved successfully")
+    })
+    public ResponseEntity<List<UserRankingDTO>> getTop3GlobalGain() {
+        List<UserRankingDTO> results = portfolioService.getTop3GlobalGain();
+        return ResponseEntity.ok(results);
+    }
 }
