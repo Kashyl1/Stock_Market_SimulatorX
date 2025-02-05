@@ -6,7 +6,7 @@ import iconOne from '../../assets/secure.png';
 import iconTwo from '../../assets/tools.png';
 import iconThree from '../../assets/experience.png';
 import logo from '../../assets/stock_logov2.png';
-// import video from '../../assets/Jano.mp4';
+import video from '../../assets/Jano.mp4';
 import exampleImageOne from '../../assets/gold_chart.png';
 import exampleImageTwo from '../../assets/vision.png';
 import Footer from '../../components/Footer/Footer'
@@ -80,11 +80,10 @@ const HomePage = () => {
       </section>
 
        <div className="features-section">
-            <div className="video-column">
-              <video controls className="feature-video" width="1000" >
-                Your browser does not support the video tag.
-               </video>
-            </div>
+            <video controls className="feature-video">
+              <source src={video} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
             <div className="info-column">
               <div className="feature-text">
                 <h2>Easy to understand for newbies, yet advanced enough for experienced traders</h2>

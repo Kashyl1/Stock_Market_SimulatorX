@@ -1,31 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { getBalance } from '../../../services/WalletService';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
 
-const BalanceDisplay = ({ refresh }) => {
+const notyf = new Notyf({
+  ripple: false,
+});
+
+const BalanceDisplay = ({ onBalanceUpdate }) => {
   const [balance, setBalance] = useState(null);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchBalance = async () => {
       try {
         const data = await getBalance();
         setBalance(data.balance);
+        if (onBalanceUpdate) {
+          onBalanceUpdate(data.balance);
+        }
       } catch (error) {
-        setError('Failed to fetch balance. Please try again later.');
+        notyf.error('Failed to fetch balance. Please try again later.');
       }
     };
 
     fetchBalance();
-  }, [refresh]);
-
-  if (error) {
-    return <p className="error-message">{error}</p>;
-  }
+  }, [onBalanceUpdate]);
 
   return (
-    <div className="balance-display">
+    <div>
       {balance !== null && balance !== undefined ? (
-        <p>${balance.toFixed(2)}</p>
+        <>${balance.toFixed(2)}</>
       ) : (
         <p>Loading...</p>
       )}
