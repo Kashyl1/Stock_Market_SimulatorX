@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { sellAsset } from '../../../services/TransactionService';
 import './SellAssetModal.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
+
+const notyf = new Notyf({
+  ripple: false,
+});
 
 const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellSuccess }) => {
   const [sellType, setSellType] = useState('Crypto');
@@ -16,16 +22,16 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
 
     if (sellType === 'Crypto' || sellType === 'All') {
       if (!sellAmount || sellAmount <= 0) {
-        setError('Please enter a valid amount of cryptocurrency.');
+        notyf.error('Please enter a valid amount of cryptocurrency.');
         return;
       }
       if (sellAmount > currentAmount) {
-        setError('You cannot sell more than you own.');
+        notyf.error('You cannot sell more than you own.');
         return;
       }
     } else if (sellType === 'USD') {
       if (!priceInUSD || parseFloat(priceInUSD) <= 0) {
-        setError('Please enter a valid price in USD.');
+        notyf.error('Please enter a valid price in USD.');
         return;
       }
     }
@@ -45,7 +51,7 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
         sellData.amount,
         sellData.priceInUSD
       );
-      alert('Asset sold successfully');
+      notyf.success('Asset sold successfully');
       onSellSuccess();
       onClose();
     } catch (err) {
@@ -58,7 +64,7 @@ const SellAssetModal = ({ currency, portfolioid, currentAmount, onClose, onSellS
           errorMessage = errors;
         }
       }
-      setError('Failed to sell asset. ' + errorMessage);
+      notyf.error('Failed to sell asset. ' + errorMessage);
     } finally {
       setLoading(false);
     }

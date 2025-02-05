@@ -1,0 +1,269 @@
+.wallet-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  width: 350px;
+  font-family: Arial, sans-serif;
+  color: #fff;
+}
+
+.wallet-icon {
+  margin-right: 16px;
+}
+
+.wallet-content {
+  flex: 1;
+}
+
+.wallet-header {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 4px;
+  font-weight: bold;
+  text-align: right;
+}
+.wallet-header .header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.wallet-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 8px 0;
+}
+
+.gain {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.balance {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  color: #d4af37 !important;
+}
+
+.wallet-footer {
+  font-size: 12px;
+  color: #fff;
+  text-align: right;
+}
+
+.wallet-footer a {
+  color: #d4af37;
+  text-decoration: none;
+}
+
+.wallet-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .wallet-card {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .wallet-value {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .balance {
+    margin-top: 8px;
+  }
+}
+
+
+.transaction-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  width: 350px;
+  font-family: Arial, sans-serif;
+  color: #fff;
+}
+
+.transaction-icon {
+  margin-right: 16px;
+}
+
+.transaction-content {
+  flex: 1;
+}
+
+.transaction-header {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 4px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.transaction-header .header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transaction-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 8px 0;
+}
+
+.count {
+  font-size: 24px;
+  font-weight: bold;
+  color: #d4af37;
+}
+
+.transaction-footer {
+  font-size: 12px;
+  color: #fff;
+  text-align: right;
+}
+
+.transaction-footer a {
+  color: #d4af37;
+  text-decoration: none;
+}
+
+.transaction-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .transaction-card {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .transaction-value {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .count {
+    margin-top: 8px;
+  }
+}
+
+.top3-card {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  width: 350px;
+  font-family: Arial, sans-serif;
+  color: #fff;
+}
+
+.top3-content {
+  flex: 1;
+}
+
+.top3-header {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.top3-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.top3-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 5px 0;
+}
+
+.player-name {
+  font-weight: bold;
+}
+
+.player-gain {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.top3-footer {
+  font-size: 12px;
+  color: #fff;
+  text-align: center;
+}
+
+.top3-footer a {
+  color: #d4af37;
+  text-decoration: none;
+}
+
+.top3-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .top3-card {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-card,
+  .transaction-card,
+  .top3-card {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .wallet-header,
+  .transaction-header,
+  .top3-header {
+    font-size: 12px;
+  }
+
+  .wallet-value,
+  .transaction-value {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gain,
+  .balance,
+  .count {
+    font-size: 18px !important;
+  }
+
+  .top3-item {
+    font-size: 12px;
+    padding: 3px 0;
+  }
+
+  .wallet-footer,
+  .transaction-footer,
+  .top3-footer {
+    font-size: 10px;
+  }
+}
