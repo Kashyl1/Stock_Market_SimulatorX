@@ -83,26 +83,26 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
     }
   };
 
-  const fetchIndicators = async () => {
-    try {
-      const results = await Promise.all(
-        indicators.map((indicator) =>
-          fetchAnalyticsData(indicator, currencyId, interval).then((value) => ({
-            indicator,
-            value,
-            decision: determineDecision(indicator, value),
-          }))
-        )
-      );
-      const signalCounts = calculateSummary(results);
-      setSummary(signalCounts);
-      onSummaryChange(signalCounts);
-      return results;
-    } catch (error) {
-      console.error('Error fetching indicators:', error);
-      return [];
+  async function fetchIndicators() {
+    const results = [];
+    for (const indicator of indicators) {
+      try {
+        const value = await fetchAnalyticsData(indicator, currencyId, interval);
+        results.push({
+          indicator,
+          value,
+          decision: determineDecision(indicator, value)
+        });
+      } catch (error) {
+        console.error("Error fetching indicator:", indicator, error);
+      }
     }
-  };
+    const signalCounts = calculateSummary(results);
+    setSummary(signalCounts);
+    onSummaryChange(signalCounts);
+    return results;
+  }
+
 
 
   const fetchPrice = async () => {
@@ -125,7 +125,7 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
       queryKey: ['analyticsData', currencyId, interval],
       queryFn: fetchIndicators,
       staleTime: 300000,
-      refetchInterval: isFirstLoad ? 500 : 10000,
+      refetchInterval: isFirstLoad ? 2000 : 10000,
       onSuccess: () => {
         if (isFirstLoad) {
           setIsFirstLoad(false);
