@@ -226,4 +226,90 @@ public class AnalyticsController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @GetMapping("/all/{symbol}/{interval}/{periods}")
+    public ResponseEntity<AllIndicatorsResponse> getAllIndicators(
+            @PathVariable String symbol,
+            @PathVariable String interval,
+            @PathVariable @Min(1) int periods) {
+        try {
+            String upperSymbol = symbol.toUpperCase();
+            AllIndicatorsResponse response = new AllIndicatorsResponse();
+
+            BigDecimal sma = indicatorCacheService.getSma(upperSymbol, interval, periods);
+            if (sma == null) {
+                sma = analyticsService.calculateIndicator(upperSymbol, interval, new SmaCalculator(periods));
+            }
+            response.setSma(sma);
+
+            BigDecimal ema = indicatorCacheService.getEma(upperSymbol, interval, periods);
+            if (ema == null) {
+                List<BigDecimal> emaSeries = analyticsService.calculateIndicator(upperSymbol, interval, new EmaCalculator(periods));
+                ema = emaSeries.get(emaSeries.size() - 1);
+                indicatorCacheService.saveEma(upperSymbol, interval, periods, ema);
+            }
+            response.setEma(ema);
+
+            BigDecimal rsi = indicatorCacheService.getRsi(upperSymbol, interval, periods);
+            if (rsi == null) {
+                rsi = analyticsService.calculateIndicator(upperSymbol, interval, new RsiCalculator(periods));
+                indicatorCacheService.saveRsi(upperSymbol, interval, periods, rsi);
+            }
+            response.setRsi(rsi);
+
+            BigDecimal volatility = indicatorCacheService.getVolatility(upperSymbol, interval, periods);
+            if (volatility == null) {
+                volatility = analyticsService.calculateIndicator(upperSymbol, interval, new VolatilityCalculator(periods));
+                indicatorCacheService.saveVolatility(upperSymbol, interval, periods, volatility);
+            }
+            response.setVolatility(volatility);
+
+            MacdResult macd = indicatorCacheService.getMacd(upperSymbol, interval);
+            if (macd == null) {
+                macd = analyticsService.calculateIndicator(upperSymbol, interval, new MacdCalculator());
+                indicatorCacheService.saveMacd(upperSymbol, interval, macd);
+            }
+            response.setMacd(macd.format(8));
+
+            BigDecimal adx = indicatorCacheService.getAdx(upperSymbol, interval);
+            if (adx == null) {
+                adx = analyticsService.calculateIndicator(upperSymbol, interval, adxCalculator);
+                indicatorCacheService.saveAdx(upperSymbol, interval, adx);
+            }
+            response.setAdx(adx);
+
+            BigDecimal bp = indicatorCacheService.getBP(upperSymbol, interval);
+            if (bp == null) {
+                bp = analyticsService.calculateIndicator(upperSymbol, interval, bullBearPowerCalculator);
+                indicatorCacheService.saveBP(upperSymbol, interval, bp);
+            }
+            response.setBp(bp);
+
+            BigDecimal williamsR = indicatorCacheService.getWilliamsR(upperSymbol, interval);
+            if (williamsR == null) {
+                williamsR = analyticsService.calculateIndicator(upperSymbol, interval, new WilliamsRCalculator());
+                indicatorCacheService.saveWilliamsR(upperSymbol, interval, williamsR);
+            }
+            response.setWilliamsR(williamsR);
+
+            BigDecimal cci = indicatorCacheService.getCci(upperSymbol, interval);
+            if (cci == null) {
+                cci = analyticsService.calculateIndicator(upperSymbol, interval, new CciCalculator());
+                indicatorCacheService.saveCci(upperSymbol, interval, cci);
+            }
+            response.setCci(cci);
+
+            BigDecimal atr = indicatorCacheService.getAtr(upperSymbol, interval);
+            if (atr == null) {
+                atr = analyticsService.calculateIndicator(upperSymbol, interval, atrCalculator);
+                indicatorCacheService.saveAtr(upperSymbol, interval, atr);
+            }
+            response.setAtr(atr);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving all indicators for {}: {}", symbol, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
