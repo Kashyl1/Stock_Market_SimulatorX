@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Portfolios.css';
-import {deletePortfolio} from '../../../services/PortfolioService';
+import './PortfolioList.css';
+import { deletePortfolio } from '../../../services/PortfolioService';
 import { Notyf } from 'notyf';
 import 'notyf/notyf.min.css';
 
-const notyf = new Notyf({
-  ripple: false,
-});
+const notyf = new Notyf({ ripple: false });
 
 const PortfolioList = ({ portfolios, onDeleteSuccess }) => {
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
 
   const formatDateTime = (dateTimeStr) => {
     if (!dateTimeStr) return 'N/A';
@@ -24,16 +25,22 @@ const PortfolioList = ({ portfolios, onDeleteSuccess }) => {
     return new Date(dateTimeStr).toLocaleString(undefined, options);
   };
 
-  const handleDeletePortfolio = async (portfolioid) => {
-      try {
-        await deletePortfolio(portfolioid);
-        notyf.success('Portfolio deleted successfully!');
-        onDeleteSuccess(portfolioid);
-      } catch (error) {
-        console.error('Error deleting portfolio:', error);
-        notyf.error('Failed to delete the portfolio.');
-      }
+  const confirmDelete = (portfolio) => {
+    setSelectedPortfolio(portfolio);
+    setModalOpen(true);
+  };
 
+  const handleDeletePortfolio = async () => {
+    if (!selectedPortfolio) return;
+    try {
+      await deletePortfolio(selectedPortfolio.portfolioid);
+      notyf.success('Portfolio deleted successfully!');
+      onDeleteSuccess(selectedPortfolio.portfolioid);
+      setModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting portfolio:', error);
+      notyf.error('Failed to delete the portfolio.');
+    }
   };
 
   return (
@@ -52,13 +59,26 @@ const PortfolioList = ({ portfolios, onDeleteSuccess }) => {
             </button>
             <button
               className="delete-button"
-              onClick={() => handleDeletePortfolio(portfolio.portfolioid)}
+              onClick={() => confirmDelete(portfolio)}
             >
               Delete
             </button>
           </div>
         </div>
       ))}
+
+      {modalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete "{selectedPortfolio?.name}"?</p>
+            <div className="modal-actions">
+              <button onClick={() => setModalOpen(false)} className="cancel-button">Cancel</button>
+              <button onClick={handleDeletePortfolio} className="confirm-button">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

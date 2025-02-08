@@ -4,7 +4,7 @@ import { fetchAnalyticsData, fetchCurrentPrice } from '../../services/Analytical
 import './AnalyticalModule.css';
 
 const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
-  const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'atr', 'williamsR', 'volatility'];
+  const indicators = ['adx', 'bp', 'rsi', 'macd', 'cci', 'atr', 'williamsR'];
   const [summary, setSummary] = useState({});
   const [currentPrice, setCurrentPrice] = useState(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);

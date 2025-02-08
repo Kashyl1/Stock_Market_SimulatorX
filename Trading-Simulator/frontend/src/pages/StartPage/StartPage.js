@@ -140,12 +140,6 @@ const HomePage = () => {
             <p>Enhance your trading skills with these free resources:</p>
             <div className="tile-container">
                 <div className="tile">
-                    <a href="https://www.investopedia.com/terms/t/trading.asp" target="_blank" rel="noopener noreferrer">
-                        <h3>Investopedia - Trading Basics</h3>
-                        <p>Learn the essentials of trading with comprehensive articles and tutorials.</p>
-                    </a>
-                </div>
-                <div className="tile">
                     <a href="https://www.coursera.org/learn/financial-markets" target="_blank" rel="noopener noreferrer">
                         <h3>Coursera - Financial Markets (Yale University)</h3>
                         <p>Explore financial markets in depth with a course from Yale University.</p>

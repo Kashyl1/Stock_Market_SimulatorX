@@ -20,11 +20,6 @@ const MainPage = () => {
         </div>
 
         <div id="about-us" className="about-us">
-                     <div className="about-us__header">
-                         <h1>About Royal Coin</h1>
-                         <p>Your all-in-one solution for managing assets and tracking market trends.</p>
-                     </div>
-
                      <div className="about-us__section about-us__offer-section">
                          <div className="about-us__text">
                              <h2>What We Offer?</h2>
