@@ -64,6 +64,7 @@
   cursor: pointer;
   margin-top: 20px;
   font-weight: 600;
+  margin-bottom: 20px;
 }
 
 .tabs button:hover {
