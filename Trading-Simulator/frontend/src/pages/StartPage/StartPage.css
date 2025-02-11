@@ -163,13 +163,11 @@
 }
 
 .about-us__section {
-    margin-left: 50px;
     text-align: left;
     margin-bottom: 25px;
 }
 
 .about-us__section h2 {
-    font-size: 1.6em !important;
     color: #d4af37;
     margin-bottom: 15px;
 }
@@ -198,7 +196,6 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    flex-wrap: wrap;
 }
 
 .about-us__text {
@@ -346,7 +343,7 @@
     }
 
     .about-us__section p, .about-us__section li {
-        font-size: 1.2em;
+        font-size: 14px;
     }
 
     .about-us__image img {

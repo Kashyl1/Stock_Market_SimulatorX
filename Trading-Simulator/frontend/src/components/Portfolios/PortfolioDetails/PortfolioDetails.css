@@ -6,6 +6,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   flex: 1;
   color: #fff;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 
