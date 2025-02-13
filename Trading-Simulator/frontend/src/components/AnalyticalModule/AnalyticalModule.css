@@ -126,3 +126,96 @@
   margin-left: 5px;
 
 }
+
+@media (max-width: 768px) {
+  .analytical-module {
+    padding: 15px;
+  }
+
+  .indicator-table th,
+  .indicator-table td {
+    padding: 8px;
+    font-size: 1em;
+  }
+
+  .summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .summary .summary-decision {
+    font-size: 16px;
+  }
+
+  .summary .buy-count,
+  .summary .sell-count {
+    font-size: 14px;
+  }
+
+  .summary-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .summary strong {
+    margin-left: 0;
+  }
+
+  .indicator-table {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytical-module {
+    padding: 10px;
+    margin-top: 15px;
+  }
+
+  .indicator-table th,
+  .indicator-table td {
+    padding: 6px;
+    font-size: 0.9em;
+  }
+
+  .summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .summary .summary-decision {
+    font-size: 14px;
+  }
+
+  .summary .buy-count,
+  .summary .sell-count {
+    font-size: 12px;
+  }
+
+  .summary-container {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .summary strong {
+    margin-left: 0;
+  }
+
+  .indicator-table {
+    margin-top: 10px;
+  }
+
+  .error-message {
+    font-size: 14px;
+  }
+
+  .analytical-module .loading {
+    font-size: 1em;
+  }
+
+  .analytical-module p {
+    font-size: 1em;
+  }
+}

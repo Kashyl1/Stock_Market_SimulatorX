@@ -48,34 +48,42 @@ const MovingAverages = ({ currencyId, interval, onSummaryChange }) => {
   }, []);
 
   const fetchMovingAverages = useCallback(async () => {
-    const results = await Promise.all(
-      movingAverages.flatMap((maType) =>
-        periods.map((period) =>
-          fetchAnalyticsData(maType, currencyId, interval, period).then((value) => ({
-            maType,
-            period,
-            value,
-            decision: determineDecision(value),
-          }))
-        )
-      )
-    );
+    try {
+      const data = await fetchAnalyticsData('all', currencyId, interval);
+      const results = [];
 
-    const groupedResults = periods.map((period) => ({
-      period,
-      values: results.filter((item) => item.period === period),
-    }));
+      movingAverages.forEach((maType) => {
+        periods.forEach((period) => {
+          if (data[maType]) {
+            results.push({
+              maType,
+              period,
+              value: data[maType],
+              decision: determineDecision(data[maType]),
+            });
+          }
+        });
+      });
 
-    const summary = calculateSummary(groupedResults);
-    onSummaryChange(summary);
-    return { groupedResults, summary };
+      const groupedResults = periods.map((period) => ({
+        period,
+        values: results.filter((item) => item.period === period),
+      }));
+
+      const summary = calculateSummary(groupedResults);
+      onSummaryChange(summary);
+      return { groupedResults, summary };
+    } catch (error) {
+      console.error('Error fetching moving averages data:', error);
+      throw error;
+    }
   }, [currencyId, interval, determineDecision, calculateSummary, movingAverages, periods, onSummaryChange]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['movingAverages', currencyId, interval],
     queryFn: fetchMovingAverages,
     staleTime: 300000,
-    refetchInterval: isFirstLoad ? 500 : 10000,
+    refetchInterval: isFirstLoad ? 2000 : 10000,
     onSuccess: () => {
       if (isFirstLoad) {
         setIsFirstLoad(false);

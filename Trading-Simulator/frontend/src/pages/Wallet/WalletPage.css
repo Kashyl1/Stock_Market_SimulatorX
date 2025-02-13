@@ -1,20 +1,26 @@
 .wallet-page {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: left;
+  justify-content: left;
   font-family: "Cinzel", serif;
   font-optical-sizing: auto;
-  font-weight: 500;
+  font-weight: 600;
   font-style: normal;
+  margin-left: -20px;
 }
 
+.wallet-price {
+  margin-left: 20px;
+  font-size: 1.4em;
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
 
 .balance-section {
-  background: #fff;
-  padding: 30px;
   border-radius: 10px;
-  text-align: center;
+  text-align: left;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   max-width: 400px;
   width: 100%;
@@ -36,17 +42,7 @@
   margin-top: 20px;
 }
 
-.add-funds-form input[type="number"],
-.add-funds-form input[type="text"],
-.add-funds-form input[type="email"] {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
+
 
 .add-funds-form button {
   width: 100%;

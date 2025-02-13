@@ -14,14 +14,19 @@ const WalletPage = () => {
   return (
   <div className="main-page">
   <Sidebar />
+  <div className="portfolio-details">
+  <h1>Wallet</h1>
     <div className="wallet-page">
       <div className="balance-section">
-      <h1>Your Balance</h1>
-        <BalanceDisplay refresh={refreshBalance} />
+      <div className="wallet-price">
+      <h4>Current balance: </h4>
+        < BalanceDisplay refresh={refreshBalance} />
+        </div>
         <AddFundsForm onFundsAdded={handleFundsAdded} />
       </div>
     </div>
   </div>
+    </div>
   );
 };
 

@@ -45,14 +45,14 @@ const handleSubmit = async (e) => {
 };
 
   return (
-    <form onSubmit={handleSubmit} className="add-funds-form">
-      <div className="input-group">
-        <label htmlFor="amount">Amount to Add</label>
-        <input
+    <form onSubmit={handleSubmit} className="user-settings-form">
+      <div >
+        <input className="search-input"
           type="number"
           id="amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          placeholder="Amount to add..."
           required
         />
       </div>
