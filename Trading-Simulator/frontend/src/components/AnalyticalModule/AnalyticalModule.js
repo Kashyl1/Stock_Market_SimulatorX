@@ -78,27 +78,27 @@ const AnalyticalModule = ({ currencyId, interval, onSummaryChange }) => {
     }
   };
 
-  async function fetchIndicators() {
+  const fetchIndicators = async () => {
     try {
       const data = await fetchAnalyticsData('all', currencyId, interval);
-
-      const results = Object.keys(data).map((indicator) => {
-        return {
-          indicator,
-          value: data[indicator],
-          decision: determineDecision(indicator, data[indicator]),
-        };
-      });
-
-      const signalCounts = calculateSummary(results);
+      const filteredData = Object.keys(data)
+        .filter((indicator) => indicator !== 'ema' && indicator !== 'sma')
+        .map((indicator) => {
+          return {
+            indicator,
+            value: data[indicator],
+            decision: determineDecision(indicator, data[indicator]),
+          };
+        });
+      const signalCounts = calculateSummary(filteredData);
       setSummary(signalCounts);
       onSummaryChange(signalCounts);
-      return results;
+      return filteredData;
     } catch (error) {
       console.error('Error fetching indicators:', error);
       return [];
     }
-  }
+  };
 
   const fetchPrice = async () => {
     try {
