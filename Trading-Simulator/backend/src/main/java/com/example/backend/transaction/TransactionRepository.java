@@ -21,8 +21,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     void deleteAllByUser(User user);
 
-    void deleteAllByPortfolio(Portfolio portfolio);
-
     Page<Transaction> findByPortfolio(Portfolio portfolio, Pageable pageable);
 
     List<Transaction> findByAmountGreaterThan(BigDecimal amount);

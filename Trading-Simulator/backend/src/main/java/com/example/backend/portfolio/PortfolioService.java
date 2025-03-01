@@ -173,7 +173,7 @@ public class PortfolioService {
     public Page<PortfolioDTO> getAllPortfolios(Pageable pageable) {
         String adminEmail = authenticationService.getCurrentUserEmail();
         adminEventTrackingService.logEvent(adminEmail, AdminEvent.EventType.GET_ALL_PORTFOLIOS);
-        return portfolioRepository.findAll(pageable).map(portfolioMapper::toDTO);
+        return portfolioRepository.findAllByDeletedFalse(pageable).map(portfolioMapper::toDTO);
     }
 
     @Transactional

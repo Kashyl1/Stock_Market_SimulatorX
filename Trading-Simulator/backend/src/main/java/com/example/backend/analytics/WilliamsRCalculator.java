@@ -49,10 +49,8 @@ public class WilliamsRCalculator implements IndicatorCalculator<BigDecimal> {
             return BigDecimal.ZERO;
         }
 
-        BigDecimal williamsR = numerator
+        return numerator
                 .divide(denominator, 8, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(-100));
-
-        return williamsR;
     }
 }
