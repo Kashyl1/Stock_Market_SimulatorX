@@ -24,6 +24,7 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
     Page<Portfolio> findByUser(User user, Pageable pageable);
     Optional<Portfolio> findByPortfolioidAndUser(Integer portfolioid, User user);
     List<Portfolio> findByUserAndDeletedFalse(User user);
+    Page<Portfolio> findByUserAndDeletedFalse(User user, Pageable pageable);
     Optional<Portfolio> findByUserAndName(User user, String name);
     Page<Portfolio> findAllByDeletedFalse(Pageable pageable);
     @Query("""

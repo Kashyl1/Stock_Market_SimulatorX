@@ -37,7 +37,8 @@ public class TransactionOperationService {
 
     @Transactional
     @Operation(summary = "Buy an asset", description = "Processes the purchase of an asset")
-    public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD, BigDecimal amountOfCurrency, User user) {
+    public void buyAsset(Integer portfolioid, String currencySymbol, BigDecimal amountInUSD,
+                         BigDecimal amountOfCurrency, User user) {
         Pair<BigDecimal, BigDecimal> validatedAmounts = validateInput(amountInUSD, amountOfCurrency);
         BigDecimal finalAmountInUsd = validatedAmounts.getLeft();
         BigDecimal finalAmountOfCurrency = validatedAmounts.getRight();
@@ -50,12 +51,12 @@ public class TransactionOperationService {
         } else {
             buyAssetByCurrency(finalAmountOfCurrency, currency, portfolio, user);
         }
-
     }
 
     @Transactional
     @Operation(summary = "Sell an asset", description = "Processes the sale of an asset")
-    public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency, BigDecimal priceInUSD, User user) {
+    public void sellAsset(Integer portfolioid, Integer currencyid, BigDecimal amountOfCurrency,
+                          BigDecimal priceInUSD, User user) {
         Pair<BigDecimal, BigDecimal> validatedAmounts = validateInput(priceInUSD, amountOfCurrency);
         BigDecimal finalAmountOfCurrency = validatedAmounts.getRight();
         BigDecimal finalPriceInUSD = validatedAmounts.getLeft();
@@ -70,7 +71,8 @@ public class TransactionOperationService {
         }
     }
 
-    private Pair<BigDecimal, BigDecimal> validateInput(BigDecimal amountInUsd, BigDecimal amountOfCurrency) {
+    private Pair<BigDecimal, BigDecimal> validateInput(BigDecimal amountInUsd,
+                                                       BigDecimal amountOfCurrency) {
         if (amountInUsd != null && amountOfCurrency != null) {
             throw new IllegalArgumentException("Please provide either amount in USD or amount of currency, not both");
         }

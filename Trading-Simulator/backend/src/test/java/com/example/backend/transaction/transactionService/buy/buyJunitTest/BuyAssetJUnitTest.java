@@ -225,7 +225,8 @@ public class BuyAssetJUnitTest {
         BigDecimal amountOfCurrency = null;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transactionOperationService.buyAsset(1, "BTC", amountInUSD, amountOfCurrency, new User());
+            transactionOperationService.buyAsset(1, "BTC", amountInUSD,
+                    amountOfCurrency, new User());
         });
 
         assertEquals("Amount in USD must be positive", exception.getMessage());

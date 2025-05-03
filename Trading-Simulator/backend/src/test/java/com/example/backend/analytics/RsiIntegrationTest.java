@@ -18,15 +18,21 @@ public class RsiIntegrationTest extends BaseIntegrationTest {
     void testCalculateRsiFromDatabaseUsingCalculateIndicator() {
         Currency currency = createAndSaveCurrency("ROYAL_COIN", "toMarka");
 
-        createAndSaveHistoricalKline(currency, "1h", 1L, 10, 15, 9, 10, 1000L);
-        createAndSaveHistoricalKline(currency, "1h", 2L, 20, 25, 19, 20, 2000L);
-        createAndSaveHistoricalKline(currency, "1h", 3L, 30, 35, 29, 30, 3000L);
-        createAndSaveHistoricalKline(currency, "1h", 4L, 40, 45, 39, 40, 4000L);
-        createAndSaveHistoricalKline(currency, "1h", 5L, 50, 55, 49, 50, 5000L);
+        createAndSaveHistoricalKline(currency, "1h", 1L, 10,
+                15, 9, 10, 1000L);
+        createAndSaveHistoricalKline(currency, "1h", 2L, 20,
+                25, 19, 20, 2000L);
+        createAndSaveHistoricalKline(currency, "1h", 3L, 30,
+                35, 29, 30, 3000L);
+        createAndSaveHistoricalKline(currency, "1h", 4L, 40,
+                45, 39, 40, 4000L);
+        createAndSaveHistoricalKline(currency, "1h", 5L, 50,
+                55, 49, 50, 5000L);
 
         int periods = 3;
         try {
-            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN", "1h", new RsiCalculator(periods));
+            BigDecimal result = analyticsService.calculateIndicator("ROYAL_COIN",
+                    "1h", new RsiCalculator(periods));
             BigDecimal expected = BigDecimal.valueOf(100);
             Assertions.assertEquals(0, result.compareTo(expected));
         } catch (CurrencyNotFoundException e) {

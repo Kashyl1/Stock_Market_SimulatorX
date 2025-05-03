@@ -40,7 +40,8 @@ public class TransactionController {
     @Operation(summary = "Buy an asset", description = "Allows the user to buy an asset")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Asset purchased successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<String> buyAsset(
             @RequestBody @Valid BuyAssetRequest request,
@@ -49,10 +50,12 @@ public class TransactionController {
 
         if ((request.getAmountInUSD() == null && request.getAmountOfCurrency() == null) ||
                 (request.getAmountInUSD() != null && request.getAmountOfCurrency() != null)) {
-            return ResponseEntity.badRequest().body("Please provide amount in USD or amount of Currency, not both.");
+            return ResponseEntity.badRequest().body("Please provide amount in USD or amount of Currency, " +
+                    "not both.");
         }
 
-        transactionOperationService.buyAsset(request.getPortfolioid(), request.getCurrencyid(), request.getAmountInUSD(), request.getAmountOfCurrency(), currentUser);
+        transactionOperationService.buyAsset(request.getPortfolioid(), request.getCurrencyid(),
+                request.getAmountInUSD(), request.getAmountOfCurrency(), currentUser);
         return ResponseEntity.ok("Asset purchased successfully");
     }
 

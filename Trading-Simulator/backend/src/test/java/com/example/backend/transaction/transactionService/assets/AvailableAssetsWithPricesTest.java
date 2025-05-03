@@ -36,7 +36,8 @@ public class AvailableAssetsWithPricesTest {
 
         when(currencyRepository.findAll(any(Pageable.class))).thenReturn(currencies);
 
-        Page<Map<String, Object>> result = currencyService.getAvailableAssetsWithPrices(PageRequest.of(0, 10));
+        Page<Map<String, Object>> result = currencyService.getAvailableAssetsWithPrices(
+                PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());

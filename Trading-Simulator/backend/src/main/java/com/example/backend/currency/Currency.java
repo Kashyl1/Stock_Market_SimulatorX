@@ -20,15 +20,12 @@ import java.util.List;
 public class Currency {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "Unique identifier of the currency", example = "1")
     private Integer currencyid;
 
     @Column(nullable = false, length = 10, unique = true)
-    @Schema(description = "Symbol of the currency", example = "BTC")
     private String symbol;
 
     @Column(nullable = false, length = 100, unique = true)
-    @Schema(description = "Name of the currency", example = "Bitcoin")
     private String name;
 
     @OneToMany(mappedBy = "currency", cascade = CascadeType.ALL, orphanRemoval = true)

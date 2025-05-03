@@ -23,14 +23,16 @@ public class WilderSmoothingIntegrationTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("wilderSmoothingTestCases")
-    void testWilderSmoothing(String testName, List<BigDecimal> inputValues, List<BigDecimal> expectedValues, boolean expectException) {
+    void testWilderSmoothing(String testName, List<BigDecimal> inputValues, List<BigDecimal> expectedValues,
+                             boolean expectException) {
         if (expectException) {
             Assertions.assertThrows(NotEnoughDataForCalculationException.class, () -> {
                 wilderSmoothingCalculator.calculate(inputValues);
             }, "Expected NotEnoughDataForCalculationException for: " + testName);
         } else {
             List<BigDecimal> result = wilderSmoothingCalculator.calculate(inputValues);
-            Assertions.assertEquals(expectedValues.size(), result.size(), "Size mismatch for test: " + testName);
+            Assertions.assertEquals(expectedValues.size(), result.size(), "Size mismatch for test: " +
+                    testName);
             for (int i = 0; i < expectedValues.size(); i++) {
                 Assertions.assertEquals(0, expectedValues.get(i).compareTo(result.get(i)),
                         "Smoothed value at index " + i + " is incorrect for test: " + testName);
