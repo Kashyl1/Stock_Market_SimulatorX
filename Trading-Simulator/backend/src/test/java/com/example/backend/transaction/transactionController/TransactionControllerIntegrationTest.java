@@ -159,7 +159,7 @@ public class TransactionControllerIntegrationTest {
     @Test
     public void testBuyAsset_InvalidPortfolioId() throws Exception {
         BigDecimal amountInUSD = new BigDecimal("500.00");
-        Integer invalidPortfolioId = 9999; // Zakładamy, że ten ID nie istnieje
+        Integer invalidPortfolioId = 993123199;
 
         BuyAssetRequest request = new BuyAssetRequest();
         request.setPortfolioid(invalidPortfolioId);

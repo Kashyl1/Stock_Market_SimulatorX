@@ -189,7 +189,7 @@ public class PortfolioService {
     public Page<PortfolioDTO> getPortfoliosByUserId(Integer userid, Pageable pageable) {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        return portfolioRepository.findByUser(user, pageable).map(portfolioMapper::toDTO);
+        return portfolioRepository.findByUserAndDeletedFalse(user, pageable).map(portfolioMapper::toDTO);
 
     }
 

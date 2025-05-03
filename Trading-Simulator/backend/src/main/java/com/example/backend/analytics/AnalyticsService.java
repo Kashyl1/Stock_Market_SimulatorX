@@ -18,7 +18,8 @@ public class AnalyticsService {
         Currency currency = currencyRepository.findBySymbol(symbol.toUpperCase())
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found: " + symbol));
 
-        List<HistoricalKline> klines = historicalKlineRepository.findByCurrencyAndTimeIntervalOrderByOpenTimeAsc(currency, timeInterval);
+        List<HistoricalKline> klines = historicalKlineRepository.findByCurrencyAndTimeIntervalOrderByOpenTimeAsc
+                (currency, timeInterval);
 
         return calculator.calculate(klines);
     }

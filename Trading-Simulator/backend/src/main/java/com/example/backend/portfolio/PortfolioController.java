@@ -28,15 +28,18 @@ public class PortfolioController {
     private static final Logger logger = LoggerFactory.getLogger(PortfolioController.class);
 
     @PostMapping("/create")
-    @Operation(summary = "Create a new portfolio", description = "Creates a new portfolio for the authenticated user")
+    @Operation(summary = "Create a new portfolio", description =
+            "Creates a new portfolio for the authenticated user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Portfolio created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<PortfolioDTO> createPortfolio(
             @RequestBody @Valid CreatePortfolioRequest request) {
         Portfolio portfolio = portfolioService.createPortfolio(request.getName());
-        PortfolioDTO portfolioDTO = new PortfolioDTO(portfolio.getPortfolioid(), portfolio.getName(), null, portfolio.getCreatedAt(), portfolio.getUpdatedAt());
+        PortfolioDTO portfolioDTO = new PortfolioDTO(portfolio.getPortfolioid(), portfolio.getName(),
+                null, portfolio.getCreatedAt(), portfolio.getUpdatedAt());
         return ResponseEntity.ok(portfolioDTO);
     }
 

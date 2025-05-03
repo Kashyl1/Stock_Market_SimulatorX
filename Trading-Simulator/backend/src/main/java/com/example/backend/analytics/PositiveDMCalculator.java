@@ -18,7 +18,6 @@ public class PositiveDMCalculator implements IndicatorCalculator<List<BigDecimal
             BigDecimal low = klines.get(i).getLowPrice();
             BigDecimal highPrev = klines.get(i - 1).getHighPrice();
             BigDecimal lowPrev = klines.get(i - 1).getLowPrice();
-
             BigDecimal diffHigh = high.subtract(highPrev).setScale(5, RoundingMode.HALF_UP);
             BigDecimal diffLow = lowPrev.subtract(low).setScale(5, RoundingMode.HALF_UP);
 
